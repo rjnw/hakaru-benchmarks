@@ -9,4 +9,4 @@
 	url = git@github.com:hakaru-dev/hakaru-rktjit.git
 [submodule "hakrit"]
 	path = hakrit
-	url = ./hakrit
+	url = git@github.com:hakaru-dev/hakaru-rktjit.git
