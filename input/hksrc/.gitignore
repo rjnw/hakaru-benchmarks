@@ -1,0 +1,6 @@
+*.hi
+*.o
+*.hs
+clinicaltrial
+gmmModel
+linearRegression
