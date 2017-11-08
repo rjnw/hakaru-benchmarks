@@ -1,5 +1,6 @@
 #lang racket
-(require hakrit)
 
+(require sham
+         hakrit)
 
-(define module (debug-file "../../testcode/hkrkt/clinicalTrial_simp.hkr"))
+(define module (compile-file "../../testcode/hkrkt/clinicalTrial_simp.hkr"))
