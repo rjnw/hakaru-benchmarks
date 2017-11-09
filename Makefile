@@ -15,8 +15,8 @@ generateTestCode:
 	cd ./testcode/hssrc ; make
 
 installRktPkg:
-	cd ./sham ; raco pkg install
-	cd ./hakrit ; raco pkg install
+	cd ./sham ; raco pkg install --skip-installed
+	cd ./hakrit ; raco pkg install --skip-installed
 
 clean:
 	cd ./hakaru; stack clean
