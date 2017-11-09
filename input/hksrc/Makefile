@@ -1,4 +1,4 @@
-.PHONY generators clean
+# .PHONY generators clean
 
 generators: clinicalTrial gmmModel linearRegression
 
@@ -6,10 +6,11 @@ generators: clinicalTrial gmmModel linearRegression
 	../../hkbin/compile $<
 
 %: %.hs
-	cd ../../hakaru; stack exec -- ghc -O2 ../input/hksrc/$< -o ../input/hksrc/$@
+	cd ../../hakaru; stack exec -- ghc -O2 ../input/hksrc/$< -o ../input/bin/$@;
+	rm *.hi *.o
 
 clean:
-	rm *.hs
-	rm *.hi
-	rm *.o
-	rm clinicalTrial gmmModel linearRegression
+	rm *.hi *.o
+
+cleanbin:
+	cd ../bin; rm clinicalTrial gmmModel linearRegression;
