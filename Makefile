@@ -1,4 +1,4 @@
-.PHONY setup initSubmodules generateTestCode installRktPkg runtests benchmark
+#.PHONY setup initSubmodules generateTestCode installRktPkg runtests benchmark
 
 setup: initSubmodules setupHakaru generateTestCode installRktPkg
 
