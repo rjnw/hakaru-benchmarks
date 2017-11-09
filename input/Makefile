@@ -8,23 +8,29 @@ n := 0 00 000 0000
 i := 3 6 9 12
 numbers=$(foreach i,$(n),1$(i))
 ctinp=$(foreach n,$(numbers),./$(ct)/$n)
-lrinp=$(foreach n,$(numbers),./$(lr)/$n)
-gn=$(foreach n, $(numbers), ./$(gg)/$n)
-gminp=$(foreach k, $(i), $(foreach g,$(gn),$(g)-$k))
+
+lrinp-y=$(foreach n,$(numbers),./$(lr)/y/$n)
+lrinp-dataX=$(foreach n,$(numbers),./$(lr)/dataX/$n)
+gn=$(foreach n, $(i), ./$(gg)/$n)
+gminp=$(foreach k, $(numbers), $(foreach g,$(gn),$(g)-$k))
+
 tests := 2000
 
-all: $(ctinp) $(lrinp) $(gminp)
-
+all: $(ctinp) $(lrinp-y) $(lrinp-datax) $(gminp)
+#clinical Trial
+# we just generate 2000 values for each 10,100,1000,10000 and store it in ./clinicalTrial/<10,100,1000>
 ./$(ct)/% : ./bin/$(ct)
 	$< $(notdir $@) | head -n $(tests) > $@
 
-./data/$(lr)/% :
+#linear Regression first needs random arrays dataX
+# this rule will just generate number in name of file
+./$(lr)/dataX/% :
 	i=0;while [[ $$i -le $(notdir $@) ]];do\
 		echo $$RANDOM >> $@;\
 		((i = i + 1)); \
 	done;
-
-./$(lr)/% : ./data/$(lr)/%
+#array of y, depends on dataX- of same length
+./$(lr)/y/% : ./$(lr)/dataX/%
 	./bin/$(lr) $< | head -n $(tests) > $@
 
 ./data/$(gg)/%:
