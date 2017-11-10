@@ -1,29 +1,37 @@
-#.PHONY setup initSubmodules generateTestCode installRktPkg runtests benchmark
+.PHONY: setup initSubmodules generateTestCode installRktPkg runtests benchmark
 
-setup: initSubmodules setupHakaru generateTestCode installRktPkg
 
-setupHakaru:
-	cd ./hakaru ; stack build && stack install --local-bin-path ../hkbin
+setup: init hakaru rkt input
 
-initSubmodules:
+init:
 	git submodule init
 	git submodule update
 
-generateTestCode:
+hakaru:
+	cd ./hakaru ; stack build && stack install --local-bin-path ../hkbin
+
+test:
 	cd ./testcode/hkrkt ; make
 	cd ./testcode/hksimp ; make
 	cd ./testcode/hssrc ; make
 
-installRktPkg:
+rkt:
 	cd ./sham ; raco pkg install --skip-installed
 	cd ./hakrit ; raco pkg install --skip-installed
 
+input:
+	cd ./input ; make all
+
 clean:
 	cd ./hakaru; stack clean
+	cd ./input; make clean
 	rm ./hkbin/*
 	cd ./testcode/hkrkt ; make clean
 	cd ./testcode/hksimp ; make clean
 	cd ./testcode/hssrc ; make clean
+
+docker:
+	cd ./docker; sudo docker build -t hakaru-benchmark .
 
 runtests:
 	echo "TODO runtests :P"

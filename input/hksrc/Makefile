@@ -1,16 +1,15 @@
-# .PHONY generators clean
+.PHONY: generators
+.PRECIOUS: %.hs
 
-generators: clinicalTrial gmmModel linearRegression
+generators = $(foreach i,clinicalTrial gmmModel linearRegression, ../bin/$i)
+
+all: $(generators)
 
 %.hs: %.hk
 	../../hkbin/compile $<
 
-%: %.hs
-	cd ../../hakaru; stack exec -- ghc -O2 ../input/hksrc/$< -o ../input/bin/$@;
-	rm *.hi *.o
+../bin/%: %.hs
+	cd ../../hakaru; stack exec -- ghc -O2 ../input/hksrc/$< -o ../input/bin/$(notdir $@);
 
 clean:
-	rm *.hi *.o
-
-cleanbin:
-	cd ../bin; rm clinicalTrial gmmModel linearRegression;
+	rm *.hs *.hi *.o ../bin/*
