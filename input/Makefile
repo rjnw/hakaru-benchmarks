@@ -25,7 +25,7 @@ buildgen:
 # we just generate 2000 values for each 10,100,1000,10000 and store it in ./clinicalTrial/<10,100,1000>
 ./$(ct)/% :
 	mkdir -p $(dir $@)
-	$< $(notdir $@) | head -n $(tests) > $@
+	./bin/$(ct) $(notdir $@) | head -n $(tests) > $@
 
 #linear Regression first needs random arrays dataX
 # this rule will just generate number in name of file
