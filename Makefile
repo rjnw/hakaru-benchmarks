@@ -1,4 +1,4 @@
-.PHONY: setup initSubmodules generateTestCode installRktPkg runtests benchmark
+.PHONY: setup init hakaru rkt input clean docker runtests benchmark
 
 
 setup: init hakaru rkt input
