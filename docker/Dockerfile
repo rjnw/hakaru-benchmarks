@@ -1,9 +1,8 @@
 FROM base/devel
 
 ENV NAME Hakaru-Benchmark
-
-RUN pacman -Syyu --noconfirm
-RUN pacman-db-upgrade
-RUN pacman -S --noconfirm zsh llvm gsl stack
-
-ENV SHELL /bin/zsh
+RUN pacman -Syy --noconfirm; pacman-db-upgrade; pacman -S --noconfirm openssh zsh llvm gsl stack emacs-nox git racket-minimal
+COPY zshrc /root/.zshrc
+COPY init.sh /init.sh
+RUN chmod +x /init.sh
+ENTRYPOINT ["/init.sh"]
