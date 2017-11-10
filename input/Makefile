@@ -19,7 +19,7 @@ tests := 2000
 all: buildgen $(ctinp) $(lrinp-y) $(lrinp-datax) $(gminp)
 
 buildgen:
-	cd ./hksrc ; make generators
+	cd ./hksrc && make all
 
 #clinical Trial
 # we just generate 2000 values for each 10,100,1000,10000 and store it in ./clinicalTrial/<10,100,1000>
