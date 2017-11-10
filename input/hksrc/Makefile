@@ -9,6 +9,7 @@ all: $(generators)
 	../../hkbin/compile $<
 
 ../bin/%: %.hs
+	mkdir -p $(dir $@)
 	cd ../../hakaru; stack exec -- ghc -O2 ../input/hksrc/$< -o ../input/bin/$(notdir $@);
 
 clean:
