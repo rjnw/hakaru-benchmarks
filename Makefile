@@ -16,8 +16,8 @@ test:
 	cd ./testcode/hssrc ; make
 
 rkt:
-	cd ./sham ; raco pkg install --skip-installed
-	cd ./hakrit ; raco pkg install --skip-installed
+	cd ./sham ; raco pkg install --skip-installed --deps search-auto
+	cd ./hakrit ; raco pkg install --skip-installed --deps search-auto
 
 input:
 	cd ./input ; make all
