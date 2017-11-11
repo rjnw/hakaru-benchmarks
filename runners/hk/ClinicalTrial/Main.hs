@@ -1,17 +1,23 @@
 module Main where
 
+import           Prelude hiding (product, exp, log, (**), pi)
+
 import qualified System.Random.MWC as MWC
 import qualified Data.Vector.Unboxed   as UV
 import           Language.Hakaru.Runtime.LogFloatPrelude
+import           Language.Hakaru.Runtime.CmdLine
+import           Control.Monad
 
 import Prog
 
 main :: IO ()
 main = do
-  let v1 = UV.fromList [False, False, False, False, False, True, False, False, False, True]
-  let v2 = UV.fromList [False, False, False, False, False, False, False, False, False, True]
   let n = 10
-  let a = prog n (v1, v2)
-  g <- MWC.createSystemRandom
-  run g a
-  print "test compile"
+  dat <- readFile ("../../../input/clinicalTrial/"++show n)
+  forM_ (lines dat) $ \line -> do
+    let v1 :: [Bool]
+        v2 :: [Bool]
+        i :: Bool
+        ((v1, v2), i) = read line
+    g <- MWC.createSystemRandom
+    ni <- unMeasure (prog n (UV.fromList v1, UV.fromList v2)) g
