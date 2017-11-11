@@ -4,7 +4,7 @@
          hakrit
          ffi/unsafe)
 
-(define module-env (compile-file "../../testcode/hkrkt/clinicalTrial_simp.hkr"))
+(define module-env (compile-file "../../testcode/hkrkt/ClinicalTrial.hkr"))
 
 (define init-rng (jit-get-function 'init-rng module-env))
 (init-rng)
@@ -15,7 +15,7 @@
 
 ;(printf (current-command-line-arguments))
 
-(define n 100)     ;(string->number (get-cmd-argument 0)))
+(define n 10)     ;(string->number (get-cmd-argument 0)))
 (define xfile (format "../../input/clinicalTrial/~a" n))
 
 (define xdata (file->lines (string->path xfile)))
@@ -36,10 +36,12 @@
   (define a (map tobool (regexp-split "," (second m1))))
   (define b (map tobool (regexp-split "," (third m1))))
   (define i (tobool (fourth m1)))
+  (printf "a: ~a, b: ~a, i: ~a\n" a b i)
   (define ca (make-carray make-bool-array tbool a))
   (define cb (make-carray make-bool-array tbool b))
   (define p (make-boolarr-pair ca cb))
-
+  (unless (equal? i (prog n p))
+    (printf "wrong!\n"))
   (if (not (equal? i (prog n p)))
       (set! total-not-equal (+ total-not-equal 1))
       (void)))

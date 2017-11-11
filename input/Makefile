@@ -1,4 +1,5 @@
 .PHONY: all
+.PRECIOUS: ./linearRegression/dataX/%
 
 SHELL = /bin/bash
 

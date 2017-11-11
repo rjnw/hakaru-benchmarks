@@ -1,6 +1,8 @@
-benchmarks: clinicalTrial_simp.hk linearRegression_simp.hk gmm_gibbs_simp.hk naive_bayes_gibbs_simp.hk lda_gibbs_simp.hk
+.PHONY: all
 
-%_simp.hk: ../hksrc/%.hk
+all: ClinicalTrialSimp.hk  GmmGibbsSimp.hk  LdaGibbsSimp.hk  LinearRegressionSimp.hk  NaiveBayesGibbsSimp.hk
+
+%Simp.hk: ../hksrc/%.hk
 	../../hkbin/hk-maple --timelimit=600 $< | ./unsample > $@
 
 clean:

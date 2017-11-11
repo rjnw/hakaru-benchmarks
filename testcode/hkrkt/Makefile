@@ -1,7 +1,6 @@
-benchmarks: clinicalTrial_simp.hkr linearRegression_simp.hkr gmm_gibbs_simp.hkr naive_bayes_gibbs_simp.hkr lda_gibbs_simp.hkr
+all: ClinicalTrial.hkr  GmmGibbs.hkr  LdaGibbs.hkr  LinearRegression.hkr  NaiveBayesGibbs.hkr
 
-
-%_simp.hkr: ../hksrc/%.hk
+%.hkr: ../hksrc/%.hk
 	../../hkbin/hk-maple -p sexpression --timelimit=600 $< > $@
 
 clean:
