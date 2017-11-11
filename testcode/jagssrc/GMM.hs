@@ -24,7 +24,7 @@ main :: IO ()
 main = do
   let classes = 3
       points = 1000
-  dat <- readFile ("../../input/gmmGibbs/" ++ show classes
+  dat <- readFile ("../../input/GmmGibbs/" ++ show classes
                                     ++ "-" ++ show points)
   putStrLn "(classes,points,sampler,seconds,sweeps,accuracy)"
   forM_ (lines dat) $ \line -> do

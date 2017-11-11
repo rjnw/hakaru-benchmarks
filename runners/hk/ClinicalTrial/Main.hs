@@ -21,3 +21,4 @@ main = do
         ((v1, v2), i) = read line
     g <- MWC.createSystemRandom
     ni <- unMeasure (prog n (UV.fromList v1, UV.fromList v2)) g
+    return ()
