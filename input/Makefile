@@ -1,5 +1,7 @@
 .PHONY: all
 
+SHELL = /bin/bash
+
 ct = clinicalTrial
 lr = linearRegression
 gg = gmmGibbs
