@@ -134,5 +134,5 @@ prog :: U.Vector Prob
      -> Int
      -> Measure Int
 prog = do {
-#include "../hssrc/gmm_gibbs_simp.hs"
+#include "../hssrc/GmmGibbs.hs"
 }
