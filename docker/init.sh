@@ -5,4 +5,5 @@ cd /hakaru-benchmarks
 git pull --rebase
 git submodule update
 make setup
+raco setup hakrit sham
 /bin/zsh
