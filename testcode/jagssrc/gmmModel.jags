@@ -1,0 +1,12 @@
+model {
+    theta ~ ddirch(as)
+    for (k in 1:length(as)) {
+        phi[k] ~ dnorm(0,1)
+    }
+    for (i in 1:length(t)) {
+        z[i] ~ dcat(theta)
+    }
+    for (i in 1:length(t)) {
+        t[i] ~ dnorm(phi[z[i]],1)
+    }
+}
