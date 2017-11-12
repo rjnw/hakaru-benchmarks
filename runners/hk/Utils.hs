@@ -23,11 +23,14 @@ data SamplerKnobs = Knobs { minSeconds :: Double
                           , minSweeps :: Int
                           , stepSweeps :: Int }
 
-type Sampler = SamplerKnobs ->
-               IO (Double, -- initialization time in seconds
-                   [(Double, -- seconds since beginning of initialization
-                     Int, -- sweeps performed so far
-                     U.Vector Int)]) -- current classification
+type Snapshot = (Double,       -- seconds since beginning of initialization
+                 Int,          -- sweeps performed so far
+                 U.Vector Int) -- current classification
+
+type Trial = [Snapshot]
+
+type Sampler = SamplerKnobs -> IO (Double, Trial) 
+                                   -- ^ initialization time in seconds
 
 timeHakaru :: UTCTime -- time0
            -> (U.Vector Int -> IO (U.Vector Int)) -- sweeper function
@@ -40,8 +43,7 @@ timeHakaru time0 sweep zs knobs = do
       sweeps n = sweep >=> sweeps (n-1)
       threshCond t i = t >= minSeconds knobs &&
                        i >= minSweeps  knobs
-      loop :: Int -> Double -> Double -> U.Vector Int
-           -> IO [(Double, Int, U.Vector Int)]
+      loop :: Int -> Double -> Double -> U.Vector Int -> IO Trial
       loop iter time2 time2subgoal zs
         | threshCond time2 iter = return []
         | otherwise = do
