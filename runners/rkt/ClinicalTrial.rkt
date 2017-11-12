@@ -75,5 +75,8 @@
              (run-single line out-port))))))
   (printf "total-wrong: ~a\n" total-wrong))
 
-;(run-test (command-line #:args (n) (string->number n)))
-(run-test 1000)
+(module+ main
+  (run-test (command-line #:args (n) (string->number n))))
+
+(module+ test
+  (run-test 1000))
