@@ -3,12 +3,13 @@ hssrc = ../../testcode/hssrc/
 
 benchmarks = ClinicalTrial LinearRegression GmmGibbs NaiveBayesGibbs LdaGibbs
 
-all: $(benchmarks)
+all:
+	stack build && stack install --local-bin-path ../hkbin
 
-%:
+%/Prog.hs:
 	mkdir -p $@
-	cp $(hssrc)$@.hs $@/Prog.hs
-	cp MainTemplate.hs $@/Main.hs
+	cp $(hssrc)$@.hs $@
 
-clean:
-	rm -R $(benchmarks)
+%/Main.hs:
+	mkdir -p $@
+	cp MainTemplate.hs $@
