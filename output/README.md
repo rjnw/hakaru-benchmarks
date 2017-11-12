@@ -9,7 +9,7 @@
 |LinearRegression|10,100,1000, ...|
 |GmmGibbs|[3,6,9, ...]-[10,100,1000, ...]|
 |NaiveBayesGibbs| ? |
-
+|LDA|?|
 
 ---
 
