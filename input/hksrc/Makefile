@@ -1,7 +1,7 @@
 .PHONY: generators
 .PRECIOUS: %.hs
 
-generators = $(foreach i,clinicalTrial gmmModel linearRegression, ../bin/$i)
+generators = $(foreach i,ClinicalTrial GmmModel LinearRegression, ../bin/$i)
 
 all: $(generators)
 

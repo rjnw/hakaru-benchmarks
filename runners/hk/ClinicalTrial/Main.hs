@@ -12,8 +12,8 @@ import Prog
 
 main :: IO ()
 main = do
-  let n = 10
-  dat <- readFile ("../../../input/clinicalTrial/"++show n)
+  let n = 1000
+  dat <- readFile ("../../input/ClinicalTrial/"++show n)
   forM_ (lines dat) $ \line -> do
     let v1 :: [Bool]
         v2 :: [Bool]

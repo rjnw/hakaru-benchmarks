@@ -1,11 +1,11 @@
 .PHONY: all
-.PRECIOUS: ./linearRegression/dataX/%
+.PRECIOUS: ./LinearRegression/dataX/%
 
 SHELL = /bin/bash
 
-ct = clinicalTrial
-lr = linearRegression
-gg = gmmGibbs
+ct = ClinicalTrial
+lr = LinearRegression
+gg = GmmGibbs
 
 n := 0 00 000 0000
 i := 3 6 9 12
@@ -50,7 +50,7 @@ buildgen:
 .SECONDEXPANSION:
 ./$(gg)/% : ./data/$(gg)/$$(shell cut -d- -f1 <<< $$(notdir $$@))
 	mkdir -p $(dir $@)
-	./bin/gmmModel $< $(shell cut -d- -f2 <<< $(notdir $@)) | head -n 2000 > $@
+	./bin/GmmModel $< $(shell cut -d- -f2 <<< $(notdir $@)) | head -n 2000 > $@
 
 cleaninp:
 	rm -R ./$(ct) ./$(lr) ./$(gg)

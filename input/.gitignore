@@ -1,5 +1,5 @@
 bin
 data
-clinicalTrial
-gmmGibbs
-linearRegression
+ClinicalTrial
+GmmGibbs
+LinearRegression
