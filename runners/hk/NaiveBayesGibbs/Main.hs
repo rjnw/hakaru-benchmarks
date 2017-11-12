@@ -27,8 +27,9 @@ hakaru :: NaiveBayesSampler
 hakaru numTopics numWords w doc knobs = do
     g <- MWC.createSystemRandom
     let topicPrior = array numTopics (const 1)
-        wordPrior  = array numWords  (const 1)        
+        wordPrior  = array numWords  (const 1)
+        numDocs    = U.last doc
     time0 <- getCurrentTime
-    zs <- U.replicateM numTopics (MWC.uniformR (0, numTopics - 1) g)
+    zs <- U.replicateM numDocs (MWC.uniformR (0, numTopics - 1) g)
     let update = prog topicPrior wordPrior zs w doc
     timeHakaru time0 (gibbsSweep g update) zs knobs
