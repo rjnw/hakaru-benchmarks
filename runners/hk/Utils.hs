@@ -4,7 +4,6 @@ import qualified Data.Vector.Unboxed as U
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine
 import qualified System.Random.MWC                as MWC
-import           System.Process (readProcess)
 import           Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
 import           Control.Monad ((>=>), forM)
 
@@ -59,19 +58,9 @@ timeHakaru time0 sweep zs knobs = do
 diffTime :: UTCTime -> UTCTime -> Double
 diffTime a b = fromRational . toRational $ diffUTCTime a b
 
-timeJags :: String -- filename containing JAGS driver
-         -> FilePath -- temp file path
-         -> Int -- how many clusters
+timeJags :: String -- output from R-JAGS driver
          -> Sampler
-timeJags driverSrc fp classes knobs = do
-  output <- readProcess "R"
-                        ["--slave", "-f", driverSrc, "--args",
-                         show classes, fp,
-                         show (minSeconds knobs),
-                         show (stepSeconds knobs),
-                         show (minSweeps knobs),
-                         show (stepSweeps knobs)]
-                        ""
+timeJags output = const $ do
   let times:samples  = lines output
       [time0, time1] = map read (words times)
       parse (stats:zs_:rest) = (time2 - time0, iter, zs) : parse rest

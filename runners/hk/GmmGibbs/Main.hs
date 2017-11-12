@@ -4,6 +4,7 @@ module Main where
 import           System.IO (hPutStrLn, hClose)
 import           System.IO.Temp (withSystemTempFile)
 import           Data.Time.Clock (getCurrentTime)
+import           System.Process (readProcess)    
 import qualified Data.Vector.Unboxed as U
 import           Data.List (permutations)
     
@@ -50,7 +51,15 @@ jags :: GMMSampler
 jags classes ts knobs = withSystemTempFile "gmmModel.data" $ \fp h -> do
   hPutStrLn h (unwords (map show (U.toList ts)))
   hClose h
-  timeJags "gmmModel.R" fp classes knobs
+  output <- readProcess "R"
+            ["--slave", "-f", "gmmModel.R", "--args",
+             show classes, fp,
+             show (minSeconds knobs),
+             show (stepSeconds knobs),
+             show (minSweeps knobs),
+             show (stepSweeps knobs)]
+            ""
+  timeJags output knobs
 
 hakaru :: GMMSampler
 hakaru classes ts knobs = do
