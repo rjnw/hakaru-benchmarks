@@ -1,5 +1,5 @@
 {-# LANGUAGE DataKinds, NegativeLiterals #-}
-module Prog where
+module NaiveBayesGibbs.Prog where
 
 import           Data.Number.LogFloat (LogFloat)
 import           Prelude hiding (product, exp, log, (**))
