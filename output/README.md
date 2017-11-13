@@ -16,10 +16,11 @@
 # File format
 ```
 file    := ([:line:]<newline>)*
-line   := (<leftParen>[:time:]<space>[:sweeps:]<space>[:state:]<rightParen>)*
-state  := <leftbracket>([:number:]<space>)*<rightBracket>
-sweeps := [:number:]
-time   := [:number:]
+line    := ([:sweep:]<tab>)*
+sweep   := [:time:]<space>[:nsweeps:]<space>[:state:]
+state   := <leftbracket>([:number:]<space>)*<rightBracket>
+nsweeps := [:number:]
+time    := [:number:]
 ```
 ### Not posix compliant :wink:
 * `<stuff>` is a literal, apply common sense

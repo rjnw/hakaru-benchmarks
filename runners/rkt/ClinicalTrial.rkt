@@ -4,20 +4,17 @@
          hakrit
          ffi/unsafe racket/cmdline
         racket/runtime-path)
-(define-runtime-path CT.hkr "../../testcode/hkrkt/ClinicalTrial.hkr")
-(define module-env (debug-file CT.hkr))
-(define n (command-line #:args (n) (string->number n)))
-(define-runtime-path xfile "../../input/clinicalTrial/")
-(define xdata (file->lines (build-path xfile (number->string n))))
 
-(define hkrsrc "../../testcode/hkrkt/~a.hkr")
+(define-runtime-path hksrc-dir "../../testcode/hkrkt/")
+(define-runtime-path input-dir "../../input/")
+(define-runtime-path output-dir "../../output/")
+
 (define testname "ClinicalTrial")
-(define inputdir "../../input/")
 
 (define (run-test n)
-  (define srcfile (format hkrsrc testname))
-  (define xfile (format (string-append inputdir testname "/~a") n))
-
+  (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
+  (define xfile  (build-path input-dir testname (number->string n)))
+  (define outfile (build-path output-dir testname "rkt" (number->string n)))
   (define module-env (compile-file srcfile))
 
   (define init-rng (jit-get-function 'init-rng module-env))
@@ -49,8 +46,8 @@
     (match str
       ["True" 1]
       ["False" 0]))
-
-  (define (run-single str)
+  (define total-wrong 0)
+  (define (run-single str out-port)
     (define m1 (regexp-match "\\(\\[(.*)\\],\\[(.*)\\]\\),(.*)\\)" str))
     (when (< (length m1) 4)
       (error "matching line from input"))
@@ -61,13 +58,24 @@
     (define ca (make-array make-array-bool a tbool))
     (define cb (make-array make-array-bool b tbool))
     (define p (make-pair-array-bool ca cb))
+
+    (define before-time (current-inexact-milliseconds))
     (define outi (prog n p))
+    (define after-time (current-inexact-milliseconds))
+    (fprintf out-port "~a ~a [~a]\n" (- after-time before-time) 1 outi)
+    (unless (equal? outi i) (set! total-wrong (+ total-wrong 1)))
     outi)
 
-  (time
-   (call-with-input-file xfile
-     (λ (xf-port)
-       (for ([line (in-lines xf-port)])
-         (run-single line))))))
+  (call-with-input-file xfile
+    (λ (xf-port)
+      (call-with-output-file outfile #:exists 'replace
+        (λ (out-port)
+           (for ([line (in-lines xf-port)])
+             (run-single line out-port))))))
+  (printf "total-wrong: ~a\n" total-wrong))
 
-(run-test (string->number (vector-ref (current-command-line-arguments) 0)))
+(module+ main
+  (run-test (command-line #:args (n) (string->number n))))
+
+(module+ test
+  (run-test 1000))
