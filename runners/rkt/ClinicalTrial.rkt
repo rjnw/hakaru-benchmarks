@@ -59,11 +59,10 @@
     (define cb (make-array make-array-bool b tbool))
     (define p (make-pair-array-bool ca cb))
 
-    (define-values (outil realt cput gct)
-      (time-apply prog (list n p)))
-
-    (define outi (car outil))
-    (fprintf out-port "~a ~a [~a]\n" cput 1 outi)
+    (define before-time (current-inexact-milliseconds))
+    (define outi (prog n p))
+    (define after-time (current-inexact-milliseconds))
+    (fprintf out-port "~a ~a [~a]\n" (- after-time before-time) 1 outi)
     (unless (equal? outi i) (set! total-wrong (+ total-wrong 1)))
     outi)
 
