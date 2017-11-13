@@ -33,10 +33,6 @@ main = do
            ("jags"  , jags  )] $ \(samplerName, sampler) -> do
       (time1, samples) <- sampler classes (U.fromList ts) gmmKnobs
       print (classes, points, samplerName, time1, 0, 0)
-      mapM_ (\(time2, iter, zs') ->
-             let acc = accuracy classes (U.fromList zs) zs' :: Double in
-             print (classes, points, samplerName, time2, iter, acc))
-            samples
 
 gmmKnobs = Knobs { minSeconds = 10
                  , stepSeconds = 0.5
