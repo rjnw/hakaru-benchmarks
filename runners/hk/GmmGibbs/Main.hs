@@ -11,28 +11,26 @@ import           Data.List (permutations)
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import qualified System.Random.MWC                as MWC
 import           Control.Monad
+import           System.Environment (getArgs)    
 
-import           Utils (SamplerKnobs(..), Sampler,
+import           Utils (SamplerKnobs(..), Sampler, Trial,
                         timeJags, gibbsSweep, timeHakaru)
 import           GmmGibbs.Prog
 
 default (Int)
 
 main :: IO ()
-main = do
+main = do  
+  [inputs_path] <- getArgs
   let classes = 3
-      points = 1000
-  dat <- readFile ("../../../input/GmmGibbs/" ++ show classes
-                                    ++ "-" ++ show points)
-  putStrLn "(classes,points,sampler,seconds,sweeps,accuracy)"
+  dat <- readFile inputs_path
+  g <- MWC.createSystemRandom
   forM_ (lines dat) $ \line -> do
     let ts :: [Double]
         zs :: [Int]
         (ts,zs) = read line
-    forM_ [("hakaru", hakaru),
-           ("jags"  , jags  )] $ \(samplerName, sampler) -> do
-      (time1, samples) <- sampler classes (U.fromList ts) gmmKnobs
-      print (classes, points, samplerName, time1, 0, 0)
+    trial <- hakaru g classes (U.fromList ts) gmmKnobs
+    print trial
 
 gmmKnobs = Knobs { minSeconds = 10
                  , stepSeconds = 0.5
@@ -42,6 +40,14 @@ gmmKnobs = Knobs { minSeconds = 10
 type GMMSampler = Int -> -- how many clusters to classify points into
                   U.Vector Double -> -- data points to classify
                   Sampler
+
+hakaru :: MWC.GenIO -> GMMSampler
+hakaru g classes ts knobs = do
+  let as = array classes (const 1)
+  time0 <- getCurrentTime
+  zs <- U.replicateM (U.length ts) (MWC.uniformR (0, U.length as - 1) g)
+  let sweep = gibbsSweep (prog as zs ts) g
+  timeHakaru time0 sweep zs knobs
 
 jags :: GMMSampler
 jags classes ts knobs = withSystemTempFile "gmmModel.data" $ \fp h -> do
@@ -55,24 +61,5 @@ jags classes ts knobs = withSystemTempFile "gmmModel.data" $ \fp h -> do
              show (minSweeps knobs),
              show (stepSweeps knobs)]
             ""
-  timeJags output knobs
-
-hakaru :: GMMSampler
-hakaru classes ts knobs = do
-  g <- MWC.createSystemRandom
-  let as = array classes (const 1)
-  time0 <- getCurrentTime
-  zs <- U.replicateM (U.length ts) (MWC.uniformR (0, classes - 1) g)
-  let sweep = gibbsSweep g (prog as zs ts)
-  timeHakaru time0 sweep zs knobs
-
-accuracy :: (Fractional ratio, Ord ratio)
-         => Int -> U.Vector Int -> U.Vector Int -> ratio
-accuracy classes actuals predicts =
-  fromIntegral
-       (maximum [ U.sum (U.zipWith (\a p -> if a == mapping U.! p
-                                            then 1 else 0 :: Int)
-                                   actuals predicts)
-                | mapping <- U.fromList <$> permutations [0 .. classes - 1] ])
-   / fromIntegral (U.length actuals)
+  timeJags output knobs             
 

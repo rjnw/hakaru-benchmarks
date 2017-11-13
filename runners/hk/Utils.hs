@@ -7,11 +7,11 @@ import qualified System.Random.MWC                as MWC
 import           Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
 import           Control.Monad ((>=>), forM)
 
-gibbsSweep :: MWC.GenIO
-           -> (Int -> Measure Int) -- update one dimension
+gibbsSweep :: (Int -> Measure Int) -- how to update one dimension
+           -> MWC.GenIO
            -> U.Vector Int         -- start state
            -> IO (U.Vector Int)    -- state after one sweep
-gibbsSweep g update zs = loop (U.length zs) zs
+gibbsSweep update g zs = loop (U.length zs) zs
     where loop :: Int -> U.Vector Int -> IO (U.Vector Int)
           loop 0 zs = return zs
           loop i zs = do
@@ -27,10 +27,10 @@ type Snapshot = (Double,       -- seconds since beginning of initialization
                  Int,          -- sweeps performed so far
                  U.Vector Int) -- current classification
 
-type Trial = [Snapshot]
+type Trial = (Double, [Snapshot])
+              -- ^ initialization time in seconds
 
-type Sampler = SamplerKnobs -> IO (Double, Trial) 
-                                   -- ^ initialization time in seconds
+type Sampler = SamplerKnobs -> IO Trial
 
 timeHakaru :: UTCTime -- time0
            -> (U.Vector Int -> IO (U.Vector Int)) -- sweeper function
@@ -43,7 +43,7 @@ timeHakaru time0 sweep zs knobs = do
       sweeps n = sweep >=> sweeps (n-1)
       threshCond t i = t >= minSeconds knobs &&
                        i >= minSweeps  knobs
-      loop :: Int -> Double -> Double -> U.Vector Int -> IO Trial
+      loop :: Int -> Double -> Double -> U.Vector Int -> IO [Snapshot]
       loop iter time2 time2subgoal zs
         | threshCond time2 iter = return []
         | otherwise = do
