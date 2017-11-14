@@ -5,7 +5,11 @@ import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine
 import qualified System.Random.MWC                as MWC
 import           Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
-import           Control.Monad ((>=>), forM)
+import           Control.Monad ((>=>), forM)    
+import Data.Char (isSpace)
+import Data.Function (on)
+import Data.List (intercalate)
+import Numeric (showFFloat)    
 
 gibbsSweep :: (Int -> Measure Int) -- how to update one dimension
            -> MWC.GenIO
@@ -23,27 +27,32 @@ data SamplerKnobs = Knobs { minSeconds :: Double
                           , minSweeps :: Int
                           , stepSweeps :: Int }
 
-type Snapshot = (Double,       -- seconds since beginning of initialization
-                 Int,          -- sweeps performed so far
-                 U.Vector Int) -- current classification
+-- | Called "sweep" here:
+-- https://github.com/rjnw/hakaru-benchmarks/tree/master/output
+type Log = (Double,       -- seconds since beginning of initialization
+            Int,          -- sweeps performed so far
+            U.Vector Int) -- current classification    
 
-type Trial = (Double, [Snapshot])
-              -- ^ initialization time in seconds
+type LogsWithInit = (Double, [Log])
+                    -- ^ initialization time in seconds
 
-type Sampler = SamplerKnobs -> IO Trial
+onlyLogs :: LogsWithInit -> [Log]
+onlyLogs = snd
+
+type Sampler = SamplerKnobs -> IO LogsWithInit
 
 timeHakaru :: UTCTime -- time0
            -> (U.Vector Int -> IO (U.Vector Int)) -- sweeper function
            -> U.Vector Int -- start state
            -> Sampler
-timeHakaru time0 sweep zs knobs = do
+timeHakaru time0 sweep zs knobs = do  
   time1 <- getCurrentTime
   let sweeps :: Int -> U.Vector Int -> IO (U.Vector Int)
       sweeps 0 = return
       sweeps n = sweep >=> sweeps (n-1)
       threshCond t i = t >= minSeconds knobs &&
                        i >= minSweeps  knobs
-      loop :: Int -> Double -> Double -> U.Vector Int -> IO [Snapshot]
+      loop :: Int -> Double -> Double -> U.Vector Int -> IO [Log]
       loop iter time2 time2subgoal zs
         | threshCond time2 iter = return []
         | otherwise = do
@@ -54,8 +63,8 @@ timeHakaru time0 sweep zs knobs = do
             then ((time2, iter, zs) : ) <$>
                  loop iter time2 (time2 + stepSeconds knobs) zs
             else loop iter time2 time2subgoal zs
-  samples <- loop 0 0 (stepSeconds knobs) zs
-  return (diffTime time1 time0, samples)
+  samples <- loop 0 0 (stepSeconds knobs) zs  
+  return (diffTime time1 time0 , samples)
   
 diffTime :: UTCTime -> UTCTime -> Double
 diffTime a b = fromRational . toRational $ diffUTCTime a b
@@ -72,4 +81,37 @@ timeJags output = const $ do
               zs              = U.fromList . map (pred . read) . words $ zs_
       parse _ = []
   return (time1 - time0, parse samples)
-         
+    
+data Snapshot = Snapshot { progress, state :: [Double] }          
+
+toSnapshot :: Log -> Snapshot
+toSnapshot (seconds, sweeps, labels) =
+    Snapshot { progress = [seconds, fromIntegral sweeps]
+             , state = U.toList $ U.map fromIntegral labels }
+
+instance Show Snapshot where
+  show (Snapshot p s) = f p ++ " [" ++ f s ++ "]"
+    where f = unwords . map (($ "") . showFFloat Nothing)
+  showList = showString . intercalate "\t" . map show
+
+-- | Called "line" here:
+-- https://github.com/rjnw/hakaru-benchmarks/tree/master/output
+type Trial = [Snapshot]
+
+oneLine :: LogsWithInit -> String
+oneLine = ($ "\n") . showList . map toSnapshot . onlyLogs
+
+parseTrial :: String -> Trial
+parseTrial = parseTrial' . dropWhile delim
+  where parseTrial' "" = []
+        parseTrial' s | all isSpace s1 = parseTrial s2
+                      | otherwise      = parseSnapshot s1
+                                       : parseTrial s2
+          where (s1,s2) = break delim s
+        delim = (`elem` "\t()")
+
+parseSnapshot :: String -> Snapshot
+parseSnapshot s | all isSpace s'' = Snapshot (f s1) (f s2)
+  where (s1, '[':s' ) = break ('[' ==) s
+        (s2, ']':s'') = break (']' ==) s'
+        f             = map read . words

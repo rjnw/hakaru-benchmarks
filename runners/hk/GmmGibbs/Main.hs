@@ -11,26 +11,32 @@ import           Data.List (permutations)
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import qualified System.Random.MWC                as MWC
 import           Control.Monad
-import           System.Environment (getArgs)    
+import           System.Environment (getArgs)
+import           System.Directory (doesFileExist, removeFile)
+import           System.FilePath (takeBaseName)
+import           Data.List.Split (wordsBy)
 
-import           Utils (SamplerKnobs(..), Sampler, Trial,
-                        timeJags, gibbsSweep, timeHakaru)
+import           Utils (SamplerKnobs(..), Sampler, onlyLogs, toSnapshot,
+                        timeJags, gibbsSweep, timeHakaru, oneLine)
 import           GmmGibbs.Prog
 
 default (Int)
 
 main :: IO ()
 main = do  
-  [inputs_path] <- getArgs
-  let classes = 3
+  [inputs_path, outputs_path] <- getArgs
+  let [classes, _] = map read . wordsBy (== '-') $ takeBaseName inputs_path
   dat <- readFile inputs_path
+  b <- doesFileExist outputs_path
+  when b (removeFile outputs_path)
   g <- MWC.createSystemRandom
   forM_ (lines dat) $ \line -> do
     let ts :: [Double]
         zs :: [Int]
         (ts,zs) = read line
-    trial <- hakaru g classes (U.fromList ts) gmmKnobs
-    print trial
+    trial <- oneLine <$> hakaru g classes (U.fromList ts) gmmKnobs
+    putStrLn "writing..."
+    appendFile outputs_path trial
 
 gmmKnobs = Knobs { minSeconds = 10
                  , stepSeconds = 0.5
@@ -45,7 +51,7 @@ hakaru :: MWC.GenIO -> GMMSampler
 hakaru g classes ts knobs = do
   let as = array classes (const 1)
   time0 <- getCurrentTime
-  zs <- U.replicateM (U.length ts) (MWC.uniformR (0, U.length as - 1) g)
+  zs <- U.replicateM (U.length ts) (MWC.uniformR (0, classes - 1) g)
   let sweep = gibbsSweep (prog as zs ts) g
   timeHakaru time0 sweep zs knobs
 
