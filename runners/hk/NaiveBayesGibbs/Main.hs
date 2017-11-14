@@ -7,7 +7,7 @@ import           Data.Time.Clock (getCurrentTime)
 import           Control.Monad (forM_)
 import           System.Environment (getArgs)
     
-import           Utils (SamplerKnobs(..), Sampler, Trial,
+import           Utils (SamplerKnobs(..), Sampler,
                         timeJags, gibbsSweep, timeHakaru)    
 import           NaiveBayesGibbs.Prog    
 
