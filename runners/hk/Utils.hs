@@ -6,10 +6,12 @@ import           Language.Hakaru.Runtime.CmdLine
 import qualified System.Random.MWC                as MWC
 import           Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
 import           Control.Monad ((>=>), forM)    
-import Data.Char (isSpace)
-import Data.Function (on)
-import Data.List (intercalate)
-import Numeric (showFFloat)    
+import           Data.Char (isSpace)
+import           Data.Function (on)
+import           Data.List (intercalate)
+import           Numeric (showFFloat)
+import           System.FilePath (takeBaseName)
+import           Data.List.Split (wordsBy)
 
 gibbsSweep :: (Int -> Measure Int) -- how to update one dimension
            -> MWC.GenIO

@@ -13,8 +13,6 @@ import qualified System.Random.MWC                as MWC
 import           Control.Monad
 import           System.Environment (getArgs)
 import           System.Directory (doesFileExist, removeFile)
-import           System.FilePath (takeBaseName)
-import           Data.List.Split (wordsBy)
 
 import           Utils (SamplerKnobs(..),
                         Sampler, oneLine,
