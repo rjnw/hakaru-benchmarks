@@ -1,0 +1,42 @@
+## Latent Dirichlet Allocation
+def dirichlet(as array(prob)):
+    xs <~ plate i of int2nat(size(as)-1):
+            beta(summate j from i+1 to size(as): as[j],
+                 as[i])
+    return array i of size(as):
+             x = product j from 0 to i: xs[j]
+             x * if i+1==size(as): 1 else: real2prob(1-xs[i])
+
+fn sizeVocab nat:
+   fn numTopics nat:
+      fn numDocs nat:
+         fn docSize array(nat):
+            β <~ plate _ of numTopics:     # word dist for topic k
+                   dirichlet(array _ of sizeVocab: 1)
+            θ <~ plate _ of numDocs:
+                   dirichlet(array _ of numTopics: 1)
+            # likelihood
+            ζ <~ plate d of numDocs:                   
+                   plate _ of docSize[d]: # topic marker for word n in doc m
+                     categorical(θ[d])
+            wd <~ plate d of numDocs:
+                    plate n of docSize[d]: # for word n in doc d
+                      wdn <~ categorical(β[ζ[d][n]])
+                      return (wdn, d)
+            def concat(a array(nat,nat), b array(nat,nat)):
+                total = size(a) + size(b)
+                array i of total:
+                  if i < size(a):
+                     a[i]
+                  else:
+                     b[i]
+            def flatten(a array(array(nat,nat))):
+                reduce(concat, [], a)                                  
+            flat = flatten(wd)
+            def unzip(a array(nat,nat)):
+                fsts = array i of size(a):
+                         fst(a[i])
+                snds = array i of size(a):
+                         snd(a[i])
+                (fsts,snds)
+            return (unzip(flat), ζ)
