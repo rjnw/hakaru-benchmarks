@@ -115,3 +115,6 @@ parseSnapshot s | all isSpace s'' = Snapshot (f s1) (f s2)
   where (s1, '[':s' ) = break ('[' ==) s
         (s2, ']':s'') = break (']' ==) s'
         f             = map read . words
+
+paramsFromName :: FilePath -> [Int]
+paramsFromName = map read . wordsBy (== '-') . takeBaseName

@@ -16,8 +16,10 @@ import           System.Directory (doesFileExist, removeFile)
 import           System.FilePath (takeBaseName)
 import           Data.List.Split (wordsBy)
 
-import           Utils (SamplerKnobs(..), Sampler, onlyLogs, toSnapshot,
-                        timeJags, gibbsSweep, timeHakaru, oneLine)
+import           Utils (SamplerKnobs(..),
+                        Sampler, oneLine,
+                        timeJags, gibbsSweep,
+                        timeHakaru, paramsFromName)
 import           GmmGibbs.Prog
 
 default (Int)
@@ -25,7 +27,7 @@ default (Int)
 main :: IO ()
 main = do  
   [inputs_path, outputs_path] <- getArgs
-  let [classes, _] = map read . wordsBy (== '-') $ takeBaseName inputs_path
+  let [classes, _] = paramsFromName inputs_path
   dat <- readFile inputs_path
   b <- doesFileExist outputs_path
   when b (removeFile outputs_path)
