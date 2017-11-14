@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds, NegativeLiterals #-}
-module Prog where
-
+module ClinicalTrial.Prog where
 
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine

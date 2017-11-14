@@ -8,7 +8,7 @@ import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine
 import           Control.Monad
 
-import Prog
+import ClinicalTrial.Prog
 
 main :: IO ()
 main = do
