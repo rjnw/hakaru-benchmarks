@@ -5,14 +5,14 @@ author:              Rajan Walia
 maintainer:          walrajan@gmail.com
 
 build-type:          Simple
-cabal-version:       >=1.16
+cabal-version:       >=1.16                   
 
-Executable ClinicalTrial
+Executable clinicalTrial
+    Hs-Source-Dirs:    .
     Main-is:           ClinicalTrial/Main.hs
-    Hs-Source-Dirs:    .
     Default-Language:  Haskell2010
     GHC-Options:       -O2 -Wall -fwarn-tabs
-    other-modules:     Prog
+    other-modules:     ClinicalTrial.Prog
     build-depends:     base                 >= 4.7  && < 5.0,
                        mwc-random           >= 0.13 && < 0.14,
                        hakaru               >= 0.6,
@@ -27,12 +27,12 @@ Executable ClinicalTrial
                        temporary            >= 1.2.1.1,
                        time                 >= 1.6.0.1
 
-Executable GmmGibbs
-    Main-is:           GmmGibbs/Main.hs
+Executable gmmGibbs
     Hs-Source-Dirs:    .
+    Main-is:           GmmGibbs/Main.hs
     Default-Language:  Haskell2010
     GHC-Options:       -O2 -Wall -fwarn-tabs
-    other-modules:     Prog
+    other-modules:     Utils GmmGibbs.Prog
     build-depends:     base                 >= 4.7  && < 5.0,
                        mwc-random           >= 0.13 && < 0.14,
                        hakaru               >= 0.6,
@@ -45,4 +45,76 @@ Executable GmmGibbs
                        bytestring           >= 0.10,
                        process              >= 1.1  && < 2.0,
                        temporary            >= 1.2.1.1,
-                       time                 >= 1.6.0.1
+                       time                 >= 1.6.0.1,
+                       split                >= 0.2.3.2,
+                       directory            >= 1.3.0.0
+                       
+Executable getNews
+    Hs-Source-Dirs:    .
+    Main-is:           GetNews.hs
+    GHC-Options:       -O2 -threaded
+    other-modules:     News
+    build-depends:     base                 >= 4.7  && < 5.0,
+                       unordered-containers >= 0.2.8.0,
+                       containers           >= 0.5.7.1,
+                       mtl                  >= 2.2.1,
+                       hashable             >= 1.2.6.1,
+                       directory            >= 1.3.0.0,
+                       filepath             >= 1.1,
+                       bytestring           >= 0.10,
+                       logfloat             >= 0.13 && < 0.14,
+                       mwc-random           >= 0.13 && < 0.14,
+                       vector               >= 0.10
+    default-language:  Haskell2010
+
+Executable naiveBayesGibbs
+    Hs-Source-Dirs:    .
+    Main-is:           NaiveBayesGibbs/Main.hs
+    Default-Language:  Haskell2010
+    GHC-Options:       -O2 -Wall -fwarn-tabs
+    other-modules:     Utils News NaiveBayesGibbs.Prog
+    build-depends:     base                 >= 4.7  && < 5.0,
+                       mwc-random           >= 0.13 && < 0.14,
+                       hakaru               >= 0.6,
+                       logfloat             >= 0.13 && < 0.14,
+                       text                 >= 0.11 && < 1.3,
+                       pretty               >= 1.1  && < 1.2,
+                       filepath             >= 1.3,
+                       vector               >= 0.10,
+                       filepath             >= 1.1,
+                       bytestring           >= 0.10,
+                       process              >= 1.1  && < 2.0,
+                       temporary            >= 1.2.1.1,
+                       time                 >= 1.6.0.1,
+                       split                >= 0.2.3.2,
+                       directory            >= 1.3.0.0,
+                       unordered-containers >= 0.2.8.0,
+                       containers           >= 0.5.7.1,
+                       mtl                  >= 2.2.1,
+                       hashable             >= 1.2.6.1
+
+Executable ldaGibbs
+    Hs-Source-Dirs:    .
+    Main-is:           LdaGibbs/Main.hs
+    Default-Language:  Haskell2010
+    GHC-Options:       -O2 -Wall -fwarn-tabs
+    other-modules:     Utils News LdaGibbs.Prog
+    build-depends:     base                 >= 4.7  && < 5.0,
+                       mwc-random           >= 0.13 && < 0.14,
+                       hakaru               >= 0.6,
+                       logfloat             >= 0.13 && < 0.14,
+                       text                 >= 0.11 && < 1.3,
+                       pretty               >= 1.1  && < 1.2,
+                       filepath             >= 1.3,
+                       vector               >= 0.10,
+                       filepath             >= 1.1,
+                       bytestring           >= 0.10,
+                       process              >= 1.1  && < 2.0,
+                       temporary            >= 1.2.1.1,
+                       time                 >= 1.6.0.1,
+                       split                >= 0.2.3.2,
+                       directory            >= 1.3.0.0,
+                       unordered-containers >= 0.2.8.0,
+                       containers           >= 0.5.7.1,
+                       mtl                  >= 2.2.1,
+                       hashable             >= 1.2.6.1
