@@ -25,9 +25,15 @@
   (define infile  (build-path input-dir testname (format "~a-~a" classes points)))
   (define outfile (build-path output-dir testname "rkt" (format "~a-~a" classes points)))
 
+  (define module-env (compile-file srcfile gmminfo))
+  ;(jit-dump-module module-env)
+  (initialize-jit! module-env)
+  (define init-rng (jit-get-function 'init-rng module-env))
+
+  (init-rng)
 
   (define make-prob-array (jit-get-function (string->symbol (format "new-sized$array<~a.prob>" classes)) module-env))
-  (define set-index-prob-array (jit-get-function (string->symbol (format "set-index!$array<~a.prob>" points)) module-env))
+  (define set-index-prob-array (jit-get-function (string->symbol (format "set-index!$array<~a.prob>" classes)) module-env))
 
   (define make-nat-array (jit-get-function (string->symbol (format "new-sized$array<~a.nat>" points)) module-env))
   (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<~a.nat>" points)) module-env))
@@ -45,7 +51,7 @@
     (define arr (make-nat-array))
     (for ([v lst]
           [i (in-range (length lst))])
-      (set-nat-array arr i (exact->inexact v)))
+      (set-index-nat-array arr i  v))
     arr)
   (define (make-ts lst)
     (define arr (make-real-array))
@@ -54,29 +60,27 @@
       (set-index-real-array arr i (exact->inexact v)))
     arr)
 
-  (define module-env (compile-file srcfile gmminfo))
-  ;(jit-dump-module module-env)
-  (initialize-jit! module-env)
-  (define init-rng (jit-get-function 'init-rng module-env))
-
-  (init-rng)
   (define prog3 (jit-get-function 'prog3 module-env))
   ;((array (prob (valuerange 1 . 1)) (size . 3)) (array (nat (valuerange 0 . 2)) (size . 10)) (array real (size . 10)))
-  (define as (build-list (const (real->prob 1)) classes))
-  (define distf (uniform-dist 0 (- classes 1)))
-  (define zs (build-list (λ (i) (sample distf)) points))
+  (define as (build-list classes (const (real->prob 1))))
+  (define distf (discrete-dist (build-list (- classes 1) values)))
+  (define zs (build-list points (λ (i) (sample distf))))
   ;(curry-arg (nat (valuerange 0 . 9)))
   (define prog (jit-get-function 'prog module-env))
   (define pair-array-regex "^\\(\\[(.*)\\],\\[(.*)\\]\\)$")
   (define (run-single str out-port)
-    (match-define (_ ts-str zs-str) (regexp-match pair-array-regex str))
-    (define ts (string->number (regexp-split "," ts-str)))
+    (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
+    (define ts (map string->number (regexp-split "," ts-str)))
     ;    (define zs (string->number (regexp-split "," zs-str)))
-    (define curr-arg (prog3 (build-as as)
-                            (build-zs zs)
-                            (build-ts ts)))
-    (for))
+    (define curr-arg (prog3 (make-as as)
+                            (make-zs zs)
+                            (make-ts ts)))
 
+    (printf "test: ~a\n" (prog curr-arg 4))
+    (error 'stop)
+    (gibbs-timer (curry gibbs-sweep points vector-set! (curry prog curr-arg))
+                 (build-vector (const 1) points)
+                 (curry fprintf out-port "~a ~a [~a]\t")))
 
   (call-with-input-file infile
     (λ (inp-port)
@@ -93,4 +97,4 @@
   (run-test classes points))
 
 (module+ test
-  (run-test 3 10))
+  (run-test 9 100))

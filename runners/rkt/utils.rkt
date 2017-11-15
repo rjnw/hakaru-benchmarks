@@ -7,6 +7,8 @@
          diff-ts
          hksrc-dir
          input-dir
+         gibbs-timer
+         gibbs-sweep
          output-dir)
 
 
@@ -45,30 +47,29 @@
   (loop iter-count));(vector-length state)))
 
 
-(define (gibbs-timer sweeper state state-printer
+(define (gibbs-timer sweeper state printer
                      #:min-seconds [min-seconds 10]
                      #:step-seconds [step-seconds 0.5]
                      #:min-sweeps [min-sweeps 100]
                      #:step-sweeps [step-sweeps 10])
+  (define start-time (get-ts))
+  (define sweeps 0)
   (define (gibbs-trial)
-    (define start-time (get-ts))
-    (define sweeps 0)
     (define (step)
       (define time0 (get-ts))
       (define (step-sweep [sweeps step-sweeps])
         (if (zero? sweeps) (void)
             (begin (sweeper state)
-                   (min-sweep-loop (- sweeps 1)))))
+                   (step-sweep (- sweeps 1)))))
       (define (step-second [seconds step-seconds])
         (define (step-done?) (> (elasp-seconds time0) step-seconds))
-        (step-sweep) (set! steps (+ sweeps step-sweeps))
+        (step-sweep) (set! sweeps (+ sweeps step-sweeps))
         (if (step-done?)
-            (state-printer time0 state)
-            (step-second (elasp-seconds time0)))))
-    (define (trial)
-      (define (trial-done?) (and (> sweeps min-sweeps) (> min-seconds (elasp-seconds start-time))))
-      (step)
-      (unless (trial-done?) (trial)))
+            (printer (elasp-seconds time0) sweeps state)
+            (step-second (elasp-seconds time0))))
+      (step-second))
+    (define (trial-done?) (and (> sweeps min-sweeps) (> min-seconds (elasp-seconds start-time))))
+    (unless (trial-done?) (gibbs-trial)))
   (void))
 
 
