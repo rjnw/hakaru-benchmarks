@@ -42,7 +42,7 @@ process (_,truth) (Snapshot p predict) = Snapshot p [accuracy]
 maxClasses :: Int
 maxClasses = 12 -- factorial 13 is probably too big anyway
 
--- | Resample trials at regular accuracy-intervals using linear interpolation
+-- | Resample trials at regular time-intervals using linear interpolation
 --------------------------------------------------------------------------------
 
 -- | Given a list of times, resample a trial at those times
