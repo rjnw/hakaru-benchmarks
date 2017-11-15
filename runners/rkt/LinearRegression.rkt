@@ -81,6 +81,6 @@
   (run-test (command-line #:args (n) (string->number n))))
 
 (module+ test
-  (run-test 10)
-  (run-test 100)
+;  (run-test 10)
+;  (run-test 100)
   (run-test 1000))
