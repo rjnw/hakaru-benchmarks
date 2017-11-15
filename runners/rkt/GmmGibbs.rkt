@@ -1,62 +1,100 @@
 #lang racket
 
 (require sham
-         hakrit)
-
-
-(define hkrsrc "../../testcode/hkrkt/~a.hkr")
+         hakrit
+         racket/cmdline
+         racket/runtime-path
+         "utils.rkt")
+(require math)
 (define testname "GmmGibbs")
-(define inputdir "../../input/")
 
-(define (run-test n)
-  (define srcfile (format hksrc testname))
-  (define xfile (format (string-append inputdir "dataX/~a") n))
-  (define yfile (format (string-append inputdir "y/~a") n))
 
-  (define module-env (compile-file srcfile))
 
+(define (run-test classes points)
+  (printf "c, ~a, p: ~a\n" classes points)
+  (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
+  (printf "src: ~a" srcfile)
+  (define gmminfo (list
+                   (list `(arrayinfo . ((size . ,classes)
+                                        (typeinfo . ((probinfo . ((valuerange . (1 . 1)))))))))
+                   (list `(arrayinfo . ((size . ,points)
+                                        (typeinfo . ((natinfo . ((valuerange . (0 . ,(- classes 1))))))))))
+                   (list `(arrayinfo . ((size . ,points))) 'curry)
+                   (list `(natinfo . ((valuerange . (0 . ,(- points 1))))))))
+
+  (define infile  (build-path input-dir testname (format "~a-~a" classes points)))
+  (define outfile (build-path output-dir testname "rkt" (format "~a-~a" classes points)))
+
+  (define module-env (compile-file srcfile gmminfo))
+  ;(jit-dump-module module-env)
+  (initialize-jit! module-env)
   (define init-rng (jit-get-function 'init-rng module-env))
+
   (init-rng)
 
+  (define make-prob-array (jit-get-function (string->symbol (format "new-sized$array<~a.prob>" classes)) module-env))
+  (define set-index-prob-array (jit-get-function (string->symbol (format "set-index!$array<~a.prob>" classes)) module-env))
+
+  (define make-nat-array (jit-get-function (string->symbol (format "new-sized$array<~a.nat>" points)) module-env))
+  (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<~a.nat>" points)) module-env))
+
+  (define make-real-array (jit-get-function (string->symbol (format "new-sized$array<~a.real>" points)) module-env))
+  (define set-index-real-array (jit-get-function (string->symbol (format "set-index!$array<~a.real>" points)) module-env))
+
+  (define (make-as lst)
+    (define arr (make-prob-array))
+    (for ([v lst]
+          [i (in-range (length lst))])
+      (set-index-prob-array arr i (exact->inexact v)))
+    arr)
+  (define (make-zs lst)
+    (define arr (make-nat-array))
+    (for ([v lst]
+          [i (in-range (length lst))])
+      (set-index-nat-array arr i  v))
+    arr)
+  (define (make-ts lst)
+    (define arr (make-real-array))
+    (for ([v lst]
+          [i (in-range (length lst))])
+      (set-index-real-array arr i (exact->inexact v)))
+    arr)
+
+  (define prog3 (jit-get-function 'prog3 module-env))
+  ;((array (prob (valuerange 1 . 1)) (size . 3)) (array (nat (valuerange 0 . 2)) (size . 10)) (array real (size . 10)))
+  (define as (build-list classes (const (real->prob 1))))
+  (define distf (discrete-dist (build-list (- classes 1) values)))
+  (define zs (build-list points (λ (i) (sample distf))))
+  ;(curry-arg (nat (valuerange 0 . 9)))
   (define prog (jit-get-function 'prog module-env))
-
-  (define make-array-real (jit-get-function 'make$array<real> module-env))
-  (define get-index-array-real (jit-get-function 'get-index$array<real> module-env))
-  (define make-array-prob (jit-get-function 'make$array<prob> module-env))
-  (define get-index-array-prob (jit-get-function 'get-index$array<prob> module-env))
-  (define make-array-nat (jit-get-function 'make$array<nat> module-env))
-  (define get-index-array-nat (jit-get-function 'get-index$array<nat> module-env))
-
-  (define treal (jit-get-racket-type 'real module-env))
-  (define tprob (jit-get-racket-type 'prob module-env))
-  (define tnat (jit-get-racket-type 'nat module-env))
-
-  (define (make-array f lst type)
-    (f  (length lst) (list->cblock lst type)))
-
   (define pair-array-regex "^\\(\\[(.*)\\],\\[(.*)\\]\\)$")
+  (define (run-single str out-port)
+    (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
+    (define ts (map string->number (regexp-split "," ts-str)))
+    ;    (define zs (string->number (regexp-split "," zs-str)))
+    (define curr-arg (prog3 (make-as as)
+                            (make-zs zs)
+                            (make-ts ts)))
 
-  (define x-list (map string->number (string-split (file->string xfile))))
-  (define f (open-input-file (string->path yfile)))
+    (printf "test: ~a\n" (prog curr-arg 4))
+    (error 'stop)
+    (gibbs-timer (curry gibbs-sweep points vector-set! (curry prog curr-arg))
+                 (build-vector (const 1) points)
+                 (curry fprintf out-port "~a ~a [~a]\t")))
 
-  (define (run-single str)
-    (match-define (list _ y-str abv-str)  (regexp-match pair-array-regex str))
-    (define y-list (map string->number (string-split y-str ",")))
-    (match-define (list a b v) (map string->number (string-split abv-str ",")))
-    (define x-array (make-jit-array x-list))
-    (define y-array (make-jit-array y-list))
-    (define out-arr (prog x-array y-array))
-    (define out-a (get-index-array out-arr 0))
-    (define out-b (get-index-array out-arr 1))
-    (define out-noise (get-index-array out-arr 2))
-    (printf "out-a: ~a, orig-a: ~a\n" out-a a)
-    (printf "out-b: ~a, orig-b: ~a\n" out-b b)
-    (printf "out-n: ~a, orig-n: ~a\n\n" out-noise v)
-    (void))
+  (call-with-input-file infile
+    (λ (inp-port)
+      (call-with-output-file outfile #:exists 'replace
+        (λ (out-port)
+          (for ([line (in-lines inp-port)])
+            (run-single line out-port)))))))
 
-  (call-with-input-file yfile
-    (λ (yf-port)
-      (for ([line (in-lines yf-port)])
-        (run-single line)))))
 
-(time (run-test 10))
+
+(module+ main ;;args
+  (define-values (classes points) (command-line #:args (classes points) (values (string->number classes)
+                                                                                (string->number points))))
+  (run-test classes points))
+
+(module+ test
+  (run-test 9 100))
