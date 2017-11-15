@@ -41,9 +41,9 @@ hakaru g numTopics w doc knobs = do
       numDocs    = U.last doc
       topicPrior = array numTopics (const 1)
       wordPrior  = array numWords  (const 1)
+      update z = prog topicPrior wordPrior z w doc
   time0 <- getCurrentTime
   zs <- U.replicateM numDocs (MWC.uniformR (0, numTopics - 1) g)
-  let update = prog topicPrior wordPrior zs w doc
   timeHakaru time0 (gibbsSweep update g) zs knobs
 
              

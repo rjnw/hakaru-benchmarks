@@ -13,7 +13,7 @@ import           Numeric (showFFloat)
 import           System.FilePath (takeBaseName)
 import           Data.List.Split (wordsBy)
 
-gibbsSweep :: (Int -> Measure Int) -- how to update one dimension
+gibbsSweep :: (U.Vector Int -> Int -> Measure Int) -- update one dimension
            -> MWC.GenIO
            -> U.Vector Int         -- start state
            -> IO (U.Vector Int)    -- state after one sweep
@@ -21,8 +21,8 @@ gibbsSweep update g zs = loop (U.length zs) zs
     where loop :: Int -> U.Vector Int -> IO (U.Vector Int)
           loop 0 zs = return zs
           loop i zs = do
-            Just zNew <- unMeasure (update (i-1)) g
-            loop (i-1) (U.unsafeUpd zs [(i-1, zNew)])    
+            Just zNew <- unMeasure (update zs (i-1)) g
+            loop (i-1) (U.unsafeUpd zs [(i-1, zNew)])
 
 data SamplerKnobs = Knobs { minSeconds :: Double
                           , stepSeconds :: Double

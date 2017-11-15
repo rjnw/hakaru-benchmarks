@@ -45,9 +45,9 @@ type GMMSampler = Int -> -- how many clusters to classify points into
 hakaru :: MWC.GenIO -> GMMSampler
 hakaru g classes ts knobs = do
   let as = array classes (const 1)
+      sweep = gibbsSweep (\z -> prog as z ts) g
   time0 <- getCurrentTime
   zs <- U.replicateM (U.length ts) (MWC.uniformR (0, classes - 1) g)
-  let sweep = gibbsSweep (prog as zs ts) g
   timeHakaru time0 sweep zs knobs
 
 jags :: GMMSampler
