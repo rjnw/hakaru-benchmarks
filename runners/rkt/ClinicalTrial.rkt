@@ -2,26 +2,11 @@
 
 (require sham
          hakrit
-         ffi/unsafe racket/cmdline
-        racket/runtime-path)
-
-(define-runtime-path hksrc-dir "../../testcode/hkrkt/")
-(define-runtime-path input-dir "../../input/")
-(define-runtime-path output-dir "../../output/")
+         racket/cmdline
+         racket/runtime-path
+         "utils.rkt")
 
 (define testname "ClinicalTrial")
-(define-cstruct _timespec
-  ([tv_sec _slong]
-   [tv_nsec _long]))
-
-(define get-ts
-  (get-ffi-obj "clock_gettime" #f (_fun (clockid : _int = 2) (ts : (_ptr o _timespec)) -> (success : _int) ->
-                                        (if (zero? success) ts (error "clock_gettime returned error code." success)))))
-(define (diff-ts ts1 ts2)
-  (- (+ (/ (timespec-tv_nsec ts2) 1000.0) (* (timespec-tv_sec ts2) 1000.0))
-     (+ (/ (timespec-tv_nsec ts1) 1000.0) (* (timespec-tv_sec ts1) 1000.0))))
-
-
 
 (define (run-test n)
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
@@ -80,7 +65,7 @@
     (define before-time (get-ts))
     (define outi (prog n p))
     (define after-time (get-ts))
-    (fprintf out-port "~a ~a [~a]\n" (diff-ts before-time after-time) 1 outi)
+    (fprintf out-port "~a ~a [~a]\t\n" (diff-ts before-time after-time) 1 outi)
     (unless (equal? outi i) (set! total-wrong (+ total-wrong 1)))
     outi)
 
@@ -96,6 +81,6 @@
   (run-test (command-line #:args (n) (string->number n))))
 
 (module+ test
-  (run-test 10)
-  (run-test 100)
-  (run-test 1000))
+  (run-test 10))
+;  (run-test 100)
+;  (run-test 1000))
