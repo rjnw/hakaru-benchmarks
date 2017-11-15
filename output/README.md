@@ -26,3 +26,4 @@ time    := [:number:]
 * `<stuff>` is a literal, apply common sense
 * `[:stuff:]` is either defined or number
 * `()` is like regexp group wherever used, mostly for `*`
+* Currently time for `rkt` files is in microseconds
