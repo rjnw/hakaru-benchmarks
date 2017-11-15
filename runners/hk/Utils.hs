@@ -29,6 +29,11 @@ data SamplerKnobs = Knobs { minSeconds :: Double
                           , minSweeps :: Int
                           , stepSweeps :: Int }
 
+gmmKnobs = Knobs { minSeconds = 10
+                 , stepSeconds = 0.5
+                 , minSweeps = 100
+                 , stepSweeps = 10 }
+
 -- | Called "sweep" here:
 -- https://github.com/rjnw/hakaru-benchmarks/tree/master/output
 type Log = (Double,       -- seconds since beginning of initialization

@@ -15,7 +15,7 @@ import           System.Environment (getArgs)
 import           System.Directory (doesFileExist, removeFile)
 
 import           Utils (SamplerKnobs(..),
-                        Sampler, oneLine,
+                        Sampler, oneLine, gmmKnobs,
                         timeJags, gibbsSweep,
                         timeHakaru, paramsFromName)
 import           GmmGibbs.Prog
@@ -37,11 +37,6 @@ main = do
     trial <- oneLine <$> hakaru g classes (U.fromList ts) gmmKnobs
     putStrLn "writing..."
     appendFile outputs_path trial
-
-gmmKnobs = Knobs { minSeconds = 10
-                 , stepSeconds = 0.5
-                 , minSweeps = 100
-                 , stepSweeps = 10 }
 
 type GMMSampler = Int -> -- how many clusters to classify points into
                   U.Vector Double -> -- data points to classify
