@@ -2,12 +2,9 @@
 
 (require sham
          hakrit
-         ffi/unsafe racket/cmdline
-        racket/runtime-path)
-
-(define-runtime-path hksrc-dir "../../testcode/hkrkt/")
-(define-runtime-path input-dir "../../input/")
-(define-runtime-path output-dir "../../output/")
+         racket/cmdline
+         racket/runtime-path
+         "utils.rkt")
 
 (define testname "ClinicalTrial")
 
@@ -15,30 +12,36 @@
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
   (define xfile  (build-path input-dir testname (number->string n)))
   (define outfile (build-path output-dir testname "rkt" (number->string n)))
-  (define module-env (compile-file srcfile))
+  (define ctinfo
+    (list (list `(natinfo . ((constant . ,n))))
+          (list `(pairinfo . ((ainfo . ((arrayinfo . ((size . ,n)))))
+                              (binfo . ((arrayinfo . ((size . ,n))))))))))
+
+  (define module-env (compile-file srcfile ctinfo))
 
   (define init-rng (jit-get-function 'init-rng module-env))
   (init-rng)
 
   (define prog (jit-get-function 'prog module-env))
 
-  (define make-array-real (jit-get-function 'make$array<real> module-env))
-  (define get-index-array-real (jit-get-function 'get-index$array<real> module-env))
-  (define make-array-prob (jit-get-function 'make$array<prob> module-env))
-  (define get-index-array-prob (jit-get-function 'get-index$array<prob> module-env))
-  (define make-array-nat (jit-get-function 'make$array<nat> module-env))
-  (define get-index-array-nat (jit-get-function 'get-index$array<nat> module-env))
+  (define make-pair-array-bool
+    (jit-get-function (string->symbol (format "make$pair<array<~a.bool>*.array<~a.bool>*>" n n))
+                      module-env))
+  (define make-array-bool
+    (jit-get-function (string->symbol (format "new-sized$array<~a.bool>" n))
+                      module-env))
+  (define set-index-array-bool
+    (jit-get-function (string->symbol (format "set-index!$array<~a.bool>" n))
+                      module-env))
 
-  (define make-pair-array-bool (jit-get-function 'make$pair<array<bool>*.array<bool>*> module-env))
-  (define make-array-bool (jit-get-function 'make$array<bool> module-env))
-
-  (define treal (jit-get-racket-type 'real module-env))
-  (define tprob (jit-get-racket-type 'prob module-env))
-  (define tnat (jit-get-racket-type 'nat module-env))
   (define tbool (jit-get-racket-type 'bool module-env))
 
-  (define (make-array f lst type)
-    (f  (length lst) (list->cblock lst type)))
+  (define (make-array lst)
+    (define arr (make-array-bool))
+    (for ([v lst]
+          [i (in-range (length lst))])
+      (set-index-array-bool arr i v))
+    arr)
 
   (define pair-array-regex "^\\(\\[(.*)\\],\\[(.*)\\]\\)$")
 
@@ -55,14 +58,14 @@
     (define b (map tobool (regexp-split "," (third m1))))
     (define i (tobool (fourth m1)))
     ;(printf "a: ~a, b: ~a, i: ~a\n" a b i)
-    (define ca (make-array make-array-bool a tbool))
-    (define cb (make-array make-array-bool b tbool))
+    (define ca (make-array a))
+    (define cb (make-array b))
     (define p (make-pair-array-bool ca cb))
 
-    (define before-time (current-inexact-milliseconds))
+    (define before-time (get-ts))
     (define outi (prog n p))
-    (define after-time (current-inexact-milliseconds))
-    (fprintf out-port "~a ~a [~a]\n" (- after-time before-time) 1 outi)
+    (define after-time (get-ts))
+    (fprintf out-port "~a ~a [~a]\t\n" (diff-ts before-time after-time) 1 outi)
     (unless (equal? outi i) (set! total-wrong (+ total-wrong 1)))
     outi)
 
@@ -70,12 +73,14 @@
     (λ (xf-port)
       (call-with-output-file outfile #:exists 'replace
         (λ (out-port)
-           (for ([line (in-lines xf-port)])
-             (run-single line out-port))))))
+          (for ([line (in-lines xf-port)])
+            (run-single line out-port))))))
   (printf "total-wrong: ~a\n" total-wrong))
 
 (module+ main
   (run-test (command-line #:args (n) (string->number n))))
 
 (module+ test
-  (run-test 1000))
+  (run-test 10))
+;  (run-test 100)
+;  (run-test 1000))
