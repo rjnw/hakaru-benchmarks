@@ -16,15 +16,17 @@ library(tibble)
 # For example, runners/hk/GmmGibbs/Accuracy.hs satisfies this output format.
 
 args <- commandArgs(trailingOnly=TRUE)
+benchmark_path <- args[1]
+fname <- args[2]
 
 # testdata1 <- "0.5\t1.0\n0.36\t0.344\n0.39\t0.378\n0.35\t0.389"
-hkdata <- args[1]
+hkdata <- paste(benchmark_path,"hk",fname,sep="/")
 t1 <- read_tsv(hkdata,col_names=TRUE)
 t1 <- rowid_to_column(t1)
 t1 <- add_column(t1,backend="hs")
 
 # testdata2 <- "0.5\t1.0\n0.32\t0.33\n0.35\t0.37\n0.35\t0.36"
-jagsdata <- args[2]
+jagsdata <- paste(benchmark_path,"jags",fname,sep="/")
 t2 <- read_tsv(jagsdata,col_names=TRUE)
 t2 <- rowid_to_column(t2)
 t2 <- add_column(t2,backend="jags")
@@ -42,7 +44,7 @@ h <- g %>%
      group_by(time,backend) %>%
      summarize(mean_acc = mean(acc))
 
-meantrials <- ggplot(h, aes(x=mean_acc,y=time,group=backend)) +
+meantrials <- ggplot(h, aes(x=time,y=mean_acc,group=backend)) +
                geom_path(aes(color=backend))
 print(meantrials)
 

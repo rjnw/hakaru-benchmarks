@@ -12,9 +12,9 @@ import qualified System.Random.MWC                as MWC
 import           Control.Monad
 import           System.Environment (getArgs)
 import           System.Directory (doesFileExist, removeFile,
-                                   createDirectoryIfMissing)
-import           System.FilePath (takeDirectory)
-import           Utils (SamplerKnobs(..),
+                                   createDirectoryIfMissing)    
+import           System.FilePath ((</>))
+import           Utils (SamplerKnobs(..), freshFile,
                         Sampler, oneLine, gmmKnobs,
                         timeJags, gibbsSweep,
                         timeHakaru, paramsFromName)
@@ -27,18 +27,13 @@ main = do
   [inputs_path, jagscodedir, outputs_dir] <- getArgs
   let [classes, pts] = paramsFromName inputs_path
       output_fname = show classes ++ "-" ++ show pts
-      hkdir = outputs_dir ++ "/GmmGibbs/hk/"
-      hkpath = hkdir ++ output_fname
-      jagsmodel = jagscodedir ++ "gmmModel.jags"
-      jagsrunner = jagscodedir ++ "gmmModel.R"
-      jagsdir  = outputs_dir ++ "/GmmGibbs/jags/"
-      jagspath = jagsdir ++ output_fname  
-  createDirectoryIfMissing True hkdir
-  createDirectoryIfMissing True jagsdir
+      benchmark_dir = outputs_dir </> "GmmGibbs"
+      jagsmodel = jagscodedir </> "gmmModel.jags"
+      jagsrunner = jagscodedir </> "gmmModel.R"
   dat <- readFile inputs_path
   g <- MWC.createSystemRandom
-  writeFile hkpath ""
-  writeFile jagspath ""
+  hkfile   <- freshFile (benchmark_dir </> "hk")   output_fname
+  jagsfile <- freshFile (benchmark_dir </> "jags") output_fname
   forM_ (take 10 $ lines dat) $ \line -> do
     let ts :: [Double]
         zs :: [Int]
@@ -47,8 +42,8 @@ main = do
     hktrial   <- oneLine <$> hakaru g classes tsvec gmmKnobs
     jagstrial <- oneLine <$> jags jagsmodel jagsrunner classes tsvec gmmKnobs
     putStrLn "writing..."
-    appendFile hkpath hktrial
-    appendFile jagspath jagstrial
+    appendFile hkfile   hktrial
+    appendFile jagsfile jagstrial
   
 
 type GMMSampler = Int -> -- how many clusters to classify points into

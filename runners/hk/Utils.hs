@@ -10,8 +10,9 @@ import           Data.Char (isSpace)
 import           Data.Function (on)
 import           Data.List (intercalate)
 import           Numeric (showFFloat)
-import           System.FilePath (takeBaseName)
+import           System.FilePath (takeBaseName, takeDirectory, replaceDirectory, (</>))
 import           Data.List.Split (wordsBy)
+import           System.Directory (createDirectoryIfMissing)
 
 gibbsSweep :: (U.Vector Int -> Int -> Measure Int) -- update one dimension
            -> MWC.GenIO
@@ -125,3 +126,20 @@ parseSnapshot s | all isSpace s'' = Snapshot (f s1) (f s2)
 
 paramsFromName :: FilePath -> [Int]
 paramsFromName = map read . wordsBy (== '-') . takeBaseName
+
+freshFile :: FilePath -- path to backend subdirectory
+          -> String -- name of file
+          -> IO FilePath
+freshFile backend_dir fname = do
+  let -- backend_dir = benchmark_dir ++ backend ++ "/"
+      backend_file = backend_dir </> fname
+  createDirectoryIfMissing True backend_dir
+  writeFile backend_file ""
+  return backend_file
+
+logsToAccs :: FilePath -> FilePath
+logsToAccs logs_path =
+    let logs_dir = takeDirectory logs_path
+        backend  = takeBaseName logs_dir
+        g        = takeDirectory logs_dir
+    in replaceDirectory g (takeDirectory g </> "accuracies") </> backend
