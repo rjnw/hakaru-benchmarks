@@ -7,6 +7,7 @@ def dirichlet(as array(prob)):
              x = product j from 0 to i: xs[j]
              x * if i+1==size(as): 1 else: real2prob(1-xs[i])
 
+fn s prob:
 fn as array(prob):
 fn z array(nat):
 fn t array(real):
@@ -14,7 +15,7 @@ fn docUpdate nat:
   if size(z) == size(t) && docUpdate < size(z) && z[docUpdate] < size(as):
 
     theta <~ dirichlet(as)
-    phi <~ plate k of size(as): normal(0,14)
+    phi <~ plate k of size(as): normal(0,s)
     zNew <~ categorical(array i of size(as): 1)
     t <~ plate i of size(t):
            zz = if i == docUpdate: zNew else: z[i]
