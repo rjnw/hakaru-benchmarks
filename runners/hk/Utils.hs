@@ -30,7 +30,7 @@ data SamplerKnobs = Knobs { minSeconds :: Double
                           , stepSweeps :: Int }
 
 gmmKnobs = Knobs { minSeconds = 10
-                 , stepSeconds = 0.5
+                 , stepSeconds = 0.1
                  , minSweeps = 100
                  , stepSweeps = 10 }
 
