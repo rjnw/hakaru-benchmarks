@@ -3,9 +3,7 @@
          racket/runtime-path)
 
 
-(provide get-ts
-         diff-ts
-         hksrc-dir
+(provide hksrc-dir
          input-dir
          gibbs-timer
          gibbs-sweep
@@ -17,66 +15,63 @@
 (define-runtime-path output-dir "../../output/")
 
 
-(define-cstruct _timespec
-  ([tv_sec _slong]
-   [tv_nsec _long]))
-
-;;call ts before and after and then use diff,
-;; we can make ts a pointer and cast it later in diff-ts to do marshalling
-;; later but don't know how much that would gain us
-(define get-ts
-  (get-ffi-obj "clock_gettime" #f (_fun (clockid : _int = 2) (ts : (_ptr o _timespec)) -> (success : _int) ->
-                                        (if (zero? success) ts (error "clock_gettime returned error code." success)))))
-
-;; ts1 before, ts2 after => in microseconds
-(define (diff-ts ts1 ts2)
-  (- (+ (/ (timespec-tv_nsec ts2) 1000.0) (* (timespec-tv_sec ts2) 1000.0))
-     (+ (/ (timespec-tv_nsec ts1) 1000.0) (* (timespec-tv_sec ts1) 1000.0))))
+(define _clock (get-ffi-obj "clock" #f (_fun -> _slong)))
 
 
-(define (elasp-seconds from) 0);;TODO
-;; update: Nat -> Nat
-;; state: vector
+(define (get-time)
+  (/ (_clock) 1000.0))
+
+(define (elasp-time from)
+  (- (get-time) from))
+
+;; update: state -> nat -> nat
+;; state: array<nat>
 (define (gibbs-sweep iter-count state-pos-set! update state)
   (define (loop i)
     (if (zero? i)
         state
-        (begin
-          (state-pos-set! state (- i 1) (update (- i 1)))
+        (let ([nz (update state (- i 1))])
+          (state-pos-set! state (- i 1) nz)
           (loop (- i 1)))))
-  (loop iter-count));(vector-length state)))
+  (loop iter-count))
 
 
+;; we are using microseconds as compared to haskell
+;;; why because we can.
 (define (gibbs-timer sweeper state printer
-                     #:min-seconds [min-seconds 10]
-                     #:step-seconds [step-seconds 0.5]
+                     #:min-time [min-time 1000]
+                     #:step-time [step-time 500]
                      #:min-sweeps [min-sweeps 100]
                      #:step-sweeps [step-sweeps 10])
-  (define start-time (get-ts))
+  (define start-time (get-time))
   (define sweeps 0)
   (define (gibbs-trial)
     (define (step)
-      (define time0 (get-ts))
-      (define (step-sweep [sweeps step-sweeps])
+      (define time0 (get-time))
+      (define (sweeper-step [sweeps step-sweeps])
         (if (zero? sweeps) (void)
             (begin (sweeper state)
-                   (step-sweep (- sweeps 1)))))
-      (define (step-second [seconds step-seconds])
-        (define (step-done?) (> (elasp-seconds time0) step-seconds))
-        (step-sweep) (set! sweeps (+ sweeps step-sweeps))
+                   (sweeper-step (- sweeps 1)))))
+      (define (timer-step [tim step-time])
+        (define (step-done?) (> (elasp-time time0) step-time))
+        (sweeper-step)
+        (set! sweeps (+ sweeps step-sweeps))
         (if (step-done?)
-            (printer (elasp-seconds time0) sweeps state)
-            (step-second (elasp-seconds time0))))
-      (step-second))
-    (define (trial-done?) (and (> sweeps min-sweeps) (> min-seconds (elasp-seconds start-time))))
+            (printer (elasp-time start-time) sweeps state)
+            (timer-step (elasp-time time0))))
+      (timer-step))
+    (step)
+    ;(printf "step done: sweeps: ~a, time: ~a\n" sweeps (elasp-time start-time))
+    (define (trial-done?) (and (> sweeps min-sweeps) (> (elasp-time start-time) min-time)))
     (unless (trial-done?) (gibbs-trial)))
+  (gibbs-trial)
   (void))
 
 
 
 (module+ test
-  (define before (get-ts))
+  (define before (get-time))
   (for [[i (in-range 10000)]] (* i i))
-  (define after (get-ts))
-  (printf "total time: ~a\n" (diff-ts before after))
+  (define after (get-time))
+  (printf "total time: ~a\n" (- after  before))
   (gibbs-sweep (λ (i) (printf "i: ~a\n" i) (* i i)) (vector 1 2 3 4 5)))

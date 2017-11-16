@@ -14,13 +14,21 @@
   (printf "c, ~a, p: ~a\n" classes points)
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
   (printf "src: ~a" srcfile)
-  (define gmminfo (list
-                   (list `(arrayinfo . ((size . ,classes)
-                                        (typeinfo . ((probinfo . ((valuerange . (1 . 1)))))))))
-                   (list `(arrayinfo . ((size . ,points)
-                                        (typeinfo . ((natinfo . ((valuerange . (0 . ,(- classes 1))))))))))
-                   (list `(arrayinfo . ((size . ,points))) 'curry)
-                   (list `(natinfo . ((valuerange . (0 . ,(- points 1))))))))
+  (define gmminfo
+    (list
+     (list `(arrayinfo . ((size . ,classes)
+                          (typeinfo . ((probinfo . ((constant . 0)))))
+                          (constant . #t)))
+           `(fninfo . (remove)))
+     (list `(arrayinfo
+             . ((size . ,points)
+                (typeinfo
+                 . ((natinfo
+                     . ((valuerange . (0 . ,(- classes 1)))))))))
+           `(fninfo . (movedown)))
+     (list `(arrayinfo . ((size . ,points))))
+     (list `(natinfo . ((valuerange . (0 . ,(- points 1))))))))
+
 
   (define infile  (build-path input-dir testname (format "~a-~a" classes points)))
   (define outfile (build-path output-dir testname "rkt" (format "~a-~a" classes points)))
@@ -37,6 +45,7 @@
 
   (define make-nat-array (jit-get-function (string->symbol (format "new-sized$array<~a.nat>" points)) module-env))
   (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<~a.nat>" points)) module-env))
+  (define get-index-nat-array (jit-get-function (string->symbol (format "get-index$array<~a.nat>" points)) module-env))
 
   (define make-real-array (jit-get-function (string->symbol (format "new-sized$array<~a.real>" points)) module-env))
   (define set-index-real-array (jit-get-function (string->symbol (format "set-index!$array<~a.real>" points)) module-env))
@@ -60,34 +69,41 @@
       (set-index-real-array arr i (exact->inexact v)))
     arr)
 
-  (define prog3 (jit-get-function 'prog3 module-env))
-  ;((array (prob (valuerange 1 . 1)) (size . 3)) (array (nat (valuerange 0 . 2)) (size . 10)) (array real (size . 10)))
-  (define as (build-list classes (const (real->prob 1))))
   (define distf (discrete-dist (build-list (- classes 1) values)))
   (define zs (build-list points (λ (i) (sample distf))))
-  ;(curry-arg (nat (valuerange 0 . 9)))
+
   (define prog (jit-get-function 'prog module-env))
   (define pair-array-regex "^\\(\\[(.*)\\],\\[(.*)\\]\\)$")
   (define (run-single str out-port)
     (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
     (define ts (map string->number (regexp-split "," ts-str)))
-    ;    (define zs (string->number (regexp-split "," zs-str)))
-    (define curr-arg (prog3 (make-as as)
-                            (make-zs zs)
-                            (make-ts ts)))
+    (define orig-zs (map  string->number (regexp-split "," zs-str)))
+    (define tsc (make-ts ts))
+    (define zsc (make-zs zs))
+    (gibbs-timer (curry gibbs-sweep points set-index-nat-array (curry prog tsc))
+                 zsc
+                 (λ (tim sweeps state)
+                   (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
+                   (for ([i (in-range (- points 1))])
+                     (fprintf out-port "~a, " (get-index-nat-array state i)))
+                   (fprintf out-port "~a]\t" (get-index-nat-array state (- points 1)))))
+    (fprintf out-port "\n")
+    (printf "final state: ~a, \n\tactual state: ~a\n"
+            (for/list ([i (in-range points)])
+              (get-index-nat-array zsc i))
+            orig-zs))
 
-    (printf "test: ~a\n" (prog curr-arg 4))
-    (error 'stop)
-    (gibbs-timer (curry gibbs-sweep points vector-set! (curry prog curr-arg))
-                 (build-vector (const 1) points)
-                 (curry fprintf out-port "~a ~a [~a]\t")))
+  (call-with-output-file outfile #:exists 'replace
+    (λ (out-port)
+      (fprintf out-port "")))
 
   (call-with-input-file infile
     (λ (inp-port)
-      (call-with-output-file outfile #:exists 'replace
-        (λ (out-port)
-          (for ([line (in-lines inp-port)])
+      (for ([line (in-lines inp-port)])
+        (call-with-output-file outfile #:exists 'append
+          (λ (out-port)
             (run-single line out-port)))))))
+
 
 
 
@@ -97,4 +113,4 @@
   (run-test classes points))
 
 (module+ test
-  (run-test 9 100))
+  (run-test 3 10))
