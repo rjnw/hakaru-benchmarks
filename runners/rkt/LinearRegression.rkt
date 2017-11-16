@@ -58,14 +58,14 @@
     (define y-list (map string->number (string-split y-str ",")))
     (match-define (list a b v) (map string->number (string-split abv-str ",")))
     (define y-array (make-array y-list))
-    (define before-ts (get-ts))
+    (define before-ts (get-time))
     (define out-arr (prog curr-arg y-array))
-    (define after-ts (get-ts))
+    (define after-ts (get-time))
 
     (define out-a (get-index-array out-arr 0))
     (define out-b (get-index-array out-arr 1))
     (define out-noise (get-index-array out-arr 2))
-    (fprintf out-port "~a ~a [~a ~a ~a]\t\n" (diff-ts before-ts after-ts) 1 out-a out-b out-noise))
+    (fprintf out-port "~a ~a [~a ~a ~a]\t\n" (- after-ts before-ts) 1 out-a out-b out-noise))
 
     ;; (printf "out-a: ~a, orig-a: ~a\n" out-a a)
     ;; (printf "out-b: ~a, orig-b: ~a\n" out-b b)
