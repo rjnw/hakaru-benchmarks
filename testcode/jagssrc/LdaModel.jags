@@ -1,0 +1,17 @@
+model {    
+    for ( i in 1:Ntopics ) {
+      phi[i] ~ ddirch( onesVocab )
+    }
+
+    for ( i in 1 : Ndocs ) {
+      theta[i] ~ ddirch( onesTopics )
+    }
+
+    for ( i in 1 : Nwords ) {
+      z[i] ~ dcat( theta[doc[i]] )
+    }
+
+    for ( i in 1 : Nwords ) {
+      w[i] ~ dcat( phi[z[i]] )
+    }   
+}
