@@ -19,8 +19,7 @@ main = do
   [inputs_path, logs_path, plotdata_path] <- getArgs
   inputs <- readFile inputs_path
   logs   <- readFile logs_path
-  let ptsPerLn = 50
-      times = [i * stepSeconds gmmKnobs | i <- [1..2*minSeconds gmmKnobs]]
+  let times = [i * stepSeconds gmmKnobs | i <- [1..2*minSeconds gmmKnobs]]
       processLn i l = map (process (parseInput i)) (parseTrial l)
       processed = zipWith processLn (lines inputs) (lines logs)
   appendFile plotdata_path (output times)
