@@ -26,23 +26,26 @@
   (define module-env (compile-file srcfile nbinfo))
   ;(jit-write-module module-env "nb.ll")
   ;(jit-dump-module module-env)
-  (jit-verify-module module-env)
+  ;(jit-verify-module module-env)
   (initialize-jit! module-env)
   (define init-rng (jit-get-function 'init-rng module-env))
   (init-rng)
-
+  (printf "done initializing\n")
   (define rk-words (map string->number (file->lines wordsfile)))
   (define rk-docs (map string->number (file->lines docsfile)))
   (define rk-topics (map string->number (file->lines topicsfile)))
 
   (define make-prob-array (jit-get-function (string->symbol (format "make$array<prob>")) module-env))
+  (define new-sized-prob-array (jit-get-function (string->symbol (format "new-sized$array<prob>")) module-env))
   (define set-index-prob-array (jit-get-function (string->symbol (format "set-index!$array<prob>")) module-env))
 
   (define make-nat-array (jit-get-function (string->symbol (format "make$array<nat>")) module-env))
+  (define new-sized-nat-array (jit-get-function (string->symbol (format "new-sized$array<nat>")) module-env))
   (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<nat>")) module-env))
   (define get-index-nat-array (jit-get-function (string->symbol (format "get-index$array<nat>")) module-env))
 
   (define make-real-array (jit-get-function (string->symbol (format "make$array<real>")) module-env))
+  (define new-sized-real-array (jit-get-function (string->symbol (format "new-sized$array<real>")) module-env))
   (define set-index-real-array (jit-get-function (string->symbol (format "set-index!$array<real>" )) module-env))
 
   (define prog (jit-get-function 'prog module-env))
@@ -52,18 +55,32 @@
   (define num-words (add1 (argmax identity rk-words)))
   (define num-topics (add1 (argmax identity rk-topics)))
 
-  (define topicPrior (make-prob-array num-topics (list->cblock (build-list num-topics (const 0.0)) _double)))
-  (define wordPrior (make-prob-array num-words (list->cblock (build-list num-words (const 0.0)) _double)))
+  (define topicPrior (new-sized-prob-array num-topics))
+  (for ([i (in-range num-topics)])
+    (set-index-prob-array topicPrior i 0.0))
+  ;(make-prob-array num-topics (list->cblock (build-list num-topics (const 0.0)) _double)))
+  (define wordPrior (new-sized-prob-array num-words))
+  (for [(i (in-range num-words))]
+    (set-index-prob-array wordPrior i 0.0))
+    ;(make-prob-array num-words (list->cblock (build-list num-words (const 0.0)) _double)))
 
-  (define words (make-nat-array (length rk-words) (list->cblock rk-words _uint64)))
-  (define docs (make-nat-array (length rk-docs) (list->cblock rk-docs _uint64)))
+  (define words (new-sized-nat-array (length rk-words)))
+  ;(make-nat-array (length rk-words) (list->cblock rk-words _uint64)))
+  (for ([i (in-range (length rk-words))]
+        [v rk-words])
+    (set-index-nat-array words i v))
+  (define docs (new-sized-nat-array (length rk-docs)))
+  (for ([i (in-range (length rk-docs))]
+        [v rk-docs])
+    (set-index-nat-array docs i v));(make-nat-array (length rk-docs) (list->cblock rk-docs _uint64)))
 
   (define (update z docUpdate)
     (prog topicPrior wordPrior z words docs docUpdate))
 
   (define zs (replicate-uniform-discrete num-docs 0 (- num-topics 1)))
   (define z (make-nat-array num-docs (list->cblock zs _uint64)))
-  (update z 0)
+  (printf "done till here\n")
+  (prog topicPrior wordPrior z words docs 4)
   (void))
 
   ;; (define (run-single out-port)
