@@ -83,7 +83,7 @@
     (gibbs-timer (curry gibbs-sweep points set-index-nat-array (curry prog tsc))
                  zsc
                  (λ (tim sweeps state)
-                   (fprintf out-port "~a ~a [" (~r tim #:precision '(= 5)) sweeps)
+                   (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
                    (for ([i (in-range (- points 1))])
                      (fprintf out-port "~a, " (get-index-nat-array state i)))
                    (fprintf out-port "~a]\t" (get-index-nat-array state (- points 1)))))
@@ -93,12 +93,17 @@
               (get-index-nat-array zsc i))
             orig-zs))
 
+  (call-with-output-file outfile #:exists 'replace
+    (λ (out-port)
+      (fprintf out-port "")))
+
   (call-with-input-file infile
     (λ (inp-port)
-      (call-with-output-file outfile #:exists 'replace
-        (λ (out-port)
-          (for ([line (in-lines inp-port)])
+      (for ([line (in-lines inp-port)])
+        (call-with-output-file outfile #:exists 'append
+          (λ (out-port)
             (run-single line out-port)))))))
+
 
 
 
