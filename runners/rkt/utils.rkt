@@ -5,6 +5,7 @@
 
 (provide hksrc-dir
          input-dir
+         get-time
          gibbs-timer
          gibbs-sweep
          output-dir)
@@ -39,7 +40,7 @@
 ;; we are using microseconds as compared to haskell
 ;;; why because we can.
 (define (gibbs-timer sweeper state printer
-                     #:min-time [min-time 1000]
+                     #:min-time [min-time 10000]
                      #:step-time [step-time 500]
                      #:min-sweeps [min-sweeps 100]
                      #:step-sweeps [step-sweeps 10])

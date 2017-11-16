@@ -13,7 +13,6 @@
 (define (run-test classes points)
   (printf "c, ~a, p: ~a\n" classes points)
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
-  (printf "src: ~a" srcfile)
   (define gmminfo
     (list
      (list `(arrayinfo . ((size . ,classes)

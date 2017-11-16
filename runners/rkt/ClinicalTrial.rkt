@@ -62,10 +62,10 @@
     (define cb (make-array b))
     (define p (make-pair-array-bool ca cb))
 
-    (define before-time (get-ts))
+    (define before-time (get-time))
     (define outi (prog n p))
-    (define after-time (get-ts))
-    (fprintf out-port "~a ~a [~a]\t\n" (diff-ts before-time after-time) 1 outi)
+    (define after-time (get-time))
+    (fprintf out-port "~a ~a [~a]\t\n" (- after-time before-time) 1 outi)
     (unless (equal? outi i) (set! total-wrong (+ total-wrong 1)))
     outi)
 
