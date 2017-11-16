@@ -24,6 +24,7 @@
   (define outfile (build-path output-dir testname "rkt" "out"))
 
   (define module-env (compile-file srcfile nbinfo))
+  ;(jit-write-module module-env "nb.ll")
   ;(jit-dump-module module-env)
   (jit-verify-module module-env)
   (initialize-jit! module-env)

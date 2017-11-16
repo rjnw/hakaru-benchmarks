@@ -10,11 +10,11 @@
          "discrete.rkt"
          "utils.rkt")
 
-(define testname "NaiveBayesGibbs")
+(define testname "LdaGibbs")
 
 (define (run-test)
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
-  (define nbinfo (list (list) (list) (list) (list) (list) (list)))
+  (define nbinfo (list (list) (list) (list) (list) (list) (list) (list) (list)))
 
   (define wordsfile  (build-path input-dir "news" "words"))
   (define docsfile   (build-path input-dir "news" "docs"))
@@ -29,9 +29,6 @@
   (initialize-jit! module-env)
   (define init-rng (jit-get-function 'init-rng module-env))
   (init-rng)
-
-
-
 
 
   (define rk-words (map string->number (file->lines wordsfile)))
@@ -49,7 +46,7 @@
   (define set-index-real-array (jit-get-function (string->symbol (format "set-index!$array<real>" )) module-env))
 
   (define prog (jit-get-function 'prog module-env))
-  (disassemble-ffi-function (jit-get-function-ptr 'prog module-env) #:size 1000)
+;  (disassemble-ffi-function (jit-get-function-ptr 'prog module-env) #:size 1000)
 
   (define num-docs (last rk-docs))
   (define num-words (add1 (argmax identity rk-words)))
@@ -62,7 +59,7 @@
   (define docs (make-nat-array (length rk-docs) (list->cblock rk-docs _uint64)))
 
   (define (update z docUpdate)
-    (prog topicPrior wordPrior z words docs docUpdate))
+    (prog topicPrior wordPrior num-docs words docs z docUpdate))
 
   (define zs (replicate-uniform-discrete num-docs 0 (- num-topics 1)))
   (define z (make-nat-array num-docs (list->cblock zs _uint64)))
