@@ -1,8 +1,8 @@
 suppressMessages(library(rjags))
 
 args <- commandArgs(trailingOnly=TRUE)
-if (length(args) != 6) {
-    cat("R --slave -f gmmModel.R --args <classes> <input.file> <min.seconds> <step.seconds> <min.sweeps> <step.sweeps>\n")
+if (length(args) != 7) {
+    cat("R --slave -f gmmModel.R --args <classes> <input.file> <min.seconds> <step.seconds> <min.sweeps> <step.sweeps> <model>\n")
     # Command-line arguments:
     #   <classes> is how many clusters to classify points into
     #   <input.file> points to a file containing whitespace-delimited
@@ -11,6 +11,7 @@ if (length(args) != 6) {
     #   <step.seconds> is the minimum number of seconds to run before each report
     #   <min.sweeps> is the minimum number of sweeps to perform
     #   <step.sweeps> is the number of sweeps to perform before possibly reporting
+    #   <model> is the path to the JAGS model to use
     # Standard output:
     #   First line is "time0 time1" where
     #     time0 is the elapsed real time before jags reads the model
@@ -24,7 +25,8 @@ if (length(args) != 6) {
 as <- array(1,as.numeric(args[1]))
 t <- as.vector(read.table(args[2], header=FALSE), mode="numeric")
 time0 <- proc.time()["elapsed"]
-model <- jags.model("gmmModel.jags",
+modelfile <- args[7]
+model <- jags.model(modelfile,
     data = list("as" = as, "t" = t),
     n.chains = 1,
     n.adapt = 0,
