@@ -15,7 +15,8 @@
   (define outfile (build-path output-dir testname "rkt" (number->string n)))
 
   (define lrinfo (list
-                  (list `(arrayinfo . ((size . ,n))) 'curry)
+                  (list `(arrayinfo . ((size . ,n)))
+                        `(fninfo . (curry)))
                   (list `(arrayinfo . ((size . ,n))))))
 
   (define module-env (compile-file srcfile lrinfo))
