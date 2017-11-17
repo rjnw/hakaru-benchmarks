@@ -7,6 +7,7 @@ import qualified Data.Map.Strict as M
 import Data.List (intercalate)
 
 import Utils (SamplerKnobs(..), gmmKnobs,
+              paramsFromName, freshFile, logsToAccs,
               Trial, parseTrial, Snapshot(..))
 
 type Input = ([Double], [Int])
@@ -16,14 +17,17 @@ parseInput = read
 
 main :: IO ()
 main = do
-  [inputs_path, logs_path, plotdata_path] <- getArgs
+  [inputs_path, logs_path] <- getArgs
   inputs <- readFile inputs_path
+  let [classes, pts] = paramsFromName inputs_path
+      fname          = show classes ++ "-" ++ show pts
+  accsFile <- freshFile (logsToAccs logs_path) fname
   logs   <- readFile logs_path
   let times = [i * stepSeconds gmmKnobs | i <- [1..2*minSeconds gmmKnobs]]
       processLn i l = map (process (parseInput i)) (parseTrial l)
       processed = zipWith processLn (lines inputs) (lines logs)
-  appendFile plotdata_path (output times)
-  mapM_ (appendFile plotdata_path . output . resampleWith times) processed
+  appendFile accsFile (output times) -- this is the header line
+  mapM_ (appendFile accsFile . output . resampleWith times) processed
 
 process :: Input -> Snapshot -> Snapshot
 process (_,truth) (Snapshot p predict) = Snapshot p [accuracy]
@@ -69,5 +73,6 @@ query table x =
 interpolate :: (Double,Double) -> (Double,Double) -> Double -> Double
 interpolate (t1,a1) (t2,a2) x = a1 + (a2-a1)*(x-t1)/(t2-t1)
 
+-- | Output accuracies in a format that is easy to plot
 output :: [Double] -> String
 output = ($ "\n") . showString . intercalate "\t" . map show

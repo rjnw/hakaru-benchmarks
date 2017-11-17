@@ -5,13 +5,15 @@ import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine
 import qualified System.Random.MWC                as MWC
 import           Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
-import           Control.Monad ((>=>), forM)    
+import           Control.Monad ((>=>), forM, when)    
 import           Data.Char (isSpace)
 import           Data.Function (on)
 import           Data.List (intercalate)
 import           Numeric (showFFloat)
-import           System.FilePath (takeBaseName)
+import           System.FilePath (takeBaseName, takeDirectory, replaceDirectory, (</>))
 import           Data.List.Split (wordsBy)
+import           System.Directory (createDirectoryIfMissing)
+import Debug.Trace    
 
 gibbsSweep :: (U.Vector Int -> Int -> Measure Int) -- update one dimension
            -> MWC.GenIO
@@ -21,6 +23,10 @@ gibbsSweep update g zs = loop (U.length zs) zs
     where loop :: Int -> U.Vector Int -> IO (U.Vector Int)
           loop 0 zs = return zs
           loop i zs = do
+            t1 <- getCurrentTime
+            when (i `mod` 100 == 0) $
+                 putStrLn $ "maybe sample new topic for doc " ++
+                            show i ++ ", time = " ++ show t1
             Just zNew <- unMeasure (update zs (i-1)) g
             loop (i-1) (U.unsafeUpd zs [(i-1, zNew)])
 
@@ -56,13 +62,14 @@ timeHakaru time0 sweep zs knobs = do
   time1 <- getCurrentTime
   let sweeps :: Int -> U.Vector Int -> IO (U.Vector Int)
       sweeps 0 = return
-      sweeps n = sweep >=> sweeps (n-1)
+      sweeps n = sweep >=> \v -> putStrLn "did 1 sweep" >> sweeps (n-1) v
       threshCond t i = t >= minSeconds knobs &&
                        i >= minSweeps  knobs
       loop :: Int -> Double -> Double -> U.Vector Int -> IO [Log]
       loop iter time2 time2subgoal zs
         | threshCond time2 iter = return []
         | otherwise = do
+            putStrLn $ "done " ++ show iter ++ " sweeps"
             zs <- sweeps (stepSweeps knobs) zs
             time2 <- (`diffTime` time0) <$> getCurrentTime
             iter  <- return (iter + stepSweeps knobs)
@@ -125,3 +132,24 @@ parseSnapshot s | all isSpace s'' = Snapshot (f s1) (f s2)
 
 paramsFromName :: FilePath -> [Int]
 paramsFromName = map read . wordsBy (== '-') . takeBaseName
+
+freshFile :: FilePath -- path to backend subdirectory
+          -> String -- name of file
+          -> IO FilePath
+freshFile backend_dir fname = do
+  createDirectoryIfMissing True backend_dir
+  let backend_file = backend_dir </> fname
+  writeFile backend_file ""
+  return backend_file
+
+logsToAccs :: FilePath -> FilePath
+logsToAccs logs_path =
+    let logs_dir = takeDirectory logs_path
+        backend  = takeBaseName logs_dir
+        g        = takeDirectory logs_dir
+    in replaceDirectory g (takeDirectory g </> "accuracies") </> backend
+
+every :: Int -> [Int] -> [Int]
+every n xs = case drop (n-1) xs of
+               (y:ys) -> y : every n ys
+               [] -> []

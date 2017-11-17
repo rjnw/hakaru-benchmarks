@@ -24,7 +24,10 @@ Executable clinicalTrial
                        bytestring           >= 0.10,
                        process              >= 1.1  && < 2.0,
                        temporary            >= 1.2.1.1,
-                       time                 >= 1.6.0.1
+                       split                >= 0.2.3.2,
+                       time                 >= 1.6.0.1,
+                       directory            >= 1.3.0.0,
+                       deepseq              >= 1.4.2.0
 
 Executable gmmGibbs
     Hs-Source-Dirs:    .
@@ -89,8 +92,8 @@ Executable naiveBayesGibbs
     Hs-Source-Dirs:    .
     Main-is:           NaiveBayesGibbs/Main.hs
     Default-Language:  Haskell2010
-    GHC-Options:       -O2 -Wall -fwarn-tabs
-    other-modules:     Utils News NaiveBayesGibbs.Prog
+    GHC-Options:       -O2 -Wall -threaded -fwarn-tabs
+    other-modules:     Utils News NaiveBayesGibbs.Prog3
     build-depends:     base                 >= 4.7  && < 5.0,
                        mwc-random           >= 0.13 && < 0.14,
                        hakaru               >= 0.6,
@@ -115,7 +118,7 @@ Executable ldaGibbs
     Main-is:           LdaGibbs/Main.hs
     Default-Language:  Haskell2010
     GHC-Options:       -O2 -Wall -fwarn-tabs
-    other-modules:     Utils News LdaGibbs.Prog
+    other-modules:     Utils News LdaGibbs.Prog2
     build-depends:     base                 >= 4.7  && < 5.0,
                        mwc-random           >= 0.13 && < 0.14,
                        hakaru               >= 0.6,
