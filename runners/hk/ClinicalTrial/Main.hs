@@ -15,7 +15,7 @@ import Utils
 
 main :: IO ()
 main = do
-  let n = 1000
+  let n = 10000
   dat <- readFile ("../../input/ClinicalTrial/"++show n)
   let time (t_sofar, numright) line = do
          let v1 :: [Bool]
