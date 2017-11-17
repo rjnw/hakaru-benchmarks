@@ -31,7 +31,13 @@ t2 <- read_tsv(jagsdata,col_names=TRUE)
 t2 <- rowid_to_column(t2)
 t2 <- add_column(t2,backend="jags")
 
+rktdata <- paste(benchmark_path,"rkt",fname,sep="/")
+t3 <- read_tsv(rktdata,col_names=TRUE)
+t3 <- rowid_to_column(t3)
+t3 <- add_column(t3,backend="rkt")
+
 t <- full_join(t1,t2)
+t <- full_join(t,t3)
 g <- gather(t,key=time,value=acc,-rowid,-backend,convert=TRUE)
 
 # plot all trials
@@ -42,10 +48,11 @@ g <- gather(t,key=time,value=acc,-rowid,-backend,convert=TRUE)
 # plot mean of all trials
 h <- g %>%
      group_by(time,backend) %>%
-     summarize(mean_acc = mean(acc))
+     summarize(mean_accuracy = mean(acc))
 
-meantrials <- ggplot(h, aes(x=time,y=mean_acc,group=backend)) +
+meantrials <- ggplot(h, aes(x=time,y=mean_accuracy,group=backend)) +
                geom_path(aes(color=backend))
 print(meantrials)
 
-ggsave(file = "output.pdf")
+output <- args[3]
+ggsave(file = output)
