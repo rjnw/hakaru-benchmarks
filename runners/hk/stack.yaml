@@ -3,4 +3,7 @@ resolver: lts-9.12
 packages:
  - .
  - location: ../../hakaru/
-   extra-dep: true
+   extra-dep:
+
+extra-deps:
+ - colorize-haskell-1.0.1
