@@ -23,7 +23,7 @@ main = do
       fname          = show classes ++ "-" ++ show pts
   accsFile <- freshFile (logsToAccs logs_path) fname
   logs   <- readFile logs_path
-  let f n s = [1000 * i * s | i <- [1..n/s]]
+  let f n s = [i * s | i <- [1..n/s]]
       times = f (minSeconds gmmKnobs) (stepSeconds gmmKnobs)
       processLn i l = map (process (parseInput i)) (parseTrial l)
       processed = zipWith processLn (lines inputs) (lines logs)
