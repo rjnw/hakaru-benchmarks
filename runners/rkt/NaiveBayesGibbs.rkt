@@ -116,9 +116,7 @@
     (prog topicPrior wordPrior z words docs docUpdate))
 
   (define zs (replicate-uniform-discrete num-docs 0 (- num-topics 1)))
-  (printf "~a\n" zs)
   (define z (make-nat-array num-docs (list->cblock zs _uint64)))
-  (printf "done till here\n")
   ;  (prog z words docs 4)
   (define (run-single out-port)
     (gibbs-timer (curry gibbs-sweep num-docs set-index-nat-array update)
@@ -131,7 +129,11 @@
     (printf "final state: ~a, \n\tactual state: ~a\n"
             (for/list ([i (in-range num-topics)])
               (get-index-nat-array z i))
-            rk-topics)))
+            rk-topics))
+  (define time0 (get-time))
+  (update z 0)
+  (define time1 (get-time))
+  (printf "naive bayes sweep took: ~a ms" (- time1 time0)))
 
 (module+ test 
   (run-test))
