@@ -73,5 +73,6 @@ query table x =
 interpolate :: (Double,Double) -> (Double,Double) -> Double -> Double
 interpolate (t1,a1) (t2,a2) x = a1 + (a2-a1)*(x-t1)/(t2-t1)
 
+-- | Output accuracies in a format that is easy to plot
 output :: [Double] -> String
 output = ($ "\n") . showString . intercalate "\t" . map show
