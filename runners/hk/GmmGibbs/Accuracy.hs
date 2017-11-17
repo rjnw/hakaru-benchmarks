@@ -23,7 +23,7 @@ main = do
       fname          = show classes ++ "-" ++ show pts
   accsFile <- freshFile (logsToAccs logs_path) fname
   logs   <- readFile logs_path
-  let times = [i * stepSeconds gmmKnobs | i <- [1..2*minSeconds gmmKnobs]]
+  let times = [1000 * i * stepSeconds gmmKnobs | i <- [1..2*minSeconds gmmKnobs]]
       processLn i l = map (process (parseInput i)) (parseTrial l)
       processed = zipWith processLn (lines inputs) (lines logs)
   appendFile accsFile (output times) -- this is the header line
