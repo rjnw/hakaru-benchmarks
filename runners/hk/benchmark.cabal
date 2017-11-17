@@ -12,7 +12,7 @@ Executable clinicalTrial
     Main-is:           ClinicalTrial/Main.hs
     Default-Language:  Haskell2010
     GHC-Options:       -O2 -Wall -fwarn-tabs
-    other-modules:     ClinicalTrial.Prog
+    other-modules:     Utils ClinicalTrial.Prog
     build-depends:     base                 >= 4.7  && < 5.0,
                        mwc-random           >= 0.13 && < 0.14,
                        hakaru               >= 0.6,
@@ -34,7 +34,7 @@ Executable linearRegression
     Main-is:           LinearRegression/Main.hs
     Default-Language:  Haskell2010
     GHC-Options:       -O2 -Wall -fwarn-tabs
-    other-modules:     LinearRegression.Prog
+    other-modules:     Utils LinearRegression.Prog
     build-depends:     base                 >= 4.7  && < 5.0,
                        mwc-random           >= 0.13 && < 0.14,
                        hakaru               >= 0.6,
