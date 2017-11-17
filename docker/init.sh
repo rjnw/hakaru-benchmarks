@@ -8,4 +8,8 @@ git pull --rebase
 git submodule update
 make setup
 raco setup hakrit sham
+
+if [ ! -d ./20_newsgroups ]; then
+fi
+
 /bin/zsh

@@ -2,6 +2,7 @@
 
 (require sham
          hakrit
+         disassemble
          racket/cmdline
          racket/runtime-path
          "utils.rkt")
@@ -18,11 +19,20 @@
                               (binfo . ((arrayinfo . ((size . ,n))))))))))
 
   (define module-env (compile-file srcfile ctinfo))
+  ;; (jit-verify-module module-env)
+  ;; (error 'stop)
+  ;; (jit-write-module module-env "ct.ll")
+  (optimize-module module-env #:opt-level 3)
+  (jit-dump-function module-env 'prog)
+  (initialize-jit! module-env #:opt-level 0)
 
   (define init-rng (jit-get-function 'init-rng module-env))
+
   (init-rng)
 
   (define prog (jit-get-function 'prog module-env))
+;  (jit-dump-function module-env 'prog)
+;  (disassemble-ffi-function (jit-get-function-ptr 'prog module-env) #:size 2000)
 
   (define make-pair-array-bool
     (jit-get-function (string->symbol (format "make$pair<array<~a.bool>*.array<~a.bool>*>" n n))
@@ -65,22 +75,22 @@
     (define before-time (get-time))
     (define outi (prog n p))
     (define after-time (get-time))
-    (fprintf out-port "~a ~a [~a]\t\n" (- after-time before-time) 1 outi)
+    (fprintf out-port "~a ~a [~a]\t\n" (~r (- after-time before-time) #:precision '(= 3)) 1 outi)
     (unless (equal? outi i) (set! total-wrong (+ total-wrong 1)))
     outi)
 
-  (call-with-input-file xfile
-    (λ (xf-port)
-      (call-with-output-file outfile #:exists 'replace
-        (λ (out-port)
-          (for ([line (in-lines xf-port)])
-            (run-single line out-port))))))
+  (time (call-with-input-file xfile
+     (λ (xf-port)
+       (call-with-output-file outfile #:exists 'replace
+         (λ (out-port)
+           (for ([line (in-lines xf-port)])
+             (run-single line out-port)))))))
   (printf "total-wrong: ~a\n" total-wrong))
 
 (module+ main
   (run-test (command-line #:args (n) (string->number n))))
 
 (module+ test
-  (run-test 1000))
+  (time (run-test 10)))
 ;  (run-test 100)
 ;  (run-test 1000))

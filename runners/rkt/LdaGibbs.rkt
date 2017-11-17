@@ -52,8 +52,10 @@
   (define num-words (add1 (argmax identity rk-words)))
   (define num-topics (add1 (argmax identity rk-topics)))
 
-  (define topicPrior (make-prob-array num-topics (list->cblock (build-list num-topics (const 0.0)) _double)))
-  (define wordPrior (make-prob-array num-words (list->cblock (build-list num-words (const 0.0)) _double)))
+  (define topicPrior (make-prob-array num-topics
+                                      (list->cblock (build-list num-topics (const 0.0)) _double)))
+  (define wordPrior (make-prob-array num-words
+                                     (list->cblock (build-list num-words (const 0.0)) _double)))
 
   (define words (make-nat-array (length rk-words) (list->cblock rk-words _uint64)))
   (define docs (make-nat-array (length rk-docs) (list->cblock rk-docs _uint64)))

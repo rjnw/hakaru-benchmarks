@@ -21,6 +21,9 @@
 
   (define module-env (compile-file srcfile lrinfo))
 
+  (optimize-module module-env #:opt-level 1)
+  (initialize-jit! module-env #:opt-level 1)
+
   (define init-rng (jit-get-function 'init-rng module-env))
   (init-rng)
 
