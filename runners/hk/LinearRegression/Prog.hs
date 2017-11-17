@@ -1,14 +1,16 @@
 {-# LANGUAGE DataKinds, NegativeLiterals #-}
-module Prog where
+module LinearRegression.Prog where
 
 import           Data.Number.LogFloat (LogFloat)
-import           Prelude hiding (product, exp, log, (**))
+import           Prelude hiding (product, exp, log, (**), pi)
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine
 import           Language.Hakaru.Types.Sing
 import qualified System.Random.MWC                as MWC
 import           Control.Monad
 import           System.Environment (getArgs)
+
+gammaFunc = undefined    
 
 prog ::
   ((MayBoxVec Double Double) ->
