@@ -4,46 +4,64 @@ import qualified Data.Vector.Unboxed as U
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import qualified System.Random.MWC                as MWC
 import           Data.Time.Clock (getCurrentTime)
-import           Control.Monad (forM_, when)
+import           Control.Monad (replicateM_)
 import           System.Environment (getArgs)
 import           System.Directory (doesFileExist, removeFile)
+import           System.FilePath ((</>))
     
-import           Utils (SamplerKnobs(..),
-                        Sampler, oneLine,
-                        timeJags, gibbsSweep,
-                        timeHakaru)
+import           Utils (SamplerKnobs(..), Sampler,
+                        oneLine, every, freshFile,
+                        timeJags, gibbsSweep, timeHakaru)
 import           News (getNews, SingletonType(..))
-import           NaiveBayesGibbs.Prog
+import           NaiveBayesGibbs.Prog3
 
 main = do
-  [inputs_path, outputs_path] <- getArgs
+  [inputs_path, outputs_dir] <- getArgs
+  putStrLn "going to get news"
   (w,doc,zs) <- fst <$> getNews inputs_path SingleDoc Nothing [0..]
-  g <- MWC.createSystemRandom                      -- ^ this retrieves everything
-  b <- doesFileExist outputs_path
-  when b (removeFile outputs_path)
+  putStrLn "done getting news"                     -- ^ retrieves everything
+  g <- MWC.createSystemRandom
   let numTopics = U.maximum zs + 1
-  trial <- oneLine <$> hakaru g numTopics w doc nbKnobs
-  appendFile outputs_path trial
+      numDocs = U.length zs
+      holdouts = every 10 [0..numDocs - 1]
+      numTrials = 10
+      fname = show numTopics ++ "-" ++ show numDocs
+      benchmark_dir = outputs_dir </> "NaiveBayesGibbs"
+  hkfile <- freshFile (benchmark_dir </> "hk") fname
+  replicateM_ numTrials $ do
+    putStrLn "starting a new trial"
+    trial <- oneLine <$> hakaru g holdouts numTopics numDocs w doc zs nbKnobs
+    putStrLn "writing..."
+    appendFile hkfile trial
     
 nbKnobs = Knobs { minSeconds = 10
                 , stepSeconds = 0.5
-                , minSweeps = 100
-                , stepSweeps = 10 }
+                , minSweeps = 2
+                , stepSweeps = 1 }
 
-type NBSampler = Int ->          -- number of topics
+type NBSampler = [Int] ->        -- indices of hold-out docs
+                 Int ->          -- number of topics
+                 Int ->          -- number of documents
                  U.Vector Int -> -- words array
                  U.Vector Int -> -- doc index of each word
+                 U.Vector Int -> -- true document labels
                  Sampler
 
 hakaru :: MWC.GenIO -> NBSampler
-hakaru g numTopics w doc knobs = do
+hakaru g holdouts numTopics numDocs w doc truth knobs = do
   let numWords   = U.maximum w + 1
-      numDocs    = U.last doc
       topicPrior = array numTopics (const 1)
       wordPrior  = array numWords  (const 1)
-      update z = prog topicPrior wordPrior z w doc
+      update = let f = prog topicPrior wordPrior
+               in \ z i ->
+                   if elem i holdouts
+                   then f z w doc i
+                   else return (z U.! i)
   time0 <- getCurrentTime
-  zs <- U.replicateM numDocs (MWC.uniformR (0, numTopics - 1) g)
+  zs <- U.generateM numDocs $
+        \i -> if elem i holdouts
+              then MWC.uniformR (0, numTopics - 1) g
+              else return (truth U.! i)
   timeHakaru time0 (gibbsSweep update g) zs knobs
 
              

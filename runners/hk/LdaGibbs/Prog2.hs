@@ -1,8 +1,8 @@
 {-# LANGUAGE DataKinds, NegativeLiterals #-}
-module Prog where
+module LdaGibbs.Prog2 where
 
 import           Data.Number.LogFloat (LogFloat)
-import           Prelude hiding (product, exp, log, (**), pi)
+import           Prelude hiding (product, exp, log, (**))
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine
 import           Language.Hakaru.Types.Sing
@@ -271,4 +271,5 @@ prog =
                         branch pfalse
                                (case_ (not (doc63 ! wordUpdate65 < numDocs61))
                                       [branch ptrue (reject), branch pfalse (reject)])])]
+
 

@@ -1,14 +1,15 @@
 {-# LANGUAGE DataKinds, NegativeLiterals #-}
-module Prog where
+module NaiveBayesGibbs.Prog3 where
 
 import           Data.Number.LogFloat (LogFloat)
-import           Prelude hiding (product, exp, log, (**), pi)
+import           Prelude hiding (product, exp, log, (**))
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine
 import           Language.Hakaru.Types.Sing
 import qualified System.Random.MWC                as MWC
 import           Control.Monad
 import           System.Environment (getArgs)
+
 
 prog ::
   ((MayBoxVec Prob Prob) ->
@@ -275,4 +276,5 @@ prog =
                                                                              word_prior61
                                                                              ! iF126)))))))),
          branch pfalse (reject)]
+
 
