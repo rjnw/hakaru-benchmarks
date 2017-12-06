@@ -53,11 +53,9 @@
 
   (define prog (jit-get-function 'prog module-env))
 
-
   (define real2prob (jit-get-function (string->symbol "real2prob") module-env))
 
   (define stdev (real2prob 14.0))
-
 
   (define as (new-sized-prob-array classes))
   (for ([i (in-range classes)])

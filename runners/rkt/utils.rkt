@@ -18,7 +18,6 @@
 
 (define _clock (get-ffi-obj "clock" #f (_fun -> _slong)))
 
-
 (define (get-time)
   (/ (_clock) 1000000.0))
 
