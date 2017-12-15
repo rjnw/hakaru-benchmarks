@@ -36,7 +36,7 @@
   (define num-topics (add1 (argmax identity rk-topics)))
   (printf "num-docs: ~a, num-words: ~a, num-topics: ~a\n" num-docs num-words num-topics)
 
-
+  (error 'stop)
   (define outfile (build-path output-dir testname "rkt" "out"))
 
   ;; (define nbinfo
@@ -137,4 +137,6 @@
 
 (module+ test
   (run-test))
-(run-test)
+
+(module+ main
+  (run-test))

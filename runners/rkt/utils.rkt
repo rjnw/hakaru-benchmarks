@@ -26,17 +26,13 @@
 
 ;; update: state -> nat -> nat
 ;; state: array<nat>
-(define (gibbs-sweep iter-count printer zs-pos-set! update zs)
+(define (gibbs-sweep iter-count zs-pos-set! update zs)
   (define (loop i)
     (if (zero? i)
         zs
         (let ([nz (update zs (- i 1))])
-          ;; (printer)
-          ;; (printf "i: ~a, \n" i)
-          ;(printf "nz: ~a\n" nz)
           (zs-pos-set! zs (- i 1) nz)
           (loop (- i 1)))))
-;  (printf "gibbs sweep")
   (loop iter-count))
 
 
@@ -68,7 +64,6 @@
       (timer-step))
 
     (step)
-;    (printf "step done: sweeps: ~a, time: ~a\n" sweeps (elasp-time start-time))
     (define (trial-done?) (and (> sweeps max-sweeps) (> (elasp-time start-time) max-time)))
     (unless (trial-done?) (gibbs-trial)))
   (gibbs-trial)
