@@ -2,6 +2,9 @@ sudo: enabled
 
 language: c
 
+git:
+  submodules: false
+
 before_install:
   - git clone https://github.com/rjnw/sham
   - git clone https://github.com/rjnw/hakaru-rktjit hakrit
