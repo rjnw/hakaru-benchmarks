@@ -39,9 +39,9 @@
 ;; we are using microseconds as compared to haskell
 ;;; why because we can.
 (define (gibbs-timer sweeper zs printer
-                     #:max-time [max-time 10]
+                     #:min-time [min-time 10]
                      #:step-time [step-time 0.1]
-                     #:max-sweeps [max-sweeps 100]
+                     #:min-sweeps [min-sweeps 100]
                      #:step-sweeps [step-sweeps 10])
   (define start-time (get-time))
   (define sweeps 0)
@@ -64,7 +64,7 @@
       (timer-step))
 
     (step)
-    (define (trial-done?) (and (> sweeps max-sweeps) (> (elasp-time start-time) max-time)))
+    (define (trial-done?) (and (> sweeps min-sweeps) (> (elasp-time start-time) min-time)))
     (unless (trial-done?) (gibbs-trial)))
   (gibbs-trial)
   (void))

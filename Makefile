@@ -36,5 +36,8 @@ docker:
 runtests:
 	cd ./hakrit; raco -test test
 
+run-gmmgibbs:
+	cd ./runners/rkt; racket
+
 benchmark: runtests
 	echo "We can't even run tests, yet how do we benchmark??"

@@ -13,12 +13,25 @@
 (define (run-test classes points)
   (printf "c, ~a, p: ~a\n" classes points)
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
-  (define gmm-emptyinfo (list (list) (list) (list) (list) (list)))
+  (define empty-info (list (list) (list) (list) (list) (list)))
+  (define full-info
+    `(((attrs . (constant)))
+      ((array-info . ((size . ,classes)
+                      (elem-info . ((prob-info . ((constant . 0)))))))
+       (attrs . (constant)))
+      ((array-info
+        . ((size . ,points)
+           (elem-info
+            . ((nat-info
+                . ((value-range . (0 . ,(- classes 1))))))))))
+      ((array-info . ((size . ,points))))
+      ((nat-info . ((value-range . (0 . ,(- points 1))))))))
+
   (define infile  (build-path input-dir testname (format "~a-~a" classes points)))
   (define outfile (build-path output-dir testname "rkt" (format "~a-~a" classes points)))
 
-  (define module-env (compile-file srcfile gmminfo))
-  (define jit-val (curry jit->rkt module-env))
+  (define module-env (compile-file srcfile empty-info))
+  (define jit-val (curry rkt->jit module-env))
 
   ;(jit-dump-module module-env)
   (optimize-module module-env #:opt-level 3)
@@ -28,10 +41,13 @@
   (define prog (jit-get-function 'prog module-env))
   (init-rng)
 
+  (define set-index-nat-array (get-function module-env 'set-index! '(array nat)))
+  (define get-index-nat-array (get-function module-env 'get-index '(array nat)))
   (define stdev (jit-val 'prob 14.0))
   (define as (jit-val '(array prob) (build-list classes (const 1.0))))
 
   (define (run-single str out-port)
+    (printf "running a trial\n")
     (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
     (define orig-zs (map  string->number (regexp-split "," zs-str)))
     (define zs (build-list points (λ (i) (sample (discrete-dist (build-list (- classes 1) values))))))
@@ -57,9 +73,6 @@
         (λ (out-port)
           (for ([line (in-lines inp-port)])
             (run-single line out-port)))))))
-
-
-
 
 (module+ main ;;args
   (define-values (classes points)

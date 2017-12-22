@@ -5,7 +5,7 @@ import           Language.Hakaru.Runtime.LogFloatPrelude
 import           Language.Hakaru.Runtime.CmdLine
 import qualified System.Random.MWC                as MWC
 import           Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
-import           Control.Monad ((>=>), forM, when)    
+import           Control.Monad ((>=>), forM, when)
 import           Data.Char (isSpace)
 import           Data.Function (on)
 import           Data.List (intercalate)
@@ -13,7 +13,7 @@ import           Numeric (showFFloat)
 import           System.FilePath (takeBaseName, takeDirectory, replaceDirectory, (</>))
 import           Data.List.Split (wordsBy)
 import           System.Directory (createDirectoryIfMissing)
-import Debug.Trace    
+import Debug.Trace
 
 gibbsSweep :: (U.Vector Int -> Int -> Measure Int) -- update one dimension
            -> MWC.GenIO
@@ -24,9 +24,9 @@ gibbsSweep update g zs = loop (U.length zs) zs
           loop 0 zs = return zs
           loop i zs = do
             t1 <- getCurrentTime
-            when (i `mod` 100 == 0) $
-                 putStrLn $ "maybe sample new topic for doc " ++
-                            show i ++ ", time = " ++ show t1
+            -- when (i `mod` 100 == 0) $
+            --      putStrLn $ "maybe sample new topic for doc " ++
+            --                 show i ++ ", time = " ++ show t1
             Just zNew <- unMeasure (update zs (i-1)) g
             loop (i-1) (U.unsafeUpd zs [(i-1, zNew)])
 
@@ -44,7 +44,7 @@ gmmKnobs = Knobs { minSeconds = 10
 -- https://github.com/rjnw/hakaru-benchmarks/tree/master/output
 type Log = (Double,       -- seconds since beginning of initialization
             Int,          -- sweeps performed so far
-            U.Vector Int) -- current classification    
+            U.Vector Int) -- current classification
 
 type LogsWithInit = (Double, [Log])
                     -- ^ initialization time in seconds
@@ -58,7 +58,7 @@ timeHakaru :: UTCTime -- time0
            -> (U.Vector Int -> IO (U.Vector Int)) -- sweeper function
            -> U.Vector Int -- start state
            -> Sampler
-timeHakaru time0 sweep zs knobs = do  
+timeHakaru time0 sweep zs knobs = do
   time1 <- getCurrentTime
   let sweeps :: Int -> U.Vector Int -> IO (U.Vector Int)
       sweeps 0 = return
@@ -77,9 +77,9 @@ timeHakaru time0 sweep zs knobs = do
             then ((time2, iter, zs) : ) <$>
                  loop iter time2 (time2 + stepSeconds knobs) zs
             else loop iter time2 time2subgoal zs
-  samples <- loop 0 0 (stepSeconds knobs) zs  
+  samples <- loop 0 0 (stepSeconds knobs) zs
   return (diffTime time1 time0 , samples)
-  
+
 diffTime :: UTCTime -> UTCTime -> Double
 diffTime a b = fromRational . toRational $ diffUTCTime a b
 
@@ -95,8 +95,8 @@ timeJags output = const $ do
               zs              = U.fromList . map (pred . read) . words $ zs_
       parse _ = []
   return (time1 - time0, parse samples)
-    
-data Snapshot = Snapshot { progress, state :: [Double] }          
+
+data Snapshot = Snapshot { progress, state :: [Double] }
 
 toSnapshot :: Log -> Snapshot
 toSnapshot (seconds, sweeps, labels) =

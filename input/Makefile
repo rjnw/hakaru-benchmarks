@@ -50,7 +50,7 @@ buildgen:
 .SECONDEXPANSION:
 ./$(gg)/% : ./data/$(gg)/$$(shell cut -d- -f1 <<< $$(notdir $$@))
 	mkdir -p $(dir $@)
-	./bin/GmmModel $< $(shell cut -d- -f2 <<< $(notdir $@)) | head -n 2000 > $@
+	./bin/GmmModel $< $(shell cut -d- -f2 <<< $(notdir $@)) | head -n 20 > $@
 
 cleaninp:
 	rm -R ./$(ct) ./$(lr) ./$(gg)

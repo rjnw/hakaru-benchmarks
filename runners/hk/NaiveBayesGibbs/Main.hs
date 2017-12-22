@@ -8,7 +8,7 @@ import           Control.Monad (replicateM_)
 import           System.Environment (getArgs)
 import           System.Directory (doesFileExist, removeFile)
 import           System.FilePath ((</>))
-    
+
 import           Utils (SamplerKnobs(..), Sampler,
                         oneLine, every, freshFile,
                         timeJags, gibbsSweep, timeHakaru)
@@ -23,8 +23,8 @@ main = do
   g <- MWC.createSystemRandom
   let numTopics = U.maximum zs + 1
       numDocs = U.length zs
-      holdouts = every 10 [0..numDocs - 1]
-      numTrials = 10
+      holdouts = filter (\ v -> mod v 100 == 0) $ [0..numDocs - 1]
+      numTrials = 1
       fname = show numTopics ++ "-" ++ show numDocs
       benchmark_dir = outputs_dir </> "NaiveBayesGibbs"
   hkfile <- freshFile (benchmark_dir </> "hk") fname
@@ -33,10 +33,10 @@ main = do
     trial <- oneLine <$> hakaru g holdouts numTopics numDocs w doc zs nbKnobs
     putStrLn "writing..."
     appendFile hkfile trial
-    
+
 nbKnobs = Knobs { minSeconds = 10
                 , stepSeconds = 0.5
-                , minSweeps = 2
+                , minSweeps = 1
                 , stepSweeps = 1 }
 
 type NBSampler = [Int] ->        -- indices of hold-out docs
@@ -56,12 +56,14 @@ hakaru g holdouts numTopics numDocs w doc truth knobs = do
                in \ z i ->
                    if elem i holdouts
                    then f z w doc i
-                   else return (z U.! i)
+                   else do
+                     -- let n = (z U.! i)
+                     -- let t = (truth U.! i)
+                     -- putStrLn ("i " ++ (show i) ++ "n " ++ (show n) ++ "t " ++ (show t))
+                     return (z U.! i)
   time0 <- getCurrentTime
   zs <- U.generateM numDocs $
         \i -> if elem i holdouts
               then MWC.uniformR (0, numTopics - 1) g
               else return (truth U.! i)
   timeHakaru time0 (gibbsSweep update g) zs knobs
-
-             
