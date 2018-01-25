@@ -15,6 +15,8 @@ library(tibble)
 # This format will be satisfied by the output of the accuracy calculators.
 # For example, runners/hk/GmmGibbs/Accuracy.hs satisfies this output format.
 
+## Example invocation: Rscript plots.r GmmGibbs/ 9-1000 plots.pdf
+
 args <- commandArgs(trailingOnly=TRUE)
 benchmark_path <- args[1]
 fname <- args[2]
