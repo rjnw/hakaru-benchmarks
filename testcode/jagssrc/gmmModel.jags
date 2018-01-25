@@ -1,7 +1,7 @@
 model {
     theta ~ ddirch(as)
     for (k in 1:length(as)) {
-        phi[k] ~ dnorm(0,14)
+        phi[k] ~ dnorm(0,1/14^2)
     }
     for (i in 1:length(t)) {
         z[i] ~ dcat(theta)

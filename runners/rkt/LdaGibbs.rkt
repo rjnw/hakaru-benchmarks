@@ -48,7 +48,7 @@
   (define prog (jit-get-function 'prog module-env))
 ;  (disassemble-ffi-function (jit-get-function-ptr 'prog module-env) #:size 1000)
 
-  (define num-docs (last rk-docs))
+  (define num-docs (add1 (last rk-docs)))
   (define num-words (add1 (argmax identity rk-words)))
   (define num-topics (add1 (argmax identity rk-topics)))
 
@@ -63,8 +63,8 @@
   (define (update z docUpdate)
     (prog topicPrior wordPrior num-docs words docs z docUpdate))
 
-  (define zs (replicate-uniform-discrete num-docs 0 (- num-topics 1)))
-  (define z (make-nat-array num-docs (list->cblock zs _uint64)))
+  (define zs (replicate-uniform-discrete (length rk-words) 0 (- num-topics 1)))
+  (define z (make-nat-array (length rk-words) (list->cblock zs _uint64)))
   (update z 0))
 
   ;; (define (run-single out-port)

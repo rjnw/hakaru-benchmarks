@@ -1,7 +1,7 @@
 .PHONY: setup init hakaru rkt input clean docker runtests benchmark
 
 
-setup: init hakaru rkt input
+setup: hakaru rkt input
 
 init:
 	git submodule init
@@ -34,7 +34,7 @@ docker:
 	cd ./docker; sudo docker build -t hakaru-benchmark .
 
 runtests:
-	echo "TODO runtests :P"
+	cd ./hakrit; raco -test test
 
 benchmark: runtests
-	echo "We can't even run yet how do we benchmark??"
+	echo "We can't even run tests, yet how do we benchmark??"

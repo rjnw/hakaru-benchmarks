@@ -15,7 +15,7 @@ def naive_bayes( topic_prior array(prob)
                , doc array(nat)
                , docUpdate nat ):
 
-  if docUpdate < size(z):
+  if docUpdate < size(z) && z[docUpdate] < size(topic_prior):
 
     # priors
     theta <~ dirichlet(topic_prior)   # topic prevalence

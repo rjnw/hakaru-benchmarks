@@ -10,15 +10,15 @@
          "discrete.rkt"
          "utils.rkt")
 
-(define testname "NaiveBayesGibbs")
+(define testname "NaiveBayesGibbsNew")
 
 (define (run-test)
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
   (define nbinfo (list (list) (list) (list) (list) (list) (list)))
-
-  (define wordsfile  (build-path input-dir "news" "words"))
-  (define docsfile   (build-path input-dir "news" "docs"))
-  (define topicsfile   (build-path input-dir "news" "topics"))
+  (define newsd "news")
+  (define wordsfile  (build-path input-dir newsd "words"))
+  (define docsfile   (build-path input-dir newsd "docs"))
+  (define topicsfile   (build-path input-dir newsd "topics"))
 
   (define rk-words (map string->number (file->lines wordsfile)))
   (define rk-docs (map string->number (file->lines docsfile)))
@@ -36,7 +36,7 @@
   (define num-topics (add1 (argmax identity rk-topics)))
   (printf "num-docs: ~a, num-words: ~a, num-topics: ~a\n" num-docs num-words num-topics)
 
-
+  (error 'stop)
   (define outfile (build-path output-dir testname "rkt" "out"))
 
   ;; (define nbinfo
@@ -135,6 +135,8 @@
   (define time1 (get-time))
   (printf "naive bayes sweep took: ~a ms" (- time1 time0)))
 
-(module+ test 
+(module+ test
   (run-test))
-(run-test)
+
+(module+ main
+  (run-test))
