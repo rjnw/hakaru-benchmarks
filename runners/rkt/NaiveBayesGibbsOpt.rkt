@@ -35,14 +35,17 @@
 
   (define outfile (build-path output-dir testname "rkt" (format "~a-~a" num-topics num-docs)))
 
-  (define empty-info '(() () () () () ()))
   (define full-info
     `(((array-info . ((size . ,num-topics)
-                      (elem-info . ((prob-info . ((constant . 0)))))))
-       (attrs . (constant)))
+                      ;; (elem-info . ((prob-info . ((constant . 0)))))
+                      ))
+       ;; (attrs . (constant))
+       )
       ((array-info . ((size . ,num-words)
-                      (elem-info . ((prob-info . ((constant . 0)))))))
-       (attrs . (constant)))
+                      ;; (elem-info . ((prob-info . ((constant . 0)))))
+                      ))
+       ;; (attrs . (constant))
+       )
       ((array-info . ((size . ,num-docs)
                       (elem-info . ((nat-info
                                      . ((value-range
@@ -52,53 +55,32 @@
                                      . ((value-range
                                          . (0 . ,(- num-words 1)))))))
                       (value . ,rk-words)))
-       (attrs . (constant)))
+       ;; (attrs . (constant))
+       )
       ((array-info . ((size . ,words-size)
                       (elem-info . ((nat-info
                                      . ((value-range
                                          . (0 . ,(- num-docs 1)))))))
                       (value . ,rk-docs)))
-       (attrs . (constant)))
+       ;; (attrs . (constant))
+       )
       ((nat-info . ((value-range . (0 . ,(- num-docs 1))))))))
 
 
-  (define module-env (compile-file srcfile empty-info))
+  (define module-env (compile-file srcfile full-info))
   (define init-rng (jit-get-function 'init-rng module-env))
   (init-rng)
   (define jit-val (curry rkt->jit module-env))
-
-  (define make-prob-array (get-function module-env 'make '(array prob)))
-  (define new-sized-prob-array (get-function module-env 'new '(array prob)))
-  (define set-index-prob-array (get-function module-env 'set-index! '(array prob)))
-
-  (define make-nat-array (get-function module-env 'make '(array nat)))
-  (define new-sized-nat-array (get-function module-env 'new '(array nat)))
-  (define set-index-nat-array (get-function module-env 'set-index! '(array nat)))
-  (define get-index-nat-array (get-function module-env 'get-index '(array nat)))
-
-  (define make-real-array (get-function module-env 'make '(array real)))
-  (define new-sized-real-array (get-function module-env 'new '(array real)))
-  (define set-index-real-array (get-function module-env 'set-index! '(array real)))
+  (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<~a.~a>" num-topics 'nat)) module-env ))
+  (define get-index-nat-array (jit-get-function (string->symbol (format "get-index$array<~a.~a>" num-topics 'nat)) module-env ))
 
   (define prog (jit-get-function 'prog module-env))
 
-  (define topicPrior (new-sized-prob-array num-topics))
-  (for ([i (in-range num-topics)])
-    (set-index-prob-array topicPrior i 0.0))
+  (define topicPrior (list->cblock (build-list num-topics (const 0.0)) _double))
+  (define wordPrior (list->cblock (build-list num-words (const 0.0)) _double))
 
-  (define wordPrior (new-sized-prob-array num-words))
-  (for [(i (in-range num-words))]
-    (set-index-prob-array wordPrior i 0.0))
-
-  (define words (new-sized-nat-array words-size))
-  (for ([i (in-range words-size)]
-        [v rk-words])
-    (set-index-nat-array words i v))
-  (define docs (new-sized-nat-array docs-size))
-  (for ([i (in-range docs-size)]
-        [v rk-docs])
-    (set-index-nat-array docs i v))
-
+  (define words (list->cblock rk-words _uint64))
+  (define docs (list->cblock rk-docs _uint64))
   (define holdout-modulo 100)
   (define (holdout? i) (zero? (modulo i holdout-modulo)))
   ;; holding out only every 10, similar to haskell
@@ -116,7 +98,7 @@
                (if  (holdout? i)
                     (distf)
                     orig-value)))
-  (define z (make-nat-array num-docs (list->cblock zs _uint64)))
+  (define z (list->cblock zs _uint64))
   (define (accuracy)
     (define-values (correct total)
       (for/fold ([correct '()]

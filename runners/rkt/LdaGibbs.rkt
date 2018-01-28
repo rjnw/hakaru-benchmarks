@@ -46,7 +46,6 @@
   (define set-index-real-array (jit-get-function (string->symbol (format "set-index!$array<real>" )) module-env))
 
   (define prog (jit-get-function 'prog module-env))
-;  (disassemble-ffi-function (jit-get-function-ptr 'prog module-env) #:size 1000)
 
   (define num-docs (add1 (last rk-docs)))
   (define num-words (add1 (argmax identity rk-words)))
@@ -65,25 +64,26 @@
 
   (define zs (replicate-uniform-discrete (length rk-words) 0 (- num-topics 1)))
   (define z (make-nat-array (length rk-words) (list->cblock zs _uint64)))
-  (update z 0))
 
-  ;; (define (run-single out-port)
-  ;;   (gibbs-timer (curry gibbs-sweep num-topics set-index-nat-array update)
-  ;;                z
-  ;;                (λ (tim sweeps state)
-  ;;                  (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
-  ;;                  (for ([i (in-range (- num-topics 1))])
-  ;;                    (fprintf out-port "~a, " (get-index-nat-array state i)))
-  ;;                  (fprintf out-port "~a]\t" (get-index-nat-array state (- num-topics 1)))))
-  ;;   (printf "final state: ~a, \n\tactual state: ~a\n"
-  ;;           (for/list ([i (in-range num-topics)])
-  ;;             (get-index-nat-array z i))
-  ;;           rk-topics))
+  (define (run-single out-port)
+    (gibbs-timer (curry gibbs-sweep num-topics set-index-nat-array update)
+                 z
+                 (λ (tim sweeps state)
+                   (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
+                   (for ([i (in-range (- num-topics 1))])
+                     (fprintf out-port "~a, " (get-index-nat-array state i)))
+                   (fprintf out-port "~a]\t" (get-index-nat-array state (- num-topics 1)))))
+    (printf "final state: ~a, \n\tactual state: ~a\n"
+            (for/list ([i (in-range num-topics)])
+              (get-index-nat-array z i))
+            rk-topics))
 
 
-  ;; (call-with-output-file outfile #:exists 'replace
-  ;;   (λ (out-port)
-  ;;     (run-single out-port)))
+  (call-with-output-file outfile #:exists 'replace
+    (λ (out-port)
+      (run-single out-port))))
+
+
 
 
 (run-test)
