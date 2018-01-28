@@ -64,9 +64,10 @@
       (timer-step))
 
     (step)
-    (define (trial-done?) (and (> sweeps min-sweeps) (> (elasp-time start-time) min-time)))
+    (define (trial-done?) (and (>= sweeps min-sweeps) (>= (elasp-time start-time) min-time)))
     (unless (trial-done?) (gibbs-trial)))
   (gibbs-trial)
+  (printf "trialdone; total-time: ~a, sweeps: ~a\n" (elasp-time start-time) sweeps)
   (void))
 
 

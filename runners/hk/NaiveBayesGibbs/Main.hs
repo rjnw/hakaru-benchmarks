@@ -23,7 +23,7 @@ main = do
   g <- MWC.createSystemRandom
   let numTopics = U.maximum zs + 1
       numDocs = U.length zs
-      holdouts = filter (\ v -> mod v 100 == 0) $ [0..numDocs - 1]
+      holdouts = filter (\ v -> mod v 1000 == 0) $ [0..numDocs - 1]
       numTrials = 1
       fname = show numTopics ++ "-" ++ show numDocs
       benchmark_dir = outputs_dir </> "NaiveBayesGibbs"
@@ -32,11 +32,12 @@ main = do
     putStrLn "starting a new trial"
     trial <- oneLine <$> hakaru g holdouts numTopics numDocs w doc zs nbKnobs
     putStrLn "writing..."
+
     appendFile hkfile trial
 
 nbKnobs = Knobs { minSeconds = 10
                 , stepSeconds = 0.5
-                , minSweeps = 1
+                , minSweeps = 10
                 , stepSweeps = 1 }
 
 type NBSampler = [Int] ->        -- indices of hold-out docs
@@ -66,4 +67,6 @@ hakaru g holdouts numTopics numDocs w doc truth knobs = do
         \i -> if elem i holdouts
               then MWC.uniformR (0, numTopics - 1) g
               else return (truth U.! i)
+
+  -- print $ filter (\ v -> (mod v 10 /= 0 && (truth U.! v /= zs U.! v))) [0..numDocs - 1]
   timeHakaru time0 (gibbsSweep update g) zs knobs

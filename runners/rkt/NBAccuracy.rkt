@@ -1,14 +1,8 @@
 #lang racket
 (require hakrit)
 
-(require sham
-         hakrit
-         ffi/unsafe
-         racket/cmdline
-         racket/runtime-path
-         racket/date
-         disassemble
-         "discrete.rkt"
+(require racket/runtime-path
+         plot
          "utils.rkt")
 
 (define testname "NaiveBayesGibbs")
@@ -19,28 +13,36 @@
   (define docsfile   (build-path input-dir newsd "docs"))
   (define topicsfile   (build-path input-dir newsd "topics"))
 
-  (define rk-words (map string->number (file->lines wordsfile)))
-  (define rk-docs (map string->number (file->lines docsfile)))
+  ;; (define rk-words (map string->number (file->lines wordsfile)))
+  ;; (define rk-docs (map string->number (file->lines docsfile)))
   (define rk-topics (map string->number (file->lines topicsfile)))
 
-  (define words-size (length rk-words))
-  (define docs-size (length rk-docs))
-  (define topics-size (length rk-topics))
-  (define num-docs (add1 (last rk-docs)))
-  (define num-words (add1 (argmax identity rk-words)))
-  (define num-topics (add1 (argmax identity rk-topics)))
-  (printf "num-docs: ~a, num-words: ~a, num-topics: ~a\n" num-docs num-words num-topics)
-  (printf "words-size: ~a, docs-size: ~a, topics-size: ~a\n" words-size docs-size topics-size)
+  ;; (define words-size (length rk-words))
+  ;; (define docs-size (length rk-docs))
+  ;; (define topics-size (length rk-topics))
+  ;; (define num-docs (add1 (last rk-docs)))
+  ;; (define num-words (add1 (argmax identity rk-words)))
+  ;; (define num-topics (add1 (argmax identity rk-topics)))
+
+  (define num-topics 20)
+  (define num-docs 19997)
 
   (define rkt-test (build-path output-dir testname "rkt" (format "~a-~a" num-topics num-docs)))
   (define hk-test (build-path output-dir testname "hk" (format "~a-~a" num-topics num-docs)))
 
   (define rkt-trials (file->lines rkt-test))
   (define hk-trials (file->lines hk-test))
-  (define (get-zstates st)
-    (map (λ (s) (map (compose inexact->exact string->number)
-                     (regexp-match* #px"\\d\\.?\\d*" s))) (regexp-match* #rx"\\[(.*?)]" st)))
-(define holdout-modulo 100)
+  (define (get-snapshots st)
+    (define snapshots (regexp-match* #px"(\\d*\\.?\\d*) (\\d*\\.?\\d*) \\[(.*?)\\]" st #:match-select cdr))
+    (define f (compose inexact->exact string->number))
+    (map (λ (s) (match-define (list tim sweep state) s)
+            ;; (print state)
+            (list (string->number tim)
+                  (f sweep)
+                  (map f (regexp-match* #px"\\d+\\.?\\d*" state))))
+         snapshots))
+
+  (define holdout-modulo 10)
   (define (holdout? i) (zero? (modulo i holdout-modulo)))
   (define (accuracy arr truth)
     (define-values (correct total)
@@ -50,27 +52,42 @@
                  [orig-value  truth]
                  [val arr]
                  #:when (holdout? i))
-        (printf "i: ~a, ~a==~a\n" i orig-value val)
         (values (if (equal? orig-value val)
                     (cons i correct)
                     correct)
                 (cons i total))))
-    (printf "total: ~a\n" total)
-    (printf "correct: ~a\n" correct)
-    (printf "\naccuracy: ~a\n" (/ (length correct) (length total)))
-    (/ (* (length correct) 1.0) (length total)))
-  (for ([rtr rkt-trials]
-        [hkt hk-trials])
-    (define r (get-zstates rtr))
-    (define h (get-zstates hkt))
-    (for ([rst r]
-          [hst h])
-      (printf "racket:\n")
-      (define racc (accuracy rst rk-topics))
-      (printf "haskell:\n")
-      (define hacc (accuracy hst rk-topics))
-      (printf "rkt: ~a, hkr: ~a\n" racc hacc)))
+    (printf "accuracy: ~a/~a\n" (length correct) (length total))
+    (* 100 (/ (* (length correct) 1.0) (length total))))
 
-)
+  (define (get-time-accuracy trials)
+    (for/list ([rtr trials])
+      (define sshots (get-snapshots rtr))
+      (for/list ([shot sshots])
+        (define sweep (second shot))
+        (define tim (first shot))
+        (define acc (accuracy (third shot) rk-topics))
+        (printf "sweep: ~a, time: ~a, accuracy: ~a\n" sweep tim acc)
+        (list sweep acc))))
+
+  (printf "racket:\n")
+  (define rkt-points (get-time-accuracy rkt-trials))
+
+  (printf "haskell:\n")
+  (define hk-points (get-time-accuracy hk-trials))
+
+;; (plot-file (list (lines (first rkt-points) #:color 2 #:y-min 0 #:y-max 100 #:label "hakrit" )
+  ;;                  (lines (first hk-points) #:color 5 #:label "haskell"))
+  ;;            "plot.png"
+  ;;            #:x-label "sweep"
+  ;;            #:y-label "accuracy"
+  ;;            #:title "NaiveBayesGibbs"
+  ;;            #:legend-anchor 'top-right)
+  (plot (list  (lines (first rkt-points) #:color 2 #:y-min 0 #:y-max 100 #:label "hakrit" )
+              (lines (first hk-points) #:color 5 #:label "haskell"))
+        #:x-label "sweep"
+        #:y-label "accuracy"
+        #:title "NaiveBayesGibbs"))
 
 (calc-accuracy)
+;; hakrit std-dev 0.33
+;; hakaru std-dev 2.4

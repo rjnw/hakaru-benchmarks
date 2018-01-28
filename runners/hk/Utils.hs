@@ -24,10 +24,12 @@ gibbsSweep update g zs = loop (U.length zs) zs
           loop 0 zs = return zs
           loop i zs = do
             t1 <- getCurrentTime
-            -- when (i `mod` 100 == 0) $
-            --      putStrLn $ "maybe sample new topic for doc " ++
-            --                 show i ++ ", time = " ++ show t1
             Just zNew <- unMeasure (update zs (i-1)) g
+            -- when (i `mod` 1000 == 0) $
+            --      putStrLn $ "sampled new topic for doc " ++
+            --                 show i ++ ", time = " ++ show t1 ++
+            --                 "original topic: " ++ show (zs U.! i) ++
+            --                 " new: " ++ show zNew
             loop (i-1) (U.unsafeUpd zs [(i-1, zNew)])
 
 data SamplerKnobs = Knobs { minSeconds :: Double
@@ -62,7 +64,7 @@ timeHakaru time0 sweep zs knobs = do
   time1 <- getCurrentTime
   let sweeps :: Int -> U.Vector Int -> IO (U.Vector Int)
       sweeps 0 = return
-      sweeps n = sweep >=> \v -> putStrLn "did 1 sweep" >> sweeps (n-1) v
+      sweeps n = sweep >=> \v -> putStrLn "" >> sweeps (n-1) v
       threshCond t i = t >= minSeconds knobs &&
                        i >= minSweeps  knobs
       loop :: Int -> Double -> Double -> U.Vector Int -> IO [Log]
