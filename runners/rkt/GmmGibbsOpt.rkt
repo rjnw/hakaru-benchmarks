@@ -76,7 +76,9 @@
                    (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
                    (for ([i (in-range (- points 1))])
                      (fprintf out-port "~a " (get-index-nat-array state i)))
-                   (fprintf out-port "~a]\t" (get-index-nat-array state (- points 1)))))
+                   (fprintf out-port "~a]\t" (get-index-nat-array state (- points 1))))
+                 #:min-time 1
+                 #:step-time 0.01)
     (fprintf out-port "\n"))
 
   (call-with-input-file infile

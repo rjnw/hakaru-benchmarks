@@ -1,3 +1,4 @@
+.PHONY: GmmGibbs
 
 GmmGibbs:
 	cd ./rkt && racket GmmGibbsOpt.rkt 6 100

@@ -4,15 +4,15 @@ module Main where
 import           System.IO (hPutStrLn, hClose)
 import           System.IO.Temp (withSystemTempFile)
 import           Data.Time.Clock (getCurrentTime)
-import           System.Process (readProcess)    
+import           System.Process (readProcess)
 import qualified Data.Vector.Unboxed as U
-    
+
 import           Language.Hakaru.Runtime.LogFloatPrelude
 import qualified System.Random.MWC                as MWC
 import           Control.Monad
 import           System.Environment (getArgs)
 import           System.Directory (doesFileExist, removeFile,
-                                   createDirectoryIfMissing)    
+                                   createDirectoryIfMissing)
 import           System.FilePath ((</>))
 import           Utils (SamplerKnobs(..), freshFile,
                         Sampler, oneLine, gmmKnobs,
@@ -34,7 +34,7 @@ main = do
   g <- MWC.createSystemRandom
   hkfile   <- freshFile (benchmark_dir </> "hk")   output_fname
   jagsfile <- freshFile (benchmark_dir </> "jags") output_fname
-  forM_ (take 10 $ lines dat) $ \line -> do
+  forM_ (lines dat) $ \line -> do
     let ts :: [Double]
         zs :: [Int]
         (ts,zs) = read line
@@ -44,7 +44,7 @@ main = do
     putStrLn "writing..."
     appendFile hkfile   hktrial
     appendFile jagsfile jagstrial
-  
+
 
 type GMMSampler = Int -> -- how many clusters to classify points into
                   U.Vector Double -> -- data points to classify
@@ -71,5 +71,4 @@ jags m r classes ts knobs = withSystemTempFile "gmmModel.data" $ \fp h -> do
              show (minSweeps knobs),
              show (stepSweeps knobs), m]
             ""
-  timeJags output knobs             
-
+  timeJags output knobs
