@@ -2,6 +2,7 @@
 * :star: Build  `docker build . -t benchmarks`
 * :runner: Run `docker run -it benchmark`
 * :alien: To share directory `docker run -v $(pwd)/..:/root/hb -it benchmark`
+* To copy files out of a container `docker cp <container-id>:<docker-path> <host-path>`
 
 Running a continer will always create a new one,
 but the older one is still saved, paused with its state. :open_mouth:
