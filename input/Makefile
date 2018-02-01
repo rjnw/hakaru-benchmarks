@@ -7,8 +7,10 @@ ct = ClinicalTrial
 lr = LinearRegression
 gg = GmmGibbs
 
-n := 0 00 000 0000
-i := 3 6 9 12
+n := 0 00
+# 000 0000
+i := 3 6
+# 9 12
 numbers=$(foreach i,$(n),1$(i))
 ctinp=$(foreach n,$(numbers),./$(ct)/$n)
 

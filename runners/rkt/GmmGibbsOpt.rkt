@@ -54,6 +54,8 @@
   (define stdev (jit-val 'prob 14.0))
   (define as (list->cblock (build-list classes (const 0.0)) _double))
 
+
+
   (define (run-single str out-port)
     (printf "running a trial\n")
     (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
@@ -69,16 +71,14 @@
 
     (define (update z doc)
       (prog stdev as z tsc doc))
+    (define (printer tim sweeps state)
+      (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
+      (for ([i (in-range (- points 1))])
+        (fprintf out-port "~a " (get-index-nat-array state i)))
+      (fprintf out-port "~a]\t" (get-index-nat-array state (- points 1))))
+    (define sweeper (curry gibbs-sweep points set-index-nat-array update))
 
-    (gibbs-timer (curry gibbs-sweep points set-index-nat-array update)
-                 zsc
-                 (λ (tim sweeps state)
-                   (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
-                   (for ([i (in-range (- points 1))])
-                     (fprintf out-port "~a " (get-index-nat-array state i)))
-                   (fprintf out-port "~a]\t" (get-index-nat-array state (- points 1))))
-                 #:min-time 1
-                 #:step-time 0.01)
+    (gibbs-timer sweeper zsc printer #:min-time 0.1 #:step-time 0.001)
     (fprintf out-port "\n"))
 
   (call-with-input-file infile

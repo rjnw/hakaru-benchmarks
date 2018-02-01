@@ -1,6 +1,8 @@
-.PHONY: GmmGibbs
+.PHONY: GmmGibbs hkbin
 
-GmmGibbs:
+hkbin:
+	cd ./hk && make all
+GmmGibbs: hkbin
 	cd ./rkt && racket GmmGibbsOpt.rkt 6 100
 	./hkbin/gmmGibbs ../input/GmmGibbs/6-100 ../testcode/jagssrc ../output/
 	./hkbin/gmmAccuracy ../input/GmmGibbs/6-100 ../output/GmmGibbs/jags/6-100

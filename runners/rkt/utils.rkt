@@ -35,9 +35,6 @@
           (loop (- i 1)))))
   (loop iter-count))
 
-
-;; we are using microseconds as compared to haskell
-;;; why because we can.
 (define (gibbs-timer sweeper zs printer
                      #:min-time [min-time 10]
                      #:step-time [step-time 0.1]
