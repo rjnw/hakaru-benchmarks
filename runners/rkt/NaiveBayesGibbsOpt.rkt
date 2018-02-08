@@ -36,16 +36,8 @@
   (define outfile (build-path output-dir testname "rkt" (format "~a-~a" num-topics num-docs)))
 
   (define full-info
-    `(((array-info . ((size . ,num-topics)
-                      ;; (elem-info . ((prob-info . ((constant . 0)))))
-                      ))
-       ;; (attrs . (constant))
-       )
-      ((array-info . ((size . ,num-words)
-                      ;; (elem-info . ((prob-info . ((constant . 0)))))
-                      ))
-       ;; (attrs . (constant))
-       )
+    `(((array-info . ((size . ,num-topics))))
+      ((array-info . ((size . ,num-words))))
       ((array-info . ((size . ,num-docs)
                       (elem-info . ((nat-info
                                      . ((value-range
@@ -54,16 +46,12 @@
                       (elem-info . ((nat-info
                                      . ((value-range
                                          . (0 . ,(- num-words 1)))))))
-                      (value . ,rk-words)))
-       ;; (attrs . (constant))
-       )
+                      (value . ,rk-words))))
       ((array-info . ((size . ,words-size)
                       (elem-info . ((nat-info
                                      . ((value-range
                                          . (0 . ,(- num-docs 1)))))))
-                      (value . ,rk-docs)))
-       ;; (attrs . (constant))
-       )
+                      (value . ,rk-docs))))
       ((nat-info . ((value-range . (0 . ,(- num-docs 1))))))))
 
 

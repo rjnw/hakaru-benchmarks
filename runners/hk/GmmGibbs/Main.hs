@@ -41,7 +41,6 @@ main = do
         tsvec = U.fromList ts
     hktrial   <- oneLine <$> hakaru g classes tsvec gmmKnobs
     jagstrial <- oneLine <$> jags jagsmodel jagsrunner classes tsvec gmmKnobs
-    putStrLn "writing..."
     appendFile hkfile   hktrial
     appendFile jagsfile jagstrial
 

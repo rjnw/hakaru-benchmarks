@@ -7,10 +7,9 @@ ct = ClinicalTrial
 lr = LinearRegression
 gg = GmmGibbs
 
-n := 0 00
-# 000 0000
-i := 3 6
-# 9 12
+n := 0 00 000
+i := 3 6 9 12
+
 numbers=$(foreach i,$(n),1$(i))
 ctinp=$(foreach n,$(numbers),./$(ct)/$n)
 
@@ -19,7 +18,7 @@ lrinp-dataX=$(foreach n,$(numbers),./$(lr)/dataX/$n)
 gn=$(foreach n, $(i), ./$(gg)/$n)
 gminp=$(foreach k, $(numbers), $(foreach g,$(gn),$(g)-$k))
 
-tests := 2000
+tests := 2
 
 all: buildgen $(ctinp) $(lrinp-y) $(lrinp-datax) $(gminp)
 
@@ -52,7 +51,7 @@ buildgen:
 .SECONDEXPANSION:
 ./$(gg)/% : ./data/$(gg)/$$(shell cut -d- -f1 <<< $$(notdir $$@))
 	mkdir -p $(dir $@)
-	./bin/GmmModel $< $(shell cut -d- -f2 <<< $(notdir $@)) | head -n 200 > $@
+	./bin/GmmModel $< $(shell cut -d- -f2 <<< $(notdir $@)) | head -n 500 > $@
 
 cleaninp:
 	rm -R ./$(ct) ./$(lr) ./$(gg)

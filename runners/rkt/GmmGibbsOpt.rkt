@@ -57,7 +57,6 @@
 
 
   (define (run-single str out-port)
-    (printf "running a trial\n")
     (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
     (define orig-zs (map  string->number (regexp-split "," zs-str)))
     (define distf (discrete-sampler 0 (- classes 1)))
@@ -73,20 +72,17 @@
       (prog stdev as z tsc doc))
     (define (printer tim sweeps state)
       (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
-      (for ([i (in-range (- points 1))])
+      (for ([i (in-range points)])
         (fprintf out-port "~a " (get-index-nat-array state i)))
       (fprintf out-port "~a]\t" (get-index-nat-array state (- points 1))))
     (define sweeper (curry gibbs-sweep points set-index-nat-array update))
 
-    (gibbs-timer sweeper zsc printer #:min-time 0.1 #:step-time 0.001)
+    (gibbs-timer sweeper zsc printer #:min-time 3 #:step-time 0.01 )
     (fprintf out-port "\n"))
-
-  (call-with-input-file infile
-    (λ (inp-port)
-      (call-with-output-file outfile #:exists 'replace
-        (λ (out-port)
-          (for ([line (in-lines inp-port)])
-            (run-single line out-port)))))))
+  (call-with-output-file outfile #:exists 'replace
+    (λ (out-port)
+      (for ([line (file->lines infile)])
+        (run-single line out-port)))))
 
 (module+ main ;;args
   (define-values (classes points)

@@ -55,9 +55,9 @@
         (define (step-done?) (> (elasp-time time0) step-time))
         (sweeper-step)
         (set! sweeps (+ sweeps step-sweeps))
-        (if (step-done?)
-            (printer (elasp-time start-time) sweeps zs)
-            (timer-step (elasp-time time0))))
+        (printer (elasp-time start-time) sweeps zs)
+        (unless (step-done?)
+          (timer-step (elasp-time time0))))
       (timer-step))
 
     (step)

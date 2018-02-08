@@ -37,8 +37,8 @@ data SamplerKnobs = Knobs { minSeconds :: Double
                           , minSweeps :: Int
                           , stepSweeps :: Int }
 
-gmmKnobs = Knobs { minSeconds = 0.1
-                 , stepSeconds = 0.001
+gmmKnobs = Knobs { minSeconds = 1
+                 , stepSeconds = 0.01
                  , minSweeps = 100
                  , stepSweeps = 10 }
 
@@ -69,7 +69,10 @@ timeHakaru time0 sweep zs knobs = do
                        i >= minSweeps  knobs
       loop :: Int -> Double -> Double -> U.Vector Int -> IO [Log]
       loop iter time2 time2subgoal zs
-        | threshCond time2 iter = return []
+        | threshCond time2 iter = do
+            tim <- getCurrentTime
+            putStrLn $ "trialdone; total-time: " ++ show (diffTime tim time0) ++ ", sweeps: " ++ show iter
+            return []
         | otherwise = do
             -- putStrLn $ "done " ++ show iter ++ " sweeps"
             zs <- sweeps (stepSweeps knobs) zs
@@ -80,6 +83,7 @@ timeHakaru time0 sweep zs knobs = do
                  loop iter time2 (time2 + stepSeconds knobs) zs
             else loop iter time2 time2subgoal zs
   samples <- loop 0 0 (stepSeconds knobs) zs
+
   return (diffTime time1 time0 , samples)
 
 diffTime :: UTCTime -> UTCTime -> Double

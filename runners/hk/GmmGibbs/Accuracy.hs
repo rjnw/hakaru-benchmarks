@@ -27,8 +27,9 @@ main = do
       times = f (minSeconds gmmKnobs) (stepSeconds gmmKnobs)
       processLn i l = map (process (parseInput i)) (parseTrial l)
       processed = zipWith processLn (lines inputs) (lines logs)
-  appendFile accsFile (output times) -- this is the header line
-  mapM_ (appendFile accsFile . output . resampleWith times) processed
+  mapM_ (appendFile accsFile . ($ "\n") . showList) processed
+  -- appendFile accsFile (output times) -- this is the header line
+  -- mapM_ (appendFile accsFile . output . resampleWith times) processed
 
 process :: Input -> Snapshot -> Snapshot
 process (_,truth) (Snapshot p predict) = Snapshot p [accuracy]
