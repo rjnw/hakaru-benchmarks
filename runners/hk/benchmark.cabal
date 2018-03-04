@@ -5,7 +5,7 @@ author:              Rajan Walia
 maintainer:          walrajan@gmail.com
 
 build-type:          Simple
-cabal-version:       >=1.16                   
+cabal-version:       >=1.16
 
 Executable clinicalTrial
     Hs-Source-Dirs:    .
@@ -49,7 +49,7 @@ Executable linearRegression
                        split                >= 0.2.3.2,
                        time                 >= 1.6.0.1,
                        directory            >= 1.3.0.0,
-                       deepseq              >= 1.4.2.0                       
+                       deepseq              >= 1.4.2.0
 
 Executable gmmGibbs
     Hs-Source-Dirs:    .
@@ -90,8 +90,9 @@ Executable gmmAccuracy
                        directory            >= 1.3.0.0,
                        logfloat             >= 0.13 && < 0.14,
                        process              >= 1.1  && < 2.0,
-                       temporary            >= 1.2.1.1
-                       
+                       temporary            >= 1.2.1.1,
+                       Munkres              >= 0.1
+
 Executable getNews
     Hs-Source-Dirs:    .
     Main-is:           GetNews.hs

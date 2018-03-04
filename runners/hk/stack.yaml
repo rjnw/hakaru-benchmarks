@@ -7,3 +7,4 @@ packages:
 
 extra-deps:
  - colorize-haskell-1.0.1
+ - Munkres-0.1
