@@ -43,67 +43,40 @@ topicIndices <- c(sapply(0:(topicSize-1),
 zTrues <- topics[topicIndices]
 topics[topicIndices] <- NA
 
-jags <- jags.model('naive_bayes.jags',
-                   data = list('Nwords'     = length(words),
-                               'Ndocs'      = docsSize,
-                               'Ntopics'    = topicSize,
-                               'Nvocab'     = vocabSize,
-                               'onesTopics' = rep(1,topicSize),
-                               'onesVocab'  = rep(1,vocabSize),
-                               'z'          = topics,
-                               'w'          = words,
-                               'doc'        = docs),
-                   n.chains = chains,
-                   n.adapt = 10,
-                   quiet=TRUE)
+time0 <- proc.time()["elapsed"]
 
-##start.time <- Sys.time()
+model <- jags.model('naive_bayes.jags',
+                    data = list('Nwords'     = length(words),
+                                'Ndocs'      = docsSize,
+                                'Ntopics'    = topicSize,
+                                'Nvocab'     = vocabSize,
+                                'onesTopics' = rep(1,topicSize),
+                                'onesVocab'  = rep(1,vocabSize),
+                                'z'          = topics,
+                                'w'          = words,
+                                'doc'        = docs),
+                    n.chains = chains,
+                    n.adapt = 10,
+                    quiet=TRUE)
 
-##update(jags, sweeps);
+time1 <- proc.time()["elapsed"]
+write(c(time0, time1), file="")
+time2 <- time1
+time2goal = time2 + as.numeric(args[3])
+time2subgoal = time2 + as.numeric(args[4])
+itergoal = as.numeric(args[5])
+iterstep = as.numeric(args[6])
+iter <- 0
+while (time2 < time2goal || iter < itergoal) {
+    update(model, iterstep-1)
+    samples <- jags.samples(model, variable.names=c("z"), n.iter=1)
+    time2 <- proc.time()["elapsed"]
+    iter <- model$iter()
+    if (time2 >= time2subgoal || time2 >= time2goal && iter >= itergoal) {
+        time2subgoal = time2 + as.numeric(args[4])
+        write(c(time2, iter), file="", append=TRUE)
+        write(samples$z, ncolumns=length(t), file="", append=TRUE)
+    }
 
-##samples <- jags.samples(jags, c('z'), 1);
-##zPredicts <- samples$"z"[topicIndices]
-## end.time <- Sys.time()
-## duration <- difftime(end.time, start.time, units="sec")
-
-samplesC <- coda.samples(jags,
-                         c('z'),
-                         sweeps);
-
-mk_acc <- function(samples) {
-    zPred <- samples[topicIndices]
-    length(zTrues[zPred == zTrues])/length(zTrues)
-}
-
-d <- melt(sapply(1:sweeps,
-          function(j) {
-              sapply(1:chains,
-                     function(i) {
-                         mk_acc(as.vector(samplesC[j,][[i]]))
-                     })
-          }));
-
-if (chains == 1 ) {
-    d$Var1 <- 1
-    d$Var2 <- 1:sweeps
-    d <- d[c("Var1", "Var2", "value")]
-}
-
-colnames(d) <- c("Chains", "Sweeps", "Accuracy")
-d$System <- "JAGS"
-d <- d[c("System","Chains","Sweeps","Accuracy")]
-write.csv(d, row.names=FALSE, quote=FALSE, file="nbsweeps2.csv")
-
-
-## cat("JAGS",
-##     as.numeric(docsSize),
-##     format(sweeps),
-##     format(trial),
-##     format(accuracy),
-##     sep=",",
-##     fill=TRUE)
-
-## print(zPredicts)
-## print(zTrues)
 
 }
