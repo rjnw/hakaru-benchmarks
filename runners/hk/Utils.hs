@@ -37,10 +37,10 @@ data SamplerKnobs = Knobs { minSeconds :: Double
                           , minSweeps :: Int
                           , stepSweeps :: Int }
 
-gmmKnobs = Knobs { minSeconds = 1
+gmmKnobs = Knobs { minSeconds = 2
                  , stepSeconds = 0.01
-                 , minSweeps = 100
-                 , stepSweeps = 10 }
+                 , minSweeps = 2
+                 , stepSweeps = 2 }
 
 -- | Called "sweep" here:
 -- https://github.com/rjnw/hakaru-benchmarks/tree/master/output
@@ -65,8 +65,8 @@ timeHakaru time0 sweep zs knobs = do
   let sweeps :: Int -> U.Vector Int -> IO (U.Vector Int)
       sweeps 0 = return
       sweeps n = sweep >=> sweeps (n-1)
-      threshCond t i = t >= minSeconds knobs &&
-                       i >= minSweeps  knobs
+      threshCond t i = t >= minSeconds knobs--  &&
+                       -- i >= minSweeps  knobs
       loop :: Int -> Double -> Double -> U.Vector Int -> IO [Log]
       loop iter time2 time2subgoal zs
         | threshCond time2 iter = do

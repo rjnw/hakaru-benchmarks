@@ -28,8 +28,8 @@ main = do
   let [classes, pts] = paramsFromName inputs_path
       output_fname = show classes ++ "-" ++ show pts
       benchmark_dir = outputs_dir </> "GmmGibbs"
-      jagsmodel = jagscodedir </> "gmmModel.jags"
-      jagsrunner = jagscodedir </> "gmmModel.R"
+      jagsmodel = jagscodedir </> "GmmModel.jags"
+      jagsrunner = jagscodedir </> "GmmModel.R"
   dat <- readFile inputs_path
   g <- MWC.createSystemRandom
   hkfile   <- freshFile (benchmark_dir </> "hk")   output_fname
@@ -59,7 +59,7 @@ hakaru g classes ts knobs = do
   timeHakaru time0 sweep zs knobs
 
 jags :: FilePath -> FilePath -> GMMSampler
-jags m r classes ts knobs = withSystemTempFile "gmmModel.data" $ \fp h -> do
+jags m r classes ts knobs = withSystemTempFile "GmmModel.data" $ \fp h -> do
   hPutStrLn h (unwords (map show (U.toList ts)))
   hClose h
   output <- readProcess "R"
