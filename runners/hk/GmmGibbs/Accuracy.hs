@@ -2,10 +2,11 @@ module Main where
 
 import System.Environment (getArgs)
 import Data.List (permutations)
-import Data.Array (accumArray, elems, assocs, (!))
+import Data.Algorithm.Munkres (hungarianMethodInt)
+import Data.Array ( assocs, (!))
+import Data.Array.IArray (accumArray, elems)
 import qualified Data.Map.Strict as M
 import Data.List (intercalate)
-
 import Utils (SamplerKnobs(..), gmmKnobs,
               paramsFromName, freshFile, logsToAccs,
               Trial, parseTrial, Snapshot(..))
@@ -24,8 +25,8 @@ main = do
   accsFile <- freshFile (logsToAccs logs_path) fname
   logs   <- readFile logs_path
   let f n s = [i * s | i <- [1..n/s]]
-      times = f (minSeconds gmmKnobs) (stepSeconds gmmKnobs)
-      processLn i l = map (process (parseInput i)) (parseTrial l)
+      -- times = f (minSeconds gmmKnobs) (stepSeconds gmmKnobs)
+      processLn i l = map (processHungry classes pts (parseInput i)) (parseTrial l)
       processed = zipWith processLn (lines inputs) (lines logs)
   mapM_ (appendFile accsFile . ($ "\n") . showList) processed
   -- appendFile accsFile (output times) -- this is the header line
@@ -43,6 +44,13 @@ process (_,truth) (Snapshot p predict) = Snapshot p [accuracy]
         classes = [0 .. maximum (do ((t,p),count) <- assocs confusion
                                     if count > 0 then [t,p] else [])]
         total = sum (elems confusion)
+
+processHungry :: Int -> Int -> Input -> Snapshot -> Snapshot
+processHungry classes pts (_,truth) (Snapshot p predict) = Snapshot p [accuracy]
+  where accuracy = (fromIntegral . abs $ snd (hungarianMethodInt confusion))/fromIntegral pts
+        confusion = accumArray (+) 0 ((1,1), (classes,classes))
+                               (zipWith (\t p -> ((t+1, floor p + 1), -1))
+                                        truth predict)
 
 maxClasses :: Int
 maxClasses = 12 -- factorial 13 is probably too big anyway
