@@ -7,6 +7,7 @@ mallet-2.0.8/bin/mallet: mallet-2.0.8.tar.gz
 	tar -xvzf mallet-2.0.8.tar.gz
 	touch ./mallet-2.0.8/bin/mallet
 
+# http://www.cs.pomona.edu/~dkauchak/classes/f12/cs458/lectures/classification_exercise.pdf
 20newsgroup.mallet: mallet-2.0.8/bin/mallet
 	./mallet-2.0.8/bin/mallet import-dir --input ../../input/20_newsgroups/* --output 20newsgroup.mallet
 
