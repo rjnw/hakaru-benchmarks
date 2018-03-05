@@ -1,0 +1,5 @@
+20newsgroup.mallet
+mallet-2.0.8.tar.gz
+nb.classifier
+mallet-2.0.8/*
+._mallet-2.0.8
