@@ -1,51 +1,39 @@
 #!/usr/bin/env Rscript
 
 suppressMessages(library('rjags'))
-suppressMessages(library('coda'))
-suppressMessages(library('assertthat'))
-suppressMessages(library('reshape2'))
-suppressMessages(library('MASS'))
 
-ascending <- function (x) all(diff(x) >= 0)
+args <- commandArgs(trailingOnly=TRUE)
 
-scan.file <- function (f, suffix) {
-    scan(paste(f, suffix, sep="."), quiet=TRUE) + 1
+if (length(args) != 7) {
+    # R --slave -f NaiveBayesModel.R --args "../../input/news/" 2 2 2 1 "./NaiveBayesModel.jags" 1000
+    cat("NaiveBayesModel.R <input.path> <min.seconds> <step.seconds> <min.sweeps> <step.sweeps> <model> <holdout.modulo>\n")
+    quit(save="no",status=1)
 }
 
-args = commandArgs(trailingOnly=TRUE)
-if (length(args) != 3) {
-  cat("naive_bayes_sweeps.R <docsPerTopic> <sweeps> <chains>\n")
-} else {
+inputPath = args[1]
+minSeconds = as.numeric(args[2])
+stepSeconds = as.numeric(args[3])
+minSweeps = as.numeric(args[4])
+stepSweeps = as.numeric(args[5])
+modelFile = args[6]
+holdoutModulo = as.numeric(args[7])
 
-docsPerTopic <- as.numeric(args[1])
-sweeps       <- as.numeric(args[2])
-chains       <- as.numeric(args[3])
-
-topics <- scan.file("topics", docsPerTopic)
-words  <- scan.file("words",  docsPerTopic)
-docs   <- scan.file("docs",   docsPerTopic)
-
-invisible(assert_that(ascending(topics)))
-invisible(assert_that(ascending(docs)))
+topics <- scan(file.path(inputPath, "topics"))
+words  <- scan(file.path(inputPath, "words"))
+docs   <- scan(file.path(inputPath, "docs"))
 
 docsSize  <- length(topics)
 topicSize <- length(unique(topics))
 vocabSize <- length(unique(words))
 
-# We take a subset of the smaller dataset to use as
-# a test set
-trainTestSplit <- fractions(9/10)
-testDocsPerTopic <- ceiling(docsPerTopic * (1 - trainTestSplit))
-topicIndices <- c(sapply(0:(topicSize-1),
-                         function(i)
-                           (docsPerTopic*i+1):(docsPerTopic*i+testDocsPerTopic)))
+holdoutFilter <- function (x) {if(x%%holdoutModulo==0) return(TRUE) else return(FALSE)}
+topicIndices <- Filter(holdoutFilter, array(0:docsSize))
 
-zTrues <- topics[topicIndices]
 topics[topicIndices] <- NA
 
 time0 <- proc.time()["elapsed"]
 
-model <- jags.model('naive_bayes.jags',
+model <- jags.model(modelFile, #'NaiveBayesModel.jags',
                     data = list('Nwords'     = length(words),
                                 'Ndocs'      = docsSize,
                                 'Ntopics'    = topicSize,
@@ -55,18 +43,19 @@ model <- jags.model('naive_bayes.jags',
                                 'z'          = topics,
                                 'w'          = words,
                                 'doc'        = docs),
-                    n.chains = chains,
+                    n.chains = 1,
                     n.adapt = 10,
                     quiet=TRUE)
 
 time1 <- proc.time()["elapsed"]
 write(c(time0, time1), file="")
 time2 <- time1
-time2goal = time2 + as.numeric(args[3])
-time2subgoal = time2 + as.numeric(args[4])
-itergoal = as.numeric(args[5])
-iterstep = as.numeric(args[6])
+time2goal = time2 + minSeconds
+time2subgoal = time2 + stepSeconds
+itergoal = minSweeps
+iterstep = stepSweeps
 iter <- 0
+
 while (time2 < time2goal || iter < itergoal) {
     update(model, iterstep-1)
     samples <- jags.samples(model, variable.names=c("z"), n.iter=1)
@@ -77,6 +66,4 @@ while (time2 < time2goal || iter < itergoal) {
         write(c(time2, iter), file="", append=TRUE)
         write(samples$z, ncolumns=length(t), file="", append=TRUE)
     }
-
-
 }
