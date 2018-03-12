@@ -7,8 +7,8 @@ ct = ClinicalTrial
 lr = LinearRegression
 gg = GmmGibbs
 
-n := 0 00 000
-i := 3 6 9 12
+n := 0 00 000 0000
+i := 3 6 9 12 15 20 25 30
 
 numbers=$(foreach i,$(n),1$(i))
 ctinp=$(foreach n,$(numbers),./$(ct)/$n)
@@ -51,7 +51,11 @@ buildgen:
 .SECONDEXPANSION:
 ./$(gg)/% : ./data/$(gg)/$$(shell cut -d- -f1 <<< $$(notdir $$@))
 	mkdir -p $(dir $@)
-	./bin/GmmModel $< $(shell cut -d- -f2 <<< $(notdir $@)) | head -n 500 > $@
+	./bin/GmmModel $< $(shell cut -d- -f2 <<< $(notdir $@)) | head -n $(trials) > $@
+
+gmm:
+	yes 1 | head -n $(classes) > data/GmmGibbs/$(classes)
+	./bin/GmmModel data/GmmGibbs/$(classes) $(points) | head -n $(trials) > GmmGibbs/$(classes)-$(points)
 
 cleaninp:
 	rm -R ./$(ct) ./$(lr) ./$(gg)

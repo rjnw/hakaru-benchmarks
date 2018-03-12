@@ -13,7 +13,7 @@
 
 (define testname "NaiveBayesGibbs")
 
-(define (run-test)
+(define (run-test num-trials)
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
   (define newsd "news")
   (define wordsfile  (build-path input-dir newsd "words"))
@@ -75,9 +75,7 @@
 
   (define (update z docUpdate)
     (if (holdout? docUpdate)
-        (let ([newTopic (prog topicPrior wordPrior z words docs docUpdate)])
-          (printf "prog ~a, original: ~a, new: ~a\n" docUpdate (get-index-nat-array z docUpdate) newTopic)
-          newTopic)
+        (prog topicPrior wordPrior z words docs docUpdate)
         (get-index-nat-array z docUpdate)))
 
   (define distf (discrete-sampler 0 (- num-topics 1)))
@@ -87,41 +85,32 @@
                     (distf)
                     orig-value)))
   (define z (list->cblock zs _uint64))
-  (define (accuracy)
-    (define-values (correct total)
-      (for/fold ([correct '()]
-                 [total '()])
-                ([i (in-range num-docs)]
-                 [orig-value  rk-topics]
-                 #:when (holdout? i))
-        (values (if (equal? orig-value (get-index-nat-array z i))
-                    (cons i correct)
-                    correct)
-                (cons i total))))
-    ;; (printf "correct: ~a\n" correct)
-    (printf "\naccuracy: ~a/~a\n" (length correct) (length total))
-    (* (/ (* (length correct) 1.0) (length total)) 100.0))
+
   (define (run out-port)
     (gibbs-timer (curry gibbs-sweep num-docs set-index-nat-array update)
                  z
                  (λ (tim sweeps state)
-                   (define acc (accuracy))
-                   (printf "taking-step: current-accuracy: ~a,  time: ~a\n" acc tim)
+                   (printf "sweeped: ~a in ~a\n" sweeps (~r tim #:precision '(= 3)))
                    (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
                    (for ([i (in-range (- num-docs 1))])
                      (fprintf out-port "~a, " (get-index-nat-array state i)))
                    (fprintf out-port "~a]\t" (get-index-nat-array state (- num-topics 1))))
-                 #:min-sweeps 1
-                 #:step-sweeps 1))
+                 #:min-sweeps 20
+                 #:step-sweeps 1
+                 #:min-time 0)
+    (fprintf out-port "\n"))
+
   (printf "locked and loaded!\nrunning-test:\n")
-  (call-with-output-file outfile #:exists 'replace
+  (call-with-output-file outfile #:exists 'update
     (λ (out-port)
-      (printf "starting at: ~a\n" (current-date))
-      (run out-port)
-      (printf "finished at: ~a\n" (current-date)))))
+      (for ([i (in-range num-trials)])
+        (run out-port)))))
 
 (module+ test
-  (run-test))
+  (run-test 1))
 
 (module+ main
-  (run-test))
+    (define num-trials
+      (command-line #:args (num-trials)
+                    (string->number num-trials)))
+  (run-test num-trials))

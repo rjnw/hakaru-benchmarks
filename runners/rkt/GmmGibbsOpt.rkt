@@ -38,17 +38,19 @@
   (define infile  (build-path input-dir testname (format "~a-~a" classes points)))
   (define outfile (build-path output-dir testname "rkt" (format "~a-~a" classes points)))
 
+
   (define module-env (compile-file srcfile full-info))
+
   (define jit-val (curry rkt->jit module-env))
 
   ;; (jit-dump-module module-env)
   ;; (optimize-module module-env #:opt-level 3)
   ;; (initialize-jit! module-env #:opt-level 3)
 
-  (define init-rng (jit-get-function 'init-rng module-env))
+  (define init-rng (time (jit-get-function 'init-rng module-env)))
   (define prog (jit-get-function 'prog module-env))
   (init-rng)
-
+  (printf "current-process-milliseconds: ~a\n" (current-process-milliseconds))
   (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<~a.~a>" classes 'nat)) module-env ))
   (define get-index-nat-array (jit-get-function (string->symbol (format "get-index$array<~a.~a>"  classes 'nat)) module-env ))
   (define stdev (jit-val 'prob 14.0))
@@ -70,6 +72,8 @@
 
     (define (update z doc)
       (prog stdev as z tsc doc))
+
+    ;; (update zsc 0)
     (define (printer tim sweeps state)
       (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
       (for ([i (in-range points)])
@@ -77,7 +81,7 @@
       (fprintf out-port "~a]\t" (get-index-nat-array state (- points 1))))
     (define sweeper (curry gibbs-sweep points set-index-nat-array update))
 
-    (gibbs-timer sweeper zsc printer #:min-time 3 #:step-time 0.01 )
+    (gibbs-timer sweeper zsc printer #:min-time 0 #:step-time 0.01 #:min-sweeps 1 #:step-sweeps 1)
     (fprintf out-port "\n"))
   (call-with-output-file outfile #:exists 'replace
     (λ (out-port)

@@ -65,6 +65,7 @@
   (define module-env (compile-file srcfile empty-info))
   (define init-rng (jit-get-function 'init-rng module-env))
   (init-rng)
+  (define prog (jit-get-function 'prog module-env))
   (define jit-val (curry rkt->jit module-env))
 
   (define make-prob-array (get-function module-env 'make '(array prob)))
@@ -80,7 +81,7 @@
   (define new-sized-real-array (get-function module-env 'new '(array real)))
   (define set-index-real-array (get-function module-env 'set-index! '(array real)))
 
-  (define prog (jit-get-function 'prog module-env))
+
 
   (define topicPrior (new-sized-prob-array num-topics))
   (for ([i (in-range num-topics)])
@@ -106,7 +107,6 @@
   (define (update z docUpdate)
     (if (holdout? docUpdate)
         (let ([newTopic (prog topicPrior wordPrior z words docs docUpdate)])
-          (printf "prog ~a, original: ~a, new: ~a\n" docUpdate (get-index-nat-array z docUpdate) newTopic)
           newTopic)
         (get-index-nat-array z docUpdate)))
 
@@ -135,8 +135,7 @@
     (gibbs-timer (curry gibbs-sweep num-docs set-index-nat-array update)
                  z
                  (λ (tim sweeps state)
-                   (define acc (accuracy))
-                   (printf "taking-step: current-accuracy: ~a,  time: ~a\n" acc tim)
+
                    (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
                    (for ([i (in-range (- num-docs 1))])
                      (fprintf out-port "~a, " (get-index-nat-array state i)))

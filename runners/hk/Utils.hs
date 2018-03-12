@@ -39,7 +39,7 @@ data SamplerKnobs = Knobs { minSeconds :: Double
 
 gmmKnobs = Knobs { minSeconds = 2
                  , stepSeconds = 0.01
-                 , minSweeps = 2
+                 , minSweeps = 100
                  , stepSweeps = 2 }
 
 -- | Called "sweep" here:
@@ -65,8 +65,8 @@ timeHakaru time0 sweep zs knobs = do
   let sweeps :: Int -> U.Vector Int -> IO (U.Vector Int)
       sweeps 0 = return
       sweeps n = sweep >=> sweeps (n-1)
-      threshCond t i = t >= minSeconds knobs--  &&
-                       -- i >= minSweeps  knobs
+      threshCond t i = t >= minSeconds knobs  &&
+                       i >= minSweeps  knobs
       loop :: Int -> Double -> Double -> U.Vector Int -> IO [Log]
       loop iter time2 time2subgoal zs
         | threshCond time2 iter = do
