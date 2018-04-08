@@ -5,7 +5,7 @@ suppressMessages(library('rjags'))
 args <- commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 7) {
-    # R --slave -f NaiveBayesModel.R --args "../../input/news/" 2 2 2 1 "./NaiveBayesModel.jags" 1000
+    # R --slave -f NaiveBayesModel.R --args "../../input/news/" 2 2 5 1 "./NaiveBayesModel.jags" 10
     cat("NaiveBayesModel.R <input.path> <min.seconds> <step.seconds> <min.sweeps> <step.sweeps> <model> <holdout.modulo>\n")
     quit(save="no",status=1)
 }
@@ -18,16 +18,30 @@ stepSweeps = as.numeric(args[5])
 modelFile = args[6]
 holdoutModulo = as.numeric(args[7])
 
-topics <- scan(file.path(inputPath, "topics"))
-words  <- scan(file.path(inputPath, "words"))
-docs   <- scan(file.path(inputPath, "docs"))
+topics <- scan(file.path(inputPath, "news", "topics"), quiet=TRUE)+1
+words  <- scan(file.path(inputPath, "news", "words"), quiet=TRUE)+1
+docs   <- scan(file.path(inputPath, "news", "docs"), quiet=TRUE)+1
 
 docsSize  <- length(topics)
 topicSize <- length(unique(topics))
 vocabSize <- length(unique(words))
 
+## write(docsSize, file="")
+## write(topicSize,file="")
+## write(vocabSize, file="")
+## write(length(docs), file="")
+## write("docs", file="")
+
+## write(docs, file="", append=TRUE)
+## write("topics", file="")
+## write(topics, file="", append=TRUE)
+## write("words", file="")
+## write(words, file="", append=TRUE)
+
 holdoutFilter <- function (x) {if(x%%holdoutModulo==0) return(TRUE) else return(FALSE)}
 topicIndices <- Filter(holdoutFilter, array(0:docsSize))
+## write("topicindices: ", file="", append=TRUE)
+## write(topicIndices, file="", append=TRUE)
 
 topics[topicIndices] <- NA
 
@@ -46,9 +60,9 @@ model <- jags.model(modelFile, #'NaiveBayesModel.jags',
                     n.chains = 1,
                     n.adapt = 10,
                     quiet=TRUE)
-
 time1 <- proc.time()["elapsed"]
 write(c(time0, time1), file="")
+
 time2 <- time1
 time2goal = time2 + minSeconds
 time2subgoal = time2 + stepSeconds
@@ -57,13 +71,10 @@ iterstep = stepSweeps
 iter <- 0
 
 while (time2 < time2goal || iter < itergoal) {
-    update(model, iterstep-1)
     samples <- jags.samples(model, variable.names=c("z"), n.iter=1)
     time2 <- proc.time()["elapsed"]
     iter <- model$iter()
-    if (time2 >= time2subgoal || time2 >= time2goal && iter >= itergoal) {
-        time2subgoal = time2 + as.numeric(args[4])
-        write(c(time2, iter), file="", append=TRUE)
-        write(samples$z, ncolumns=length(t), file="", append=TRUE)
-    }
+    write(c(time2, iter), file="", append=TRUE)
+    write(samples$z, ncolumns=docsSize, file="", append=TRUE)
+    time2subgoal = time2 + as.numeric(args[4])
 }

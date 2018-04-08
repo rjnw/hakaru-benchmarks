@@ -19,3 +19,6 @@ GmmGibbsAcc: gmm-rkt-acc gmm-hs-acc
 GmmGibbsTrial: gmm-rkt gmm-hs
 
 GmmGibbs: GmmGibbsTrial GmmGibbsAcc
+
+NaiveBayes:
+	./hkbin/naiveBayesGibbs ../input ../testcode/jagssrc ../output

@@ -21,13 +21,13 @@ import           NaiveBayesGibbs.Prog3
 main = do
   [inputs_path, jagscodedir, outputs_dir] <- getArgs --change input path to read already parsed news data similar to rkt
   putStrLn "going to get news"
-  (w,doc,zs) <- fst <$> getNews inputs_path SingleDoc Nothing [0..]
+  (w,doc,zs) <- fst <$> getNews (inputs_path </> "20_newsgroups/") SingleDoc Nothing [0..]
   putStrLn "done getting news"                     -- ^ retrieves everything
   g <- MWC.createSystemRandom
   let numTopics = U.maximum zs + 1
       numDocs = U.length zs
-      holdouts = filter (\ v -> mod v 1000 == 0) $ [0..numDocs - 1]
-      numTrials = 1
+      holdouts = filter (\ v -> mod v 10 == 0) $ [0..numDocs - 1]
+      numTrials = 3
       fname = show numTopics ++ "-" ++ show numDocs
       benchmark_dir = outputs_dir </> "NaiveBayesGibbs"
       jagsmodel = jagscodedir </> "NaiveBayesModel.jags"
@@ -38,14 +38,15 @@ main = do
   replicateM_ numTrials $ do
     putStrLn "starting a new trial"
     hktrial   <- oneLine <$> hakaru g holdouts numTopics numDocs w doc zs nbKnobs
-    jagstrial <- oneLine <$> jags jagsmodel jagsrunner inputs_path nbKnobs
-    putStrLn "writing..."
+    putStrLn "writing haskell..."
     appendFile hkfile   hktrial
+    jagstrial <- oneLine <$> jags jagsmodel jagsrunner inputs_path nbKnobs
+    putStrLn "writing jags..."
     appendFile jagsfile jagstrial
 
 nbKnobs = Knobs { minSeconds = 10
                 , stepSeconds = 0.5
-                , minSweeps = 10
+                , minSweeps = 5
                 , stepSweeps = 1 }
 
 type NBSampler = [Int] ->        -- indices of hold-out docs
@@ -83,10 +84,12 @@ jags :: FilePath -> FilePath -> FilePath -> Sampler
 jags m r inputs_path knobs = do
   output <- readProcess "R"
             ["--slave", "-f", r, "--args",
-             show inputs_path,
+             inputs_path,
              show (minSeconds knobs),
              show (stepSeconds knobs),
              show (minSweeps knobs),
-             show (stepSweeps knobs), m]
+             show (stepSweeps knobs),
+             m,
+             show 10]
             ""
   timeJags output knobs

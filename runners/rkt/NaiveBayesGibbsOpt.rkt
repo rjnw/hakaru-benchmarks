@@ -58,6 +58,7 @@
   (define module-env (compile-file srcfile full-info))
   (define init-rng (jit-get-function 'init-rng module-env))
   (init-rng)
+  (printf "compiled prog\n")
   (define jit-val (curry rkt->jit module-env))
   (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<~a.~a>" num-topics 'nat)) module-env ))
   (define get-index-nat-array (jit-get-function (string->symbol (format "get-index$array<~a.~a>" num-topics 'nat)) module-env ))
@@ -69,13 +70,16 @@
 
   (define words (list->cblock rk-words _uint64))
   (define docs (list->cblock rk-docs _uint64))
-  (define holdout-modulo 100)
+  (printf "loaded words, docs\n")
+  (define holdout-modulo 10)
   (define (holdout? i) (zero? (modulo i holdout-modulo)))
   ;; holding out only every 10, similar to haskell
 
   (define (update z docUpdate)
     (if (holdout? docUpdate)
-        (prog topicPrior wordPrior z words docs docUpdate)
+        (begin
+          ;; (printf "." )
+          (prog topicPrior wordPrior z words docs docUpdate))
         (get-index-nat-array z docUpdate)))
 
   (define distf (discrete-sampler 0 (- num-topics 1)))
@@ -95,13 +99,13 @@
                    (for ([i (in-range (- num-docs 1))])
                      (fprintf out-port "~a, " (get-index-nat-array state i)))
                    (fprintf out-port "~a]\t" (get-index-nat-array state (- num-topics 1))))
-                 #:min-sweeps 20
+                 #:min-sweeps 10
                  #:step-sweeps 1
                  #:min-time 0)
     (fprintf out-port "\n"))
 
   (printf "locked and loaded!\nrunning-test:\n")
-  (call-with-output-file outfile #:exists 'update
+  (call-with-output-file outfile #:exists 'replace
     (λ (out-port)
       (for ([i (in-range num-trials)])
         (run out-port)))))
