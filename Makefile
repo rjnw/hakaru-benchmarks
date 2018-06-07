@@ -1,25 +1,24 @@
-.PHONY: setup init hakaru rkt input clean docker runtests benchmark
+.PHONY: setup submodule-init build-hakaru build-rkt build-input clean docker BenchmarkGmmGibbs
 
+setup: submodule-input build-hakaru generate-testcode build-rkt build-input
 
-setup: hakaru rkt input
-
-init:
+submodule-init:
 	git submodule init
 	git submodule update
 
-hakaru:
+build-hakaru:
 	cd ./hakaru ; stack build && stack install --local-bin-path ../hkbin
 
-test:
+generate-testcode:
 	cd ./testcode/hkrkt ; make
 	cd ./testcode/hksimp ; make
 	cd ./testcode/hssrc ; make
 
-rkt:
+build-rkt:
 	cd ./sham ; raco pkg install --skip-installed --deps search-auto
 	cd ./hakrit ; raco pkg install --skip-installed --deps search-auto
 
-input:
+build-input:
 	cd ./input ; make all
 
 clean:
@@ -33,11 +32,6 @@ clean:
 docker:
 	cd ./docker; sudo docker build -t hakaru-benchmark .
 
-runtests:
-	cd ./hakrit; raco -test test
-
-run-gmmgibbs:
-	cd ./runners/rkt; racket
-
-benchmark: runtests
-	echo "We can't even run tests, yet how do we benchmark??"
+BenchmarkGmmGibbs:
+	cd ./runners; make GmmGibbs classes=$(classes) points=$(points)
+	cd ./output; racket GmmGibbsAccuracy.rkt $(classes) $(points)
