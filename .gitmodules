@@ -7,3 +7,6 @@
 [submodule "hakrit"]
 	path = hakrit
 	url = https://github.com/hakaru-dev/hakaru-rktjit.git
+[submodule "other/augurv2"]
+	path = other/augurv2
+	url = https://github.com/danehuang/augurv2.git
