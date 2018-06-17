@@ -1,0 +1,9 @@
+os: linux
+augurdir: /home/rajan/work/hakaru-benchmarks/other/augurv2/cbits
+# libaugurdir: /home/rajan/work/hakaru-benchmarks/other/augurv2/compiler/augurn/.stack-work/dist/x86_64-linux-nopie/Cabal-2.0.1.0/build/
+libaugurdir: /home/rajan/work/hakaru-benchmarks/other/augurv2/compiler/augur/.stack-work/dist/x86_64-linux-nopie/Cabal-2.0.1.0/build/
+workingdir: /var/tmp
+incdir:
+    - /usr/local/include
+libdir:
+    - /usr/local/lib
