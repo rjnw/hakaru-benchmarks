@@ -7,36 +7,20 @@ def dirichlet(as array(prob)):
              x = product j from 0 to i: xs[j]
              x * if i+1==size(as): 1 else: real2prob(1-xs[i])
 
-fn sizeVocab nat:
-   fn numTopics nat:
-      fn numDocs nat:
-         fn docSize array(nat):
-            β <~ plate _ of numTopics:     # word dist for topic k
-                   dirichlet(array _ of sizeVocab: 1)
-            θ <~ plate _ of numDocs:
-                   dirichlet(array _ of numTopics: 1)
-            # likelihood
-            ζ <~ plate d of numDocs:                   
-                   plate _ of docSize[d]: # topic marker for word n in doc m
-                     categorical(θ[d])
-            wd <~ plate d of numDocs:
-                    plate n of docSize[d]: # for word n in doc d
-                      wdn <~ categorical(β[ζ[d][n]])
-                      return (wdn, d)
-            def concat(a array(nat,nat), b array(nat,nat)):
-                total = size(a) + size(b)
-                array i of total:
-                  if i < size(a):
-                     a[i]
-                  else:
-                     b[i]
-            def flatten(a array(array(nat,nat))):
-                reduce(concat, [], a)                                  
-            flat = flatten(wd)
-            def unzip(a array(nat,nat)):
-                fsts = array i of size(a):
-                         fst(a[i])
-                snds = array i of size(a):
-                         snd(a[i])
-                (fsts,snds)
-            return (unzip(flat), ζ)
+def lda( topic_prior array(prob)
+               , word_prior array(prob)
+               , numDocs nat
+               , doc array(nat) ):
+  numWords = size(doc)
+  numTopics = size(topic_prior)
+  theta <~ plate d of numDocs:
+    dirichlet(topic_prior)
+  phi <~ plate k of numTopics:     # word dist for topic k
+    dirichlet(word_prior)
+  z <~ plate n of numWords:
+    categorical(theta[doc[n]])
+  w <~ plate n of numWords:
+    categorical(phi[z[n]])
+  return (w,z)
+
+lda
