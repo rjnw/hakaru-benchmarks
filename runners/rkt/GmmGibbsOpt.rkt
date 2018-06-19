@@ -31,7 +31,6 @@
   (define stdev (real->prob '14.0))
   (define as (real-array (build-list classes (const 0.0))))
 
-
   (define (run-single str out-port)
     (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
     (define orig-zs (map  string->number (regexp-split "," zs-str)))

@@ -51,6 +51,7 @@
   (define (remove-warmup tsa)
     (for/list ([trial tsa])
       (define min-time (first (first trial)))
+      ;; (printf "~a " min-time)
       (map (λ (shot) (list (- (first shot) min-time) (second shot) (third shot))) trial)))
 
   (define (line-intr runner lcolor lstyle icolor istyle legend pstyle  (i 1))
@@ -60,6 +61,7 @@
     (define smta (sweep-time.accuracy->sweep-mean$time.accuracy sta))
     ;; (pretty-display smta)
     (define tsa  (time-as pr))
+    (void)
     (list
      (lines-interval
       (sort (for/list ([(k v) tsa])
@@ -80,7 +82,7 @@
       (for/list ([(s ta) smta]
                  #:when (zero? (modulo s 10)))
         ta)
-      #:size 4 #:color lcolor #:sym pstyle)
+      #:size 6 #:color lcolor #:sym pstyle)
      ;; (points
      ;;  (apply append
      ;;         (for/list ([trial pr])
@@ -96,30 +98,79 @@
       #:color lcolor #:style lstyle
       #:width 1
       #:label legend)
-     ))
-  (plot-file
-   (append
-    ;; http://www.somersault1824.com/wp-content/uploads/2015/02/color-blindness-palette.png
-    ;; line-color line-style interval-color style legend line-points
-    (line-intr "rkt"
-               (make-object color% 0 73 73) 'solid
-               (make-object color% 0 146 146) 'solid
-               "Hakaru LLVM-backend" 'triangle)
-    (line-intr "hk"
-               (make-object color% 73 0 146) 'dot-dash
-               (make-object color% 0 146 146) 'solid
-               "Hakaru Haskell-backend" 'square)
-    (line-intr "jags"
-               (make-object color% 146 0 0) 'short-dash
-               (make-object color% 146 73 0) 'solid
-               "JAGS" 'diamond)
-    (list (tick-grid)))
-   (format "./mean/GmmGibbs~a-~a.pdf" classes pts)
-   #:y-max 100
-   #:y-min 0
-   #:x-max 90
-   #:y-label "Accuracy in %" #:x-label "Time in seconds" #:legend-anchor 'top-right))
+     )
+    )
+  ;; (line-intr "jags"
+  ;;            (make-object color% 73 0 146) 'dot-dash
+  ;;            (make-object color% 0 146 146) 'solid
+  ;;            "Old Haskell-backend" 'square)
 
+  (parameterize
+      ([plot-font-size 8]
+       [plot-legend-box-alpha 1])
+    (plot-file
+
+     (append
+      ;; http://www.somersault1824.com/wp-content/uploads/2015/02/color-blindness-palette.png
+      ;; line-color line-style interval-color style legend line-points
+      ;; (line-intr "rkt"
+      ;;            (make-object color% 0 73 73) 'solid
+      ;;            (make-object color% 0 146 146) 'solid
+      ;;            "New LLVM-backend" 'triangle)
+
+      ;; (line-intr "hk"
+      ;;            (make-object color% 73 0 146) 'dot-dash
+      ;;            (make-object color% 0 146 146) 'solid
+      ;;            "Old Haskell-backend" 'square)
+      ;; (line-intr "jags"
+      ;;            (make-object color% 146 0 0) 'short-dash
+      ;;            (make-object color% 146 73 0) 'solid
+      ;;            "JAGS" 'diamond)
+      (line-intr "augur"
+                 (make-object color% 0 73 73) 'solid
+                 (make-object color% 0 146 146) 'solid
+                 "Augur" 'triangle)
+      (list (tick-grid)))
+          "augur50-10000.pdf"
+     ;; (format "../../ppaml/writing/pipeline/GmmGibbs~a-~a.pdf" classes pts)
+
+     ;; #:y-max 50
+     ;; #:y-min 0
+     ;; #:x-max 90
+     ;; #:width 500
+     ;; #:height 300
+     #:y-label "Accuracy in %" #:x-label "Time in seconds" #:legend-anchor 'bottom-right))
+  )
+
+;; full optimizations 294.1ms
+;; no runtimeopts 485.0ms
+;; no histogram 22000ms
+;; no licm and loop fusion 11000ms
+;; no loop fusion 400ms
+
+;; (define (plot-opt-bench )
+;;   (parameterize (
+;;                  ;; [plot-y-ticks (ticks-add (plot-y-ticks) '(294 485 400))]
+;;                  )
+;;     (plot
+
+;;      (list
+;;       (tick-grid)
+;;       (discrete-histogram `((a 294)
+;;                             (b 485)
+;;                             (d 11000)
+;;                             (e 400)
+;;                             (c 22000)
+;;                             )
+;;                           #:add-ticks? #t
+;; )
+;;       )
+;;      #:y-min 0.1
+;;      #:y-max 1000
+;;      )
+;;     )
+;;   )
+;; (plot-opt-bench)
 (module+ main
   (define-values (classes points)
     (command-line #:args (classes points)
@@ -127,7 +178,7 @@
                           (string->number points)))))
 
 (module+ test
-  ;; (plot-accuracy 9 1000)
+  ;; (plot-accuracy 6 10)
   ;; (plot-accuracy 12 1000)
   ;; (plot-accuracy 15 1000)
   ;; (plot-accuracy 20 1000)

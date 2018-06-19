@@ -6,24 +6,24 @@ import time
 
 
 augur_mvgmm = '''
-(K : Int, N : Int, a : Vec Real) => {
+(classes : Int, points : Int, s : Real, a : Vec Real) => {
   param theta ~  Dirichlet(a) ;
   param phi[k] ~ Normal(0.0, 196)
       for k <- 0 until K ;
   param z[n] ~ Categorical(theta)
-      for n <- 0 until N ;
+      for n <- 0 until points ;
   data t[n] ~ Normal(phi[z[n]], 1.0)
-      for n <- 0 until N ;
+      for n <- 0 until points ;
 }
 '''
 
 def run_gmm(classes, points, t, out):
-    def log_snapshot(num_samples, z):
-        out.write("%.3f" % t)
+    def log_snapshot(tim, num_samples, z):
+        out.write("%.3f" % tim)
         out.write(' ')
         out.write(str(num_samples))
         out.write(' ')
-        out.write('['+' '.join([str(n) for n in samples]) + ']')
+        out.write('['+' '.join([str(n) for n in z]) + ']')
         out.write('\t')
 
     with AugurInfer('config.yml', augur_mvgmm) as infer_obj:
@@ -33,17 +33,17 @@ def run_gmm(classes, points, t, out):
         infer_obj.set_user_sched('ConjGibbs [phi] (*) DiscGibbs [z]')
 
         init_time = time.clock()
-        infer_obj.compile(points,classes, np.array([1.0]*classes))(np.array(t))
+        infer_obj.compile(classes, points, (1.0/14)**2, np.array([1.0]*classes))(np.array(t))
 
         num_samples = 1
-        t = 0
-        while t < 20:
-            t = time.clock() - init_time
+        tim = 0
+        while tim < 1:
+            tim = time.clock() - init_time
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
-            log_snapshot(t, z)
+            log_snapshot(tim, num_samples, z)
             num_samples += 1
         out.write('\n')
-    error()
+    # error()
 
 if __name__ == '__main__':
     classes = sys.argv[1]

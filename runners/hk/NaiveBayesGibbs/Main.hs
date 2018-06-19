@@ -26,27 +26,27 @@ main = do
   g <- MWC.createSystemRandom
   let numTopics = U.maximum zs + 1
       numDocs = U.length zs
-      holdouts = filter (\ v -> mod v 10 == 0) $ [0..numDocs - 1]
-      numTrials = 3
+      holdouts = filter (\ v -> mod v 100 == 0) $ [0..numDocs - 1]
+      numTrials = 1
       fname = show numTopics ++ "-" ++ show numDocs
       benchmark_dir = outputs_dir </> "NaiveBayesGibbs"
-      jagsmodel = jagscodedir </> "NaiveBayesModel.jags"
-      jagsrunner = jagscodedir </> "NaiveBayesModel.R"
+      -- jagsmodel = jagscodedir </> "NaiveBayesModel.jags"
+      -- jagsrunner = jagscodedir </> "NaiveBayesModel.R"
   hkfile   <- freshFile (benchmark_dir </> "hk") fname
-  jagsfile <- freshFile (benchmark_dir </> "jags") fname
+  -- jagsfile <- freshFile (benchmark_dir </> "jags") fname
 
   replicateM_ numTrials $ do
     putStrLn "starting a new trial"
     hktrial   <- oneLine <$> hakaru g holdouts numTopics numDocs w doc zs nbKnobs
     putStrLn "writing haskell..."
     appendFile hkfile   hktrial
-    jagstrial <- oneLine <$> jags jagsmodel jagsrunner inputs_path nbKnobs
-    putStrLn "writing jags..."
-    appendFile jagsfile jagstrial
+    -- jagstrial <- oneLine <$> jags jagsmodel jagsrunner inputs_path nbKnobs
+    -- putStrLn "writing jags..."
+    -- appendFile jagsfile jagstrial
 
-nbKnobs = Knobs { minSeconds = 10
+nbKnobs = Knobs { minSeconds = 1
                 , stepSeconds = 0.5
-                , minSweeps = 5
+                , minSweeps = 1
                 , stepSweeps = 1 }
 
 type NBSampler = [Int] ->        -- indices of hold-out docs
