@@ -1,0 +1,12 @@
+
+* run augur gmm 1D
+* run augur NB
+* evaluation LDA
+* augur LDA
+
+* PSI CT/LR
+* Logistic Regresssion
+* investigate augur data sets
+* investigate 2D GMM
+* present startup better
+* NB holdout 50%
