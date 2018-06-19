@@ -8,7 +8,7 @@ import time
 augur_mvgmm = '''
 (K : Int, N : Int, a : Vec Real) => {
   param theta ~  Dirichlet(a) ;
-  param phi[k] ~ Normal(0.0, 0.005)
+  param phi[k] ~ Normal(0.0, 196)
       for k <- 0 until K ;
   param z[n] ~ Categorical(theta)
       for n <- 0 until N ;
@@ -30,7 +30,7 @@ def run_gmm(classes, points, t, out):
         # Compile
         augur_opt = AugurOpt(cached=False, target='cpu', paramScale=None)
         infer_obj.set_compile_opt(augur_opt)
-        infer_obj.set_user_sched('DiscGibbs [z]')
+        infer_obj.set_user_sched('ConjGibbs [phi] (*) DiscGibbs [z]')
 
         init_time = time.clock()
         infer_obj.compile(points,classes, np.array([1.0]*classes))(np.array(t))
