@@ -4,7 +4,6 @@ import scipy as sp
 import scipy.stats as sps
 import time
 
-
 # K = length(topic_prior)
 # D = size(z)
 # N = map number-of-word documents
@@ -14,20 +13,22 @@ import time
 # at line n in docs file = same line word in words file
 
 
-augur_nb = '''(K : Int, D : Int, N : Vec Int, topic_prior : Vec Real, word_prior : Vec Real) => {
+augur_nb = '''(K : Int, D : Int, N : Int, topic_prior : Vec Real, word_prior : Vec Real, doc : Vec Int) => {
   param theta ~ Dirichlet(topic_prior);
   param phi[k] ~ Dirichlet(word_prior)
       for k <- 0 until K ;
   param z[d] ~ Categorical(theta)
       for d <- 0 until D ;
-  data w[d, n] ~ Categorical(phi[z[d]])
-      for d <- 0 until D, n <- 0 until N[d] ;
+  data w[n] ~ Categorical(phi[z[doc[n]]])
+      for n <- 0 until N;
 }
 '''
+  # data w[d, n] ~ Categorical(phi[z[d]])
+  #     for d <- 0 until D, n <- 0 until N[d] ;
 
 sched1 = 'ConjGibbs [theta] (*) ConjGibbs [phi] (*) DiscGibbs [z]'
 
-def run_nb(ntopics, ndocs, topics, w, out):
+def run_nb(words, docs, topics, out):
     def log_snapshot(tim, num_samples, z):
         out.write("%.3f" % tim)
         out.write(' ')
@@ -36,24 +37,23 @@ def run_nb(ntopics, ndocs, topics, w, out):
         out.write('['+' '.join([str(n) for n in z]) + ']')
         out.write('\t')
 
-    num_words=59967
-    num_topics=20
 
-    topic_prior = np.array([1.0]*num_topics)
-    word_prior = np.array([1.0]*num_words)
+    num_docs = 1+docs[-1]
+    num_words=1+max(words)
+    num_topics=1+max(topics)
+
+    topic_prior = np.full(num_topics, 1.0)
+    word_prior = np.full(num_words, 1.0)
 
     with AugurInfer('config.yml', augur_nb) as infer_obj:
         augur_opt = AugurOpt(cached=False, target='cpu', paramScale=None)
         infer_obj.set_compile_opt(augur_opt)
-        infer_obj.set_user_sched('DiscGibbs [z]')
-
+        infer_obj.set_user_sched(sched1)
         init_time = time.clock()
-        w_shape = np.array([x for x in map(len, w)])
-
-        infer_obj.compile(num_topics, ndocs, w_shape, topic_prior, word_prior)(w)
+        infer_obj.compile(num_topics, num_docs, len(words), topic_prior, word_prior, np.array(docs))(np.array(words))
         num_samples = 1
         tim = 0
-        while num_samples <= 10 or tim < 1:
+        while num_samples <= 1 or tim < 1:
             tim = time.clock() - init_time
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
             log_snapshot(tim, num_samples, z)
@@ -73,23 +73,22 @@ def loadNewsFile(fname) :
 def doc_word(docs, words):
     arr = []
     ci = 0
-    doc = np.array([])
+    doc = []
     for (d,w) in zip(docs, words):
         if d == ci:
-            doc=np.append(doc, w)
+            doc.append(w)
             ci=d
         else:
             ci=d
-            arr.append(doc)
-            doc=np.array([w])
-    return np.array(arr)
+            ndoc=np.array(doc, dtype=np.int32)
+            arr.append(ndoc)
+            doc=[w]
+    return np.array(arr, dtype=np.int32)
 
 if __name__ == '__main__':
     words=loadNewsFile(words_file)
     docs=loadNewsFile(docs_file)
     topics=loadNewsFile(topics_file)
-    w = doc_word(docs, words)
     print 'loaded news...'
-    ntopics, ndocs = 20,19997
     with open('../../output/NaiveBayesGibbs/augur/news', 'w') as out:
-        run_nb(ntopics, ndocs, topics, w, out)
+        run_nb(words, docs, topics, out)
