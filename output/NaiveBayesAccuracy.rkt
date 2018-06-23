@@ -14,19 +14,23 @@
 (define docsfile   (build-path input-dir newsd "docs"))
 (define topicsfile   (build-path input-dir newsd "topics"))
 
-(define holdout-modulo 10)
+(define holdout-modulo 50)
 (define (holdout? i) (zero? (modulo i holdout-modulo)))
 
 (define true-topics (map string->number (file->lines topicsfile)))
+(define true-topics-holdout
+  (for/list ([tt true-topics]
+             [i (in-range 0 (length true-topics))]
+             #:when (holdout? i))
+    tt))
+
 (define (accuracy predict-topics)
   (define-values (correct total)
     (for/fold ([correct-topics '()]
                [total-docs '()])
-              ([i (in-range (length true-topics))]
-               [true-topic true-topics]
-               [predict-topic predict-topics]
-               #:when  (holdout? (add1 i))
-               )
+              ([i (in-range (length true-topics-holdout))]
+               [true-topic true-topics-holdout]
+               [predict-topic predict-topics])
       (values (if (equal? true-topic predict-topic)
                   (cons i correct-topics)
                   correct-topics)
@@ -40,6 +44,7 @@
 (define rkt-test (build-path output-dir testname "rkt" (format "~a-~a" num-topics num-docs)))
 (define hk-test (build-path output-dir testname "hk" (format "~a-~a" num-topics num-docs)))
 (define jags-test (build-path output-dir testname "jags" (format "~a-~a" num-topics num-docs)))
+(define augur-test (build-path output-dir testname "augur" (format "~a-~a" num-topics num-docs)))
 
 (define (get-snapshots st)
   (define snapshots (regexp-match* #px"(\\d*\\.?\\d*) (\\d*\\.?\\d*) \\[(.*?)\\]" st #:match-select cdr))
@@ -64,20 +69,21 @@
     (trial->tsa trial)))
 
 (begin (define rkt-trials (str-trials->time-sweep-accuracy (file->lines rkt-test)))
-       (define hs-trials (str-trials->time-sweep-accuracy (file->lines hk-test)))
-       (define jags-trials (cons
-                            '((22793.95 1 0.776888444222111)
-                             (23311.4 2 0.806903451725863)
-                             (23833.82 3 0.8139069534767384)
-                             (24358.23 4 0.817408704352176)
-                             (24882.86 5 0.8164082041020511))
-                            (str-trials->time-sweep-accuracy (file->lines jags-test))))
+       (define augur-trials (str-trials->time-sweep-accuracy (file->lines augur-test)))
+       ;; (define hs-trials (str-trials->time-sweep-accuracy (file->lines hk-test)))
+       ;; (define jags-trials (cons
+       ;;                      '((22793.95 1 0.776888444222111)
+       ;;                       (23311.4 2 0.806903451725863)
+       ;;                       (23833.82 3 0.8139069534767384)
+       ;;                       (24358.23 4 0.817408704352176)
+       ;;                       (24882.86 5 0.8164082041020511))
+       ;;                      (str-trials->time-sweep-accuracy (file->lines jags-test))))
        ;; (define jags-trials
-         ;; '(((22793.95 1 0.776888444222111)
-         ;;    (23311.4 2 0.806903451725863)
-         ;;    (23833.82 3 0.8139069534767384)
-         ;;    (24358.23 4 0.817408704352176)
-         ;;    (24882.86 5 0.8164082041020511)))
+       ;; '(((22793.95 1 0.776888444222111)
+       ;;    (23311.4 2 0.806903451725863)
+       ;;    (23833.82 3 0.8139069534767384)
+       ;;    (24358.23 4 0.817408704352176)
+       ;;    (24882.86 5 0.8164082041020511)))
 
        ;;   (list (for/list ([line (length (file->lines "./NaiveBayesGibbs/jags/manual-20-19997"))])
        ;;   (define vs (map string->number (string-split line " ")))
@@ -95,24 +101,29 @@
     (map (λ (shot) (list (- (first shot) min-time) (second shot) (third shot))) trial)))
 
 (begin (define rkt-sta (run->sweep-time.accuracy rkt-trials))
-       (define hs-sta (run->sweep-time.accuracy hs-trials))
-       (define jags-sta (run->sweep-time.accuracy jags-trials))
+       (define augur-sta (run->sweep-time.accuracy augur-trials))
+       ;; (define hs-sta (run->sweep-time.accuracy hs-trials))
+       ;; (define jags-sta (run->sweep-time.accuracy jags-trials))
        (define rkt-mta (sort (sweep-time.accuracy->mean$time.accuracy rkt-sta)
                              (λ (v1 v2) (< (car v1) (car v2)))))
-       (define jags-mta (sort (sweep-time.accuracy->mean$time.accuracy jags-sta)
-                              (λ (v1 v2) (< (car v1) (car v2)))))
+       (define augur-mta (sort (sweep-time.accuracy->mean$time.accuracy augur-sta)
+                             (λ (v1 v2) (< (car v1) (car v2)))))
+       ;; (define jags-mta (sort (sweep-time.accuracy->mean$time.accuracy jags-sta)
+       ;;                        (λ (v1 v2) (< (car v1) (car v2)))))
        (pretty-display rkt-mta)
-       (pretty-display jags-mta)
+       (pretty-display augur-mta)
 
        (parameterize
            (;; [plot-x-transform log-transform]
             )
-         (plot-file (list  (lines rkt-mta #:color (make-object color% 0 73 73)  #:label "hakrit" )
-                           ;; (lines jags-mta #:color (make-object color% 146 0 0)  #:label "jags" )
-                           ;; (points jags-mta #:size 6 #:color (make-object color% 146 0 0) #:sym 'diamond)
-                           ;; (points rkt-mta #:size 6 #:color (make-object color% 0 73 73) #:sym 'triangle)
-                           ;; (lines (first hk-points) #:color 5 #:label "haskell")
-                           )
+         (plot-file (list
+                     (lines rkt-mta #:color (make-object color% 0 73 73)  #:label "hakrit" )
+                     (lines augur-mta #:color (make-object color% 0 73 73)  #:label "augur" )
+                     ;; (lines jags-mta #:color (make-object color% 146 0 0)  #:label "jags" )
+                     ;; (points jags-mta #:size 6 #:color (make-object color% 146 0 0) #:sym 'diamond)
+                     ;; (points rkt-mta #:size 6 #:color (make-object color% 0 73 73) #:sym 'triangle)
+                     ;; (lines (first hk-points) #:color 5 #:label "haskell")
+                     )
                     "nb-plot.pdf"
 
                     ;; #:y-min 0.97

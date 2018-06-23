@@ -71,7 +71,7 @@
   (define words (list->cblock rk-words _uint64))
   (define docs (list->cblock rk-docs _uint64))
   (printf "loaded words, docs\n")
-  (define holdout-modulo 10)
+  (define holdout-modulo 50)
   (define (holdout? i) (zero? (modulo i holdout-modulo)))
   ;; holding out only every 10, similar to haskell
 
@@ -96,10 +96,11 @@
                  (λ (tim sweeps state)
                    (printf "sweeped: ~a in ~a\n" sweeps (~r tim #:precision '(= 3)))
                    (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
-                   (for ([i (in-range (- num-docs 1))])
+                   (for ([i (in-range (- num-docs 1))]
+                         #:when (holdout? i))
                      (fprintf out-port "~a, " (get-index-nat-array state i)))
                    (fprintf out-port "~a]\t" (get-index-nat-array state (- num-topics 1))))
-                 #:min-sweeps 10
+                 #:min-sweeps 50
                  #:step-sweeps 1
                  #:min-time 0)
     (fprintf out-port "\n"))
