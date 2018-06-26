@@ -99,7 +99,7 @@
                    (for ([i (in-range (- num-docs 1))]
                          #:when (holdout? i))
                      (fprintf out-port "~a, " (get-index-nat-array state i)))
-                   (fprintf out-port "~a]\t" (get-index-nat-array state (- num-topics 1))))
+                   (fprintf out-port "~a]\t" (get-index-nat-array state (- num-docs 1))))
                  #:min-sweeps 50
                  #:step-sweeps 1
                  #:min-time 0)
