@@ -7,42 +7,46 @@ fn z array(nat):
 weight
   ((product d from 0 to size(topic_prior):
     product iB from 0 to size(word_prior):
-    product j
-    from 0
-    to summary = rbucket
-                   (0, size(w),
-                    rindex
-                      (: size(word_prior), iHJ: w[iHJ],
-                       rindex
-                         (iB: size(topic_prior), iHJ, iB: z[iHJ], radd(iHJ, d, iB: 1))))
-       summary[iB][d]:
-    nat2prob(j) + word_prior[iB])
+    gammaFunc
+      ((summary = rbucket
+                    (0, size(w),
+                     rindex
+                       (: size(word_prior), iHJ: w[iHJ],
+                        rindex
+                          (iB: size(topic_prior), iHJ, iB: z[iHJ], radd(iHJ, d, iB: 1))))
+        nat2real(summary[iB][d]))
+       + prob2real(word_prior[iB]))
+    / gammaFunc(prob2real(word_prior[iB])))
    * (product d from 0 to numDocs:
       product iH from 0 to size(topic_prior):
-      product j
-      from 0
-      to summary = rbucket
-                     (0, size(w),
-                      rindex
-                        (: numDocs, iHJ: doc[iHJ],
-                         rindex(d: size(topic_prior), iHJ, d: z[iHJ], radd(iHJ, iH, d: 1))))
-         summary[d][iH]:
-      nat2prob(j) + topic_prior[iH])
+      gammaFunc
+        ((summary = rbucket
+                      (0, size(w),
+                       rindex
+                         (: numDocs, iHJ: doc[iHJ],
+                          rindex(d: size(topic_prior), iHJ, d: z[iHJ], radd(iHJ, iH, d: 1))))
+          nat2real(summary[d][iH]))
+         + prob2real(topic_prior[iH]))
+      / gammaFunc(prob2real(topic_prior[iH])))
    / (product d from 0 to numDocs:
-      product iH
-      from 0
-      to summary = rbucket
-                     (0, size(w), rindex(: numDocs, iHJ: doc[iHJ], radd(iHJ, d: 1)))
-         summary[d]:
-      nat2prob(iH)
-      + (summate iHJ from 0 to size(topic_prior): topic_prior[iHJ]))
+      gammaFunc
+        ((summary = rbucket
+                      (0, size(w), rindex(: numDocs, iHJ: doc[iHJ], radd(iHJ, d: 1)))
+          nat2real(summary[d]))
+         + prob2real
+             (summate iHJ from 0 to size(topic_prior): topic_prior[iHJ]))
+      / gammaFunc
+          (prob2real
+             (summate iHJ from 0 to size(topic_prior): topic_prior[iHJ])))
    / (product d from 0 to size(topic_prior):
-      product iB
-      from 0
-      to summary = rbucket
-                     (0, size(w),
-                      rindex(: size(topic_prior), iHJ: z[iHJ], radd(iHJ, d: 1)))
-         summary[d]:
-      nat2prob(iB)
-      + (summate iHJ from 0 to size(word_prior): word_prior[iHJ])),
+      gammaFunc
+        ((summary = rbucket
+                      (0, size(w),
+                       rindex(: size(topic_prior), iHJ: z[iHJ], radd(iHJ, d: 1)))
+          nat2real(summary[d]))
+         + prob2real
+             (summate iHJ from 0 to size(word_prior): word_prior[iHJ]))
+      / gammaFunc
+          (prob2real
+             (summate iHJ from 0 to size(word_prior): word_prior[iHJ]))),
    return ())
