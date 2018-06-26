@@ -85,8 +85,8 @@ def run_nb(words, docs, topics, outf):
     num_topics=1+max(topics)
     out=open(outf+str(num_topics)+'-'+str(num_docs), 'w')
 
-    topic_prior = np.full(num_topics, 1.0)
-    word_prior = np.full(num_words, 1.0)
+    topic_prior = np.full(num_topics, 1.0, dtype=np.float64)
+    word_prior = np.full(num_words, 1.0, dtype=np.float64)
 
     ((z1, w1, doc1), (z2,w2,doc2)) = split_training(num_docs, num_words, num_topics, topics, docs, words)
     D1=len(z1)
@@ -96,14 +96,23 @@ def run_nb(words, docs, topics, outf):
     with AugurInfer('config.yml', augur_nb) as infer_obj:
         augur_opt = AugurOpt(cached=False, target='cpu', paramScale=None)
         infer_obj.set_compile_opt(augur_opt)
-        infer_obj.set_user_sched(sched2)
+        infer_obj.set_user_sched(sched1)
         init_time = time.clock()
-        infer_obj.compile(num_topics, D1, D2, N1, N2, topic_prior, word_prior, np.array(doc1), np.array(doc2))(np.array(z1), np.array(w1), np.array(w2))
+        c = infer_obj.compile(num_topics, D1, D2, N1, N2,
+                          topic_prior, word_prior,
+                          np.array(doc1, dtype=np.int32), np.array(doc2, dtype=np.int32))
+        c(np.array(z1, dtype=np.int32), np.array(w1, dtype=np.int32), np.array(w2, dtype=np.int32))
+
+        # infer_obj.set_compile_opt(augur_opt)
+        # infer_obj.set_user_sched(sched1)
+        # init_time = time.clock()
+        # c = infer_obj.compile(num_topics, len(topics), len(words), topic_prior, word_prior, np.array(docs))(np.array(words))
+
         compile_time=time.clock()-init_time
         num_samples = 0
         print 'compile-time: ', compile_time
         tim0=time.clock()
-        while num_samples <= 50 or tim < 1:
+        while num_samples <= 2 or tim < 1:
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z2'][0]
             tim = time.clock() - tim0
             print 'time at sweep: ', num_samples, tim
