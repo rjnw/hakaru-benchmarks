@@ -34,11 +34,11 @@ main = do
   mapM_ (appendFile output_file . ($ "\n") . showList) processed
 
 --calculateLikelihood ::[Int] -> [Int] -> [Int] -> Snapshot -> Snapshot
-calculateLikelihood w doc zs (Snapshot p predict) = Snapshot p [likelihood]
+calculateLikelihood w doc zs (Snapshot p predict) = Snapshot p [fromProb likelihood]
   where
     numTopics = U.maximum zs + 1
     numWords = U.maximum w + 1
     topicPrior = array numTopics (const 1)
     wordPrior  = array numWords  (const 1)
     numDocs = U.length zs
-    likelihood = prog topicPrior wordPrior numDocs w doc (U.fromList (map fromIntegral (map round predict)))
+    likelihood = prog topicPrior wordPrior numDocs w doc $ U.fromList $ map fromIntegral $ map round predict
