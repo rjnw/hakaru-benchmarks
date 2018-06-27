@@ -160,3 +160,29 @@ Executable ldaGibbs
                        containers           >= 0.5.7.1,
                        mtl                  >= 2.2.1,
                        hashable             >= 1.2.6.1
+
+Executable ldaLikelihood
+    Hs-Source-Dirs:    .
+    Main-is:           LdaGibbs/Likelihood.hs
+    Default-Language:  Haskell2010
+    GHC-Options:       -O2 -Wall -threaded -fwarn-tabs
+    other-modules:     Utils News LdaGibbs.LdaLikelihood
+    build-depends:     base                 >= 4.7  && < 5.0,
+                       mwc-random           >= 0.13 && < 0.14,
+                       hakaru               >= 0.6,
+                       logfloat             >= 0.13 && < 0.14,
+                       text                 >= 0.11 && < 1.3,
+                       pretty               >= 1.1  && < 1.2,
+                       filepath             >= 1.3,
+                       vector               >= 0.10,
+                       bytestring           >= 0.10,
+                       process              >= 1.1  && < 2.0,
+                       temporary            >= 1.2.1.1,
+                       time                 >= 1.6.0.1,
+                       split                >= 0.2.3.2,
+                       directory            >= 1.3.0.0,
+                       array                >= 0.5.1.1,
+                       unordered-containers >= 0.2.8.0,
+                       containers           >= 0.5.7.1,
+                       mtl                  >= 2.2.1,
+                       hashable             >= 1.2.6.1

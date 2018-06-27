@@ -65,8 +65,7 @@
     (list tim sweep acc)))
 
 (define (str-trials->time-sweep-accuracy trials)
-  (for/list ([trial trials])
-    (trial->tsa trial)))
+  (map trial->tsa trials))
 
 (begin (define rkt-trials (str-trials->time-sweep-accuracy (file->lines rkt-test)))
        (define augur-trials (str-trials->time-sweep-accuracy (file->lines augur-test)))

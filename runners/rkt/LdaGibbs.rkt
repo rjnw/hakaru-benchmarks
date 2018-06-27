@@ -67,7 +67,7 @@
   (printf "made update\n")
 
   (define distf (discrete-sampler 0 (- num-topics 1)))
-  (define zs  (for/list ([i (in-range (length rk-words))])
+  (define zs  (for/list ([i (in-range words-size)])
                 (distf)))
   (printf "made zs\n")
   (define z (list->cblock zs _uint64))
@@ -81,9 +81,12 @@
                  z
                  (λ (tim sweeps state)
                    (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
-                   (for ([i (in-range (- num-words 1))])
-                     (fprintf out-port "~a, " (nat-array-ref state i)))
-                   (fprintf out-port "~a]\t" (nat-array-ref state (- num-words 1)))))
+                   (for ([i (in-range (- words-size 1))])
+                     (fprintf out-port "~a " (nat-array-ref state i)))
+                   (fprintf out-port "~a]\t" (nat-array-ref state (- words-size 1))))
+                 #:min-sweeps 1
+                 #:step-sweeps 1
+                 #:min-time 0)
     (fprintf out-port "\n"))
 
 

@@ -1,1 +1,355 @@
-[(fn topic_prior ((array prob) -> (nat -> ((array nat) -> ((array nat) -> ((array nat) -> (measure unit)))))) [(fn word_prior (nat -> ((array nat) -> ((array nat) -> ((array nat) -> (measure unit))))) [(fn numDocs ((array nat) -> ((array nat) -> ((array nat) -> (measure unit)))) [(fn w ((array nat) -> ((array nat) -> (measure unit))) [(fn doc ((array nat) -> (measure unit)) [(fn z (measure unit) [(pose [(* [(product (d [(nat_ 0) : nat] [(size [topic_prior : (array prob)]) : nat]) [(product (iB [(nat_ 0) : nat] [(size [word_prior : (array prob)]) : nat]) [(* [(gammafunc [(+ [(let (summary (array (array nat)) [(bucket [(nat_ 0) : nat] [(size [w : (array nat)]) : nat] (r_index [(size [word_prior : (array prob)]) : nat] (bind iHJ [(index [w : (array nat)] [iHJ : nat]) : nat]) (r_index (bind iB [(size [topic_prior : (array prob)]) : nat]) (bind iHJ (bind iB [(index [z : (array nat)] [iHJ : nat]) : nat])) (r_add (bind iHJ (bind d (bind iB [(nat_ 1) : nat]))))))) : (array (array nat))]) [(nat2real [(index [(index [summary : (array (array nat))] [iB : nat]) : (array nat)] [d : nat]) : nat]) : real]) : real][(prob2real [(index [word_prior : (array prob)] [iB : nat]) : prob]) : real]) : real]) : prob][(recip [(gammafunc [(prob2real [(index [word_prior : (array prob)] [iB : nat]) : prob]) : real]) : prob]) : prob]) : prob]) : prob]) : prob][(product (d [(nat_ 0) : nat] [numDocs : nat]) [(product (iH [(nat_ 0) : nat] [(size [topic_prior : (array prob)]) : nat]) [(* [(gammafunc [(+ [(let (summary (array (array nat)) [(bucket [(nat_ 0) : nat] [(size [w : (array nat)]) : nat] (r_index numDocs (bind iHJ [(index [doc : (array nat)] [iHJ : nat]) : nat]) (r_index (bind d [(size [topic_prior : (array prob)]) : nat]) (bind iHJ (bind d [(index [z : (array nat)] [iHJ : nat]) : nat])) (r_add (bind iHJ (bind iH (bind d [(nat_ 1) : nat]))))))) : (array (array nat))]) [(nat2real [(index [(index [summary : (array (array nat))] [d : nat]) : (array nat)] [iH : nat]) : nat]) : real]) : real][(prob2real [(index [topic_prior : (array prob)] [iH : nat]) : prob]) : real]) : real]) : prob][(recip [(gammafunc [(prob2real [(index [topic_prior : (array prob)] [iH : nat]) : prob]) : real]) : prob]) : prob]) : prob]) : prob]) : prob][(recip [(product (d [(nat_ 0) : nat] [numDocs : nat]) [(* [(gammafunc [(+ [(let (summary (array nat) [(bucket [(nat_ 0) : nat] [(size [w : (array nat)]) : nat] (r_index numDocs (bind iHJ [(index [doc : (array nat)] [iHJ : nat]) : nat]) (r_add (bind iHJ (bind d [(nat_ 1) : nat]))))) : (array nat)]) [(nat2real [(index [summary : (array nat)] [d : nat]) : nat]) : real]) : real][(prob2real [(summate (iHJ [(nat_ 0) : nat] [(size [topic_prior : (array prob)]) : nat]) [(index [topic_prior : (array prob)] [iHJ : nat]) : prob]) : prob]) : real]) : real]) : prob][(recip [(gammafunc [(prob2real [(summate (iHJ [(nat_ 0) : nat] [(size [topic_prior : (array prob)]) : nat]) [(index [topic_prior : (array prob)] [iHJ : nat]) : prob]) : prob]) : real]) : prob]) : prob]) : prob]) : prob]) : prob][(recip [(product (d [(nat_ 0) : nat] [(size [topic_prior : (array prob)]) : nat]) [(* [(gammafunc [(+ [(let (summary (array nat) [(bucket [(nat_ 0) : nat] [(size [w : (array nat)]) : nat] (r_index [(size [topic_prior : (array prob)]) : nat] (bind iHJ [(index [z : (array nat)] [iHJ : nat]) : nat]) (r_add (bind iHJ (bind d [(nat_ 1) : nat]))))) : (array nat)]) [(nat2real [(index [summary : (array nat)] [d : nat]) : nat]) : real]) : real][(prob2real [(summate (iHJ [(nat_ 0) : nat] [(size [word_prior : (array prob)]) : nat]) [(index [word_prior : (array prob)] [iHJ : nat]) : prob]) : prob]) : real]) : real]) : prob][(recip [(gammafunc [(prob2real [(summate (iHJ [(nat_ 0) : nat] [(size [word_prior : (array prob)]) : nat]) [(index [word_prior : (array prob)] [iHJ : nat]) : prob]) : prob]) : real]) : prob]) : prob]) : prob]) : prob]) : prob]) : prob] [(dirac [(datum unit (inl done)) : unit]) : (measure unit)]) : (measure unit)]) : ((array nat) -> (measure unit))]) : ((array nat) -> ((array nat) -> (measure unit)))]) : ((array nat) -> ((array nat) -> ((array nat) -> (measure unit))))]) : (nat -> ((array nat) -> ((array nat) -> ((array nat) -> (measure unit)))))]) : ((array prob) -> (nat -> ((array nat) -> ((array nat) -> ((array nat) -> (measure unit))))))]) : ((array prob) -> ((array prob) -> (nat -> ((array nat) -> ((array nat) -> ((array nat) -> (measure unit)))))))]
+((fn
+     topic_prior
+   ((array prob)
+    ->
+    (nat -> ((array nat) -> ((array nat) -> ((array nat) -> prob)))))
+   ((fn
+        word_prior
+      (nat -> ((array nat) -> ((array nat) -> ((array nat) -> prob))))
+      ((fn
+           numDocs
+         ((array nat) -> ((array nat) -> ((array nat) -> prob)))
+         ((fn
+              w
+            ((array nat) -> ((array nat) -> prob))
+            ((fn
+                 doc
+               ((array nat) -> prob)
+               ((fn
+                    z
+                  prob
+                  ((*
+                    ((product
+                      (d
+                       ((nat_ 0) : nat)
+                       ((size (topic_prior : (array prob))) : nat))
+                      ((product
+                        (iB
+                         ((nat_ 0) : nat)
+                         ((size (word_prior : (array prob))) : nat))
+                        ((*
+                          ((gammafunc
+                            ((+
+                              ((let (summary
+                                     (array (array nat))
+                                     ((bucket
+                                       ((nat_ 0) : nat)
+                                       ((size (w : (array nat))) : nat)
+                                       (r_index
+                                        ((size (word_prior : (array prob))) : nat)
+                                        (bind
+                                         iHJ
+                                         ((index (w : (array nat)) (iHJ : nat))
+                                          :
+                                          nat))
+                                        (r_index
+                                         (bind
+                                          iB
+                                          ((size (topic_prior : (array prob)))
+                                           :
+                                           nat))
+                                         (bind
+                                          iHJ
+                                          (bind
+                                           iB
+                                           ((index (z : (array nat)) (iHJ : nat))
+                                            :
+                                            nat)))
+                                         (r_add
+                                          (bind
+                                           iHJ
+                                           (bind d (bind iB ((nat_ 1) : nat))))))))
+                                      :
+                                      (array (array nat))))
+                                 ((nat2real
+                                   ((index
+                                     ((index
+                                       (summary : (array (array nat)))
+                                       (iB : nat))
+                                      :
+                                      (array nat))
+                                     (d : nat))
+                                    :
+                                    nat))
+                                  :
+                                  real))
+                               :
+                               real)
+                              ((prob2real
+                                ((index (word_prior : (array prob)) (iB : nat))
+                                 :
+                                 prob))
+                               :
+                               real))
+                             :
+                             real))
+                           :
+                           prob)
+                          ((recip
+                            ((gammafunc
+                              ((prob2real
+                                ((index (word_prior : (array prob)) (iB : nat))
+                                 :
+                                 prob))
+                               :
+                               real))
+                             :
+                             prob))
+                           :
+                           prob))
+                         :
+                         prob))
+                       :
+                       prob))
+                     :
+                     prob)
+                    ((product
+                      (d ((nat_ 0) : nat) (numDocs : nat))
+                      ((product
+                        (iH
+                         ((nat_ 0) : nat)
+                         ((size (topic_prior : (array prob))) : nat))
+                        ((*
+                          ((gammafunc
+                            ((+
+                              ((let (summary
+                                     (array (array nat))
+                                     ((bucket
+                                       ((nat_ 0) : nat)
+                                       ((size (w : (array nat))) : nat)
+                                       (r_index
+                                        numDocs
+                                        (bind
+                                         iHJ
+                                         ((index (doc : (array nat)) (iHJ : nat))
+                                          :
+                                          nat))
+                                        (r_index
+                                         (bind
+                                          d
+                                          ((size (topic_prior : (array prob)))
+                                           :
+                                           nat))
+                                         (bind
+                                          iHJ
+                                          (bind
+                                           d
+                                           ((index (z : (array nat)) (iHJ : nat))
+                                            :
+                                            nat)))
+                                         (r_add
+                                          (bind
+                                           iHJ
+                                           (bind iH (bind d ((nat_ 1) : nat))))))))
+                                      :
+                                      (array (array nat))))
+                                 ((nat2real
+                                   ((index
+                                     ((index
+                                       (summary : (array (array nat)))
+                                       (d : nat))
+                                      :
+                                      (array nat))
+                                     (iH : nat))
+                                    :
+                                    nat))
+                                  :
+                                  real))
+                               :
+                               real)
+                              ((prob2real
+                                ((index (topic_prior : (array prob)) (iH : nat))
+                                 :
+                                 prob))
+                               :
+                               real))
+                             :
+                             real))
+                           :
+                           prob)
+                          ((recip
+                            ((gammafunc
+                              ((prob2real
+                                ((index (topic_prior : (array prob)) (iH : nat))
+                                 :
+                                 prob))
+                               :
+                               real))
+                             :
+                             prob))
+                           :
+                           prob))
+                         :
+                         prob))
+                       :
+                       prob))
+                     :
+                     prob)
+                    ((recip
+                      ((product
+                        (d ((nat_ 0) : nat) (numDocs : nat))
+                        ((*
+                          ((gammafunc
+                            ((+
+                              ((let (summary
+                                     (array nat)
+                                     ((bucket
+                                       ((nat_ 0) : nat)
+                                       ((size (w : (array nat))) : nat)
+                                       (r_index
+                                        numDocs
+                                        (bind
+                                         iHJ
+                                         ((index (doc : (array nat)) (iHJ : nat))
+                                          :
+                                          nat))
+                                        (r_add
+                                         (bind iHJ (bind d ((nat_ 1) : nat))))))
+                                      :
+                                      (array nat)))
+                                 ((nat2real
+                                   ((index (summary : (array nat)) (d : nat))
+                                    :
+                                    nat))
+                                  :
+                                  real))
+                               :
+                               real)
+                              ((prob2real
+                                ((summate
+                                  (iHJ
+                                   ((nat_ 0) : nat)
+                                   ((size (topic_prior : (array prob))) : nat))
+                                  ((index (topic_prior : (array prob)) (iHJ : nat))
+                                   :
+                                   prob))
+                                 :
+                                 prob))
+                               :
+                               real))
+                             :
+                             real))
+                           :
+                           prob)
+                          ((recip
+                            ((gammafunc
+                              ((prob2real
+                                ((summate
+                                  (iHJ
+                                   ((nat_ 0) : nat)
+                                   ((size (topic_prior : (array prob))) : nat))
+                                  ((index (topic_prior : (array prob)) (iHJ : nat))
+                                   :
+                                   prob))
+                                 :
+                                 prob))
+                               :
+                               real))
+                             :
+                             prob))
+                           :
+                           prob))
+                         :
+                         prob))
+                       :
+                       prob))
+                     :
+                     prob)
+                    ((recip
+                      ((product
+                        (d
+                         ((nat_ 0) : nat)
+                         ((size (topic_prior : (array prob))) : nat))
+                        ((*
+                          ((gammafunc
+                            ((+
+                              ((let (summary
+                                     (array nat)
+                                     ((bucket
+                                       ((nat_ 0) : nat)
+                                       ((size (w : (array nat))) : nat)
+                                       (r_index
+                                        ((size (topic_prior : (array prob))) : nat)
+                                        (bind
+                                         iHJ
+                                         ((index (z : (array nat)) (iHJ : nat))
+                                          :
+                                          nat))
+                                        (r_add
+                                         (bind iHJ (bind d ((nat_ 1) : nat))))))
+                                      :
+                                      (array nat)))
+                                 ((nat2real
+                                   ((index (summary : (array nat)) (d : nat))
+                                    :
+                                    nat))
+                                  :
+                                  real))
+                               :
+                               real)
+                              ((prob2real
+                                ((summate
+                                  (iHJ
+                                   ((nat_ 0) : nat)
+                                   ((size (word_prior : (array prob))) : nat))
+                                  ((index (word_prior : (array prob)) (iHJ : nat))
+                                   :
+                                   prob))
+                                 :
+                                 prob))
+                               :
+                               real))
+                             :
+                             real))
+                           :
+                           prob)
+                          ((recip
+                            ((gammafunc
+                              ((prob2real
+                                ((summate
+                                  (iHJ
+                                   ((nat_ 0) : nat)
+                                   ((size (word_prior : (array prob))) : nat))
+                                  ((index (word_prior : (array prob)) (iHJ : nat))
+                                   :
+                                   prob))
+                                 :
+                                 prob))
+                               :
+                               real))
+                             :
+                             prob))
+                           :
+                           prob))
+                         :
+                         prob))
+                       :
+                       prob))
+                     :
+                     prob))
+                   :
+                   prob))
+                :
+                ((array nat) -> prob)))
+             :
+             ((array nat) -> ((array nat) -> prob))))
+          :
+          ((array nat) -> ((array nat) -> ((array nat) -> prob)))))
+       :
+       (nat
+        ->
+        ((array nat) -> ((array nat) -> ((array nat) -> prob))))))
+    :
+    ((array prob)
+     ->
+     (nat
+      ->
+      ((array nat) -> ((array nat) -> ((array nat) -> prob)))))))
+ :
+ ((array prob)
+  ->
+  ((array prob)
+   ->
+   (nat
+    ->
+    ((array nat) -> ((array nat) -> ((array nat) -> prob)))))))
