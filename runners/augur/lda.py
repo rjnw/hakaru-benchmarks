@@ -18,28 +18,30 @@ augur_lda = '''
 }
 '''
 
-sched1 = 'ConjGibbs [theta] (*) ConjGibbs [phi] (*) DiscGibbs [z]'
-
+sched = 'ConjGibbs [theta] (*) ConjGibbs [phi] (*) DiscGibbs [z]'
 def run_lda(words, docs, topics, out):
     def log_snapshot(tim, num_samples, z):
         out.write("%.3f" % tim)
         out.write(' ')
         out.write(str(num_samples))
         out.write(' ')
-        out.write('['+' '.join([str(n) for n in z]) + ']')
+        out.write('[')
+        for za in z:
+            out.write(' '.join([str(n) for n in z]))
+        out.write(']')
         out.write('\t')
 
     w = doc_word(docs, words)
     num_words=max(words)+1
     num_topics=max(topics)+1
 
-    topic_prior = np.array([1.0]*num_topics, dtype=np.int32)
-    word_prior = np.array([1.0]*num_words, dtype=np.int32)
+    topic_prior = np.array([1.0]*num_topics)
+    word_prior = np.array([1.0]*num_words)
 
     with AugurInfer('config.yml', augur_lda) as infer_obj:
         augur_opt = AugurOpt(cached=False, target='cpu', paramScale=None)
         infer_obj.set_compile_opt(augur_opt)
-        infer_obj.set_user_sched(sched1)
+        infer_obj.set_user_sched(sched)
 
         init_time = time.clock()
         w_shape = np.array([x for x in map(len, w)], dtype=np.int32)
@@ -56,25 +58,6 @@ def run_lda(words, docs, topics, out):
             num_samples += 1
         out.write('\n')
 
-def test_lda():
-    ntopics=4
-    ndocs=4
-    nwords = 8
-    wshape=np.array([3,4,5,6], dtype=np.int32)
-    topic_prior=np.full(ntopics, 1.0)
-    words_prior=np.full(nwords, 1.0)
-    w = np.array([np.array([0,1,2], dtype=np.int32),
-                  np.array([1,2,3,4], dtype=np.int32),
-                  np.array([1,2,3,4,5], dtype=np.int32),
-                  np.array([1,2,3,4,5,6], dtype=np.int32)])
-    with AugurInfer('config.yml', augur_lda) as infer_obj:
-        augur_opt = AugurOpt(cached=False, target='cpu', paramScale=None)
-        infer_obj.set_compile_opt(augur_opt)
-        infer_obj.set_user_sched(sched1)
-        infer_obj.compile(ntopics, ndocs, wshape, topic_prior, words_prior)(w)
-        infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
-
-
 news_dir = '../../input/news/'
 words_file=news_dir+'words'
 docs_file=news_dir+'docs'
@@ -87,20 +70,19 @@ def loadNewsFile(fname) :
 
 def doc_word(docs, words):
     arr = []
-    ci = 0
-    doc = np.array([])
-    for (d,w) in zip(docs, words):
-        if d == ci:
-            doc=np.append(doc, w)
-            ci=d
+    acc = []
+    curr_doc = docs[0]
+    for doc, word in zip(docs, words):
+        if doc is curr_doc:
+            acc += [word]
         else:
-            ci=d
-            arr.append(doc)
-            doc=np.array([w], dtype=np.int32)
+            curr_doc = doc
+            arr += [np.array(acc, dtype=np.int32)]
+            acc = [word]
+    arr+= [np.array(acc, dtype=np.int32)]
     return np.array(arr)
 
 if __name__ == '__main__':
-    # test_lda()
     words=loadNewsFile(words_file)
     docs=loadNewsFile(docs_file)
     topics=loadNewsFile(topics_file)
