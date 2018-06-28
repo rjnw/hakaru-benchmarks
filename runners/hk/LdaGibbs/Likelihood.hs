@@ -34,7 +34,7 @@ main = do
   mapM_ (appendFile output_file . ($ "\n") . showList) processed
 
 --calculateLikelihood ::[Int] -> [Int] -> [Int] -> Snapshot -> Snapshot
-calculateLikelihood w doc zs (Snapshot p predict) = Snapshot p [fromProb likelihood]
+calculateLikelihood w doc zs (Snapshot p predict) = Snapshot p [Language.Hakaru.Runtime.LogFloatPrelude.log likelihood]
   where
     numTopics = U.maximum zs + 1
     numWords = U.maximum w + 1
