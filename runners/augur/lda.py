@@ -21,15 +21,18 @@ augur_lda = '''
 sched = 'ConjGibbs [theta] (*) ConjGibbs [phi] (*) DiscGibbs [z]'
 def run_lda(words, docs, topics, out):
     def log_snapshot(tim, num_samples, z):
+        print('logging snapshot')
         out.write("%.3f" % tim)
         out.write(' ')
         out.write(str(num_samples))
         out.write(' ')
         out.write('[')
         for za in z:
-            out.write(' '.join([str(n) for n in z]))
-        out.write(']')
+            for zi in za:
+                out.write(' '+str(zi))
+        out.write(' ]')
         out.write('\t')
+        print('done loging')
 
     w = doc_word(docs, words)
     num_words=max(words)+1
@@ -47,15 +50,16 @@ def run_lda(words, docs, topics, out):
         w_shape = np.array([x for x in map(len, w)], dtype=np.int32)
 
         infer_obj.compile(num_topics, len(w_shape), w_shape, topic_prior, word_prior)(w)
-        num_samples = 1
+        num_samples = 5
         tim = 0
-        while num_samples <= 1 or tim < 1:
-            tim = time.clock() - init_time
+        while num_samples <= 500:
+            print "getting sample: ", num_samples
+            start_time=time.clock()
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
-            print "got a sample at tim: ", tim
+            tim = time.clock() - start_time
+            print "got a sample in time: ", tim
             log_snapshot(tim, num_samples, z)
-            init_time=time.clock()
-            num_samples += 1
+            num_samples += 5
         out.write('\n')
 
 news_dir = '../../input/news/'

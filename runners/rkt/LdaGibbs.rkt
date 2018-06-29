@@ -80,13 +80,15 @@
     (gibbs-timer (curry gibbs-sweep num-topics nat-array-set! update)
                  z
                  (λ (tim sweeps state)
+                   (printf "loging: ~a, ~a\n" sweeps tim)
                    (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
                    (for ([i (in-range (- words-size 1))])
                      (fprintf out-port "~a " (nat-array-ref state i)))
                    (fprintf out-port "~a]\t" (nat-array-ref state (- words-size 1))))
-                 #:min-sweeps 1
-                 #:step-sweeps 1
-                 #:min-time 0)
+                 #:min-sweeps 500
+                 #:step-sweeps 50
+                 #:min-time 2000
+                 #:step-time 50)
     (fprintf out-port "\n"))
 
 
