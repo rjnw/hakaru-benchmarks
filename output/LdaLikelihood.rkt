@@ -36,9 +36,16 @@
       (values (+ t tim) (cons (list (+ t tim) sweep acc) ntsa))))
   (reverse ntsa))
 
-(define rkt-trials (recalculate-time (car (parse "rkt"))))
-(define augur-trials (recalculate-time (car (parse "augur"))))
+(define rkt-orig (last (parse "rkt_good")))
+(define rkt-trials rkt-orig)
+(define augur-orig (car (parse "augur")))
+(define augur-trials (recalculate-time augur-orig))
+(define (get-xy tsa)
+  (for/list ([t tsa])
+    (list (first t) (third t))))
 
+(define rkt-xy (get-xy rkt-trials))
+(define augur-xy (get-xy augur-trials))
 
 (define (get-line trial lcolor lstyle icolor istyle legend pstyle  (i 1) (point-size 6))
   (list
@@ -71,8 +78,7 @@
    ;;  #:color color #:label (string-append runner "-dots"))
 
    (lines
-    (for/list ([tsa trial])
-      (list (first tsa) (third tsa)))
+    trial
     #:color lcolor #:style lstyle
     #:width 1
     #:label legend)
@@ -81,16 +87,17 @@
 
 
 (plot-file
-
  (list
-  (get-line rkt-trials
+  (get-line rkt-xy
             (make-object color% 0 73 73) 'solid
             (make-object color% 0 146 146) 'solid
             "Hakaru" 'triangle)
 
-  (get-line augur-trials
+  (get-line augur-xy
             (make-object color% 73 0 146) 'dot-dash
             (make-object color% 0 146 146) 'solid
-            "AugurV2" 'square))
+            "AugurV2" 'square)
+  )
   "ldalikelihood.pdf"
- #:y-min -31000000)
+ ;; #:y-min -31000000
+ )
