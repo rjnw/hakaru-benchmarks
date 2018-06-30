@@ -1,0 +1,27 @@
+summarize(simplify(
+## Latent Dirichlet Allocation
+def dirichlet(as array(prob)):
+    xs <~ plate i of int2nat(size(as)-1):
+            beta(summate j from i+1 to size(as): as[j],
+                 as[i])
+    return array i of size(as):
+             x = product j from 0 to i: xs[j]
+             x * if i+1==size(as): 1 else: real2prob(1-xs[i])
+
+def lda( theta array(array(prob))
+               , phi array(array(prob))
+               , w array(nat)
+               , doc array(nat)
+               , wordUpdate nat ):
+  numDocs = size(theta)
+  numWords = size(w)
+
+  if wordUpdate < numWords && doc[wordUpdate] < numDocs:
+    zNew <~ categorical(theta[doc[wordUpdate]])
+    foo <~ observe(categorical(phi[zNew]), w[wordUpdate])
+    return zNew
+
+  else: reject. measure(nat)
+
+lda
+))
