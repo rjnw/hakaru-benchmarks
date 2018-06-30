@@ -19,26 +19,33 @@ import Utils (SamplerKnobs(..), gmmKnobs,
               paramsFromName, freshFile, logsToAccs,
               Trial, parseTrial, Snapshot(..))
 import           News (getNews, SingletonType(..))
+import qualified Data.Text.IO as TIO
+import qualified Data.Text as T
 
 import LdaGibbs.LdaLikelihood
 
 main :: IO ()
 main = do
-  [inputs_path, log_file, output_file] <- getArgs
-  putStrLn "getting news"
-  (w,doc,zs) <- fst <$> getNews (inputs_path </> "20_newsgroups/") SingleDoc Nothing [0..]
-  putStrLn "done getting news"                     -- ^ retrieves everything
-  logs <- readFile log_file
-  let processLn l = map (calculateLikelihood w doc zs) (parseTrial l)
-      processed = map processLn (lines logs)
-  mapM_ (appendFile output_file . ($ "\n") . showList) processed
+  [inputFolder, logFile, outputFile, num_topics] <- getArgs
 
---calculateLikelihood ::[Int] -> [Int] -> [Int] -> Snapshot -> Snapshot
-calculateLikelihood w doc zs (Snapshot p predict) = Snapshot p [Language.Hakaru.Runtime.LogFloatPrelude.log likelihood]
+  words_st <- TIO.readFile $ concat [inputFolder, "words"]
+  docs_st <- TIO.readFile $ concat [inputFolder,  "docs"]
+  logs <- readFile logFile
+
+  let words = U.fromList $ ((Prelude.map (read . T.unpack) (T.lines words_st)) :: [Int])
+      docs = U.fromList $ ((Prelude.map (read . T.unpack) (T.lines docs_st)) :: [Int])
+      numTopics = read num_topics :: Int
+  let processLn l = map (calculateLikelihood words docs numTopics) (parseTrial l)
+      processed = map processLn (lines logs)
+
+  mapM_ (appendFile outputFile . ($ "\n") . showList) processed
+
+calculateLikelihood words docs numTopics (Snapshot p predict) = Snapshot p [Language.Hakaru.Runtime.LogFloatPrelude.log likelihood]
   where
-    numTopics = U.maximum zs + 1
-    numWords = U.maximum w + 1
+    numWords = U.maximum words + 1
     topicPrior = array numTopics (const 1)
     wordPrior  = array numWords  (const 1)
-    numDocs = U.length zs
-    likelihood = prog topicPrior wordPrior numDocs w doc $ U.fromList $ map fromIntegral $ map round predict
+    numDocs = U.last docs + 1
+    likelihood = prog topicPrior wordPrior numDocs words docs $ U.fromList $ map fromIntegral $ map round predict
+
+-- ./hkbin/ldaLikelihood ../input/kos/ ../output/LdaGibbs/kos/rkt-50 ../output/accuracies/LdaGibbs/kos-rkt-50 50

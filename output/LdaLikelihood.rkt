@@ -36,9 +36,9 @@
       (values (+ t tim) (cons (list (+ t tim) sweep acc) ntsa))))
   (reverse ntsa))
 
-(define rkt-orig (last (parse "rkt_good")))
+(define rkt-orig (last (parse "kos-rkt-50")))
 (define rkt-trials rkt-orig)
-(define augur-orig (car (parse "augur")))
+(define augur-orig (car (parse "kos-augur-50")))
 (define augur-trials (recalculate-time augur-orig))
 (define (get-xy tsa)
   (for/list ([t tsa])
@@ -69,13 +69,10 @@
    ;;             #:when (zero? (modulo s 10)))
    ;;    ta)
    ;;  #:size point-size #:color lcolor #:sym pstyle)
-   ;; (points
-   ;;  (apply append
-   ;;         (for/list ([trial pr])
-   ;;           (for/list ([p trial])
-   ;;             (list (car p) (caddr p)))))
-   ;;  #:size 1 #:alpha 0.1 #:line-width 1
-   ;;  #:color color #:label (string-append runner "-dots"))
+   (points
+    trial
+    #:size point-size #:alpha 0.1 #:line-width 1
+    #:color lcolor #:sym pstyle)
 
    (lines
     trial
@@ -94,7 +91,7 @@
             "Hakaru" 'triangle)
 
   (get-line augur-xy
-            (make-object color% 73 0 146) 'dot-dash
+            (make-object color% 73 0 146) 'solid
             (make-object color% 0 146 146) 'solid
             "AugurV2" 'square)
   )
