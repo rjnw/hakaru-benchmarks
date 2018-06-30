@@ -18,8 +18,7 @@ def lda( theta array(array(prob))
 
   if wordUpdate < numWords && doc[wordUpdate] < numDocs:
     zNew <~ categorical(theta[doc[wordUpdate]])
-    foo <~ observe(categorical(phi[zNew]), w[wordUpdate])
-    return zNew
+    weight(phi[zNew][w[wordUpdate]], return zNew)
 
   else: reject. measure(nat)
 
