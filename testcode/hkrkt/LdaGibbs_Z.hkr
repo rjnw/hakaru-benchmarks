@@ -1,0 +1,83 @@
+((fn
+  theta
+  ((array (array prob))
+   ->
+   ((array nat) -> ((array nat) -> (nat -> (measure nat)))))
+  ((fn
+    phi
+    ((array nat) -> ((array nat) -> (nat -> (measure nat))))
+    ((fn
+      w
+      ((array nat) -> (nat -> (measure nat)))
+      ((fn
+        doc
+        (nat -> (measure nat))
+        ((fn
+          wordUpdate
+          (measure nat)
+          ((match
+            ((and ((< (wordUpdate : nat) ((size (w : (array nat))) : nat))
+                   :
+                   bool)
+                  ((<
+                    ((index (doc : (array nat)) (wordUpdate : nat)) : nat)
+                    ((size (theta : (array (array prob)))) : nat))
+                   :
+                   bool))
+             :
+             bool)
+            ((pdatum true (pc_inl (ps_done)))
+             ((categorical
+               ((array
+                 (zNewd
+                  ((size
+                    ((index
+                      (theta : (array (array prob)))
+                      ((index (doc : (array nat)) (wordUpdate : nat)) : nat))
+                     :
+                     (array prob)))
+                   :
+                   nat))
+                 ((*
+                   ((index
+                     ((index
+                       (theta : (array (array prob)))
+                       ((index (doc : (array nat)) (wordUpdate : nat)) : nat))
+                      :
+                      (array prob))
+                     (zNewd : nat))
+                    :
+                    prob)
+                   ((index
+                     ((index (phi : (array (array prob))) (zNewd : nat))
+                      :
+                      (array prob))
+                     ((index (w : (array nat)) (wordUpdate : nat)) : nat))
+                    :
+                    prob))
+                  :
+                  prob))
+                :
+                (array prob)))
+              :
+              (measure nat)))
+            ((pdatum false (pc_inr (pc_inl (ps_done))))
+             ((reject) : (measure nat))))
+           :
+           (measure nat)))
+         :
+         (nat -> (measure nat))))
+       :
+       ((array nat) -> (nat -> (measure nat)))))
+     :
+     ((array nat) -> ((array nat) -> (nat -> (measure nat))))))
+   :
+   ((array (array prob))
+    ->
+    ((array nat) -> ((array nat) -> (nat -> (measure nat)))))))
+ :
+ ((array (array prob))
+  ->
+  ((array (array prob))
+   ->
+   ((array nat) -> ((array nat) -> (nat -> (measure nat)))))))
