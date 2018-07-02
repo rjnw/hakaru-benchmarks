@@ -13,18 +13,18 @@ import sys
 # at line n in docs file = same line word in words file
 
 
-augur_nb = '''(K : Int, D1 : Int, D2 : Int, N1 : Int, N2 : Int, topic_prior : Vec Real, word_prior : Vec Real, doc1 : Vec Int, doc2 : Vec Int) => {
- param theta ~ Dirichlet(topic_prior);
- param phi[k] ~ Dirichlet(word_prior)
-     for k <- 0 until K ;
- data z1[d] ~ Categorical(theta)
-     for d <- 0 until D1 ;
- param z2[d] ~ Categorical(theta)
-     for d <- 0 until D2 ;
- data w1[n] ~ Categorical(phi[z1[doc1[n]]])
-     for n <- 0 until N1;
- data w2[n] ~ Categorical(phi[z2[doc2[n]]])
-     for n <- 0 until N2;
+augur_nb_2d_partially_supervised = '''(K : Int, D1 : Int, D2 : Int, topic_hyper : Vec Real, word_hyper : Vec Real, doc1_length : Vec Int, doc2_length : Vec Int) => {
+  param theta ~ Dirichlet(topic_hyper);
+  param phi[k] ~ Dirichlet(word_hyper)
+      for k <- 0 until K ;
+  data z1[d] ~ Categorical(theta)
+      for d <- 0 until D1 ;
+  param z2[d] ~ Categorical(theta)
+      for d <- 0 until D2 ;
+  data w1[d, n] ~ Categorical(phi[z1[d]])
+      for d <- 0 until D1, n <- 0 until doc1_length[d];
+  data w2[d, n] ~ Categorical(phi[z2[d]])
+      for d <- 0 until D2, n <- 0 until doc2_length[d];
 }
 '''
 # z1 topics for training documents w1 words for z1
@@ -35,25 +35,54 @@ sched = 'ConjGibbs [theta] (*) ConjGibbs [phi] (*) DiscGibbs [z2]'
 def holdout(i):
     return (i%50 == 0)
 
+def npi32(arr):
+    return np.array(arr, dtype=np.int32)
+
+def doc_word(topics, docs, words):
+    print len(docs), len(words)
+    arr = []
+    acc = []
+    curr_doc = docs[0]
+    doc_id = 0
+    for doc, word in zip(docs, words):
+        if doc == curr_doc:
+            acc += [word]
+        else:
+            curr_doc = doc
+            doc_id+=1
+            while doc_id != curr_doc:
+                assert doc_id <=  curr_doc
+                arr+=[[]]
+                doc_id+=1
+            arr += [acc]
+            assert len(arr) == doc_id
+            acc = [word]
+    arr+= [acc]
+    assert len(topics) == len(arr)
+    return arr
+
 def split_training(ndocs, nwords, ntopics, topics, docs, words):
-    z1_map = {}
+    dw = doc_word(topics, docs, words)
+
+    z1_map = []
+    z1_tmap = []
     z1n=0
-    z2_map = {}
+    z2_map = []
     z2n=0
     for d, t in enumerate(topics):
         if holdout(d):
-            z2_map[d] = (z2n, t)
+            z2_map += [(z2n, d)]
             z2n+=1
         else:
-            z1_map[d] = (z1n, t)
+            z1_map += [(z1n, d)]
+            z1_tmap += [t]
             z1n+=1
-    z1=[val for idx,val in enumerate(topics) if not holdout(idx)]
-    w1=[word for doc,word in zip(docs, words) if not holdout(doc)]
-    d1=[z1_map[doc][0] for doc,word in zip(docs, words) if not holdout(doc)]
-    z2=[val for idx,val in enumerate(topics) if  holdout(idx)]
-    w2=[word for doc,word in zip(docs, words) if holdout(doc)]
-    d2=[z2_map[doc][0] for doc,word in zip(docs, words) if holdout(doc)]
-    return ((z1,w1,d1), (z2,w2,d2))
+    D1= len(z1_map)
+    D2= len(z2_map)
+    assert D1+D2 == len(dw)
+    w1 = np.array([npi32(dw[oz]) for (z1i, oz) in z1_map])
+    w2 = np.array([npi32(dw[oz]) for (z2i, oz) in z2_map])
+    return (npi32(z1_tmap), D1, D2, w1, w2)
 
 def log_snapshot(tim, num_samples, z, out):
     out.write("%.3f" % tim)
@@ -65,34 +94,25 @@ def log_snapshot(tim, num_samples, z, out):
 
 def run_nb(words, docs, topics, output_dir, num_samples):
 
-    num_docs = 1+docs[-1]
+    num_docs = len(topics)
     num_words=1+max(words)
     num_topics=1+max(topics)
     out=open(output_dir+str(num_topics)+'-'+str(num_docs), 'w')
 
 
-    ((z1p, w1p, doc1p), (z2p,w2p,doc2p)) = split_training(num_docs, num_words, num_topics, topics, docs, words)
-    D1=len(z1p)
-    D2=num_docs - D1
-    assert (D2 == len(z2p))
-    N1=len(w1p)
-    N2=len(w2p)
+    (z1, D1, D2, w1, w2) = split_training(num_docs, num_words, num_topics, topics, docs, words)
 
     topic_prior = np.array([1.0]*num_topics)
     word_prior = np.array([1.0]*num_words)
-    doc1 = np.array(doc1p, dtype=np.int32)
-    doc2 = np.array(doc2p, dtype=np.int32)
-    w1 = np.array(w1p, dtype=np.int32)
-    w2 = np.array(w2p, dtype=np.int32)
-    z1 = np.array(z1p, dtype=np.int32)
+    doc1_length = np.array(map(len, w1), dtype=np.int32)
+    doc2_length = np.array(map(len, w2), dtype=np.int32)
 
-    with AugurInfer('config.yml', augur_nb) as infer_obj:
+    with AugurInfer('config.yml', augur_nb_2d_partially_supervised) as infer_obj:
         augur_opt = AugurOpt(cached=False, target='cpu', paramScale=None)
         infer_obj.set_compile_opt(augur_opt)
         infer_obj.set_user_sched(sched)
         init_time = time.clock()
-        c = infer_obj.compile(num_topics, D1, D2, N1, N2,
-                              topic_prior, word_prior, doc1, doc2)(z1, w1, w2)
+        c = infer_obj.compile(num_topics, D1, D2, topic_prior, word_prior, doc1_length, doc2_length)(z1, w1,w2)
 
         compile_time=time.clock()-init_time
         num_samples = 0
