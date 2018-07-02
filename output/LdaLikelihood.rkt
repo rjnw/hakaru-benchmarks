@@ -36,10 +36,10 @@
       (values (+ t tim) (cons (list (+ t tim) sweep acc) ntsa))))
   (reverse ntsa))
 
-(define rkt-orig (last (parse "kos-rkt-50")))
+(define rkt-orig (last (parse "kos-50/rkt-50")))
 (define rkt-trials rkt-orig)
-(define augur-orig (car (parse "kos-augur-50")))
-(define augur-trials (recalculate-time augur-orig))
+(define augur-orig (car (parse "kos-50/augur-50")))
+(define augur-trials  augur-orig)
 (define (get-xy tsa)
   (for/list ([t tsa])
     (list (first t) (third t))))
@@ -69,10 +69,10 @@
    ;;             #:when (zero? (modulo s 10)))
    ;;    ta)
    ;;  #:size point-size #:color lcolor #:sym pstyle)
-   (points
-    trial
-    #:size point-size #:alpha 0.1 #:line-width 1
-    #:color lcolor #:sym pstyle)
+   ;; (points
+   ;;  trial
+   ;;  #:size point-size #:alpha 0.1 #:line-width 1
+   ;;  #:color lcolor #:sym pstyle)
 
    (lines
     trial
@@ -95,6 +95,8 @@
             (make-object color% 0 146 146) 'solid
             "AugurV2" 'square)
   )
-  "ldalikelihood.pdf"
+
+ "ldalikelihood.pdf"
+ #:legend-anchor 'bottom-right
  ;; #:y-min -31000000
  )

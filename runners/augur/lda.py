@@ -51,13 +51,12 @@ def run_lda(words, docs, num_topics, out, num_samples):
         infer_obj.compile(num_topics, len(w_shape), w_shape, topic_prior, word_prior)(w)
         samples = 0
         tim = 0
-        while samples < num_samples:
-            print "getting sample: ", samples, num_samples
-            start_time=time.clock()
+        # while samples < num_samples:
+        while (time.clock() - tim) < 1800:
+            print "getting sample: ", samples
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
-            tim = time.clock() - start_time
-            print "got a sample in time: ", tim
-            log_snapshot(tim, samples, z)
+            print "got a sample in time: ", time.clock() - tim
+            log_snapshot((time.clock() - tim), samples, z)
             samples += 1
         out.write('\n')
 
@@ -81,11 +80,12 @@ def doc_word(docs, words):
     return np.array(arr)
 
 if __name__ == '__main__':
-    [ns, input_folder, output_dir, num_topics, num_samples] = sys.argv
+    [ns, input_folder, output_dir, num_topics, num_trials] = sys.argv
     words_file = input_folder + "words"
     docs_file = input_folder + "docs"
     words=loadNewsFile(words_file)
     docs=loadNewsFile(docs_file)
     print 'loaded news...'
     with open(output_dir + '/augur-'+num_topics , 'w') as out:
-        run_lda(words, docs, int(num_topics), out, int(num_samples))
+        for i in range(int(num_trials)):
+            run_lda(words, docs, int(num_topics), out, 0)
