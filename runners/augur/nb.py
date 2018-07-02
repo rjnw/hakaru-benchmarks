@@ -3,7 +3,7 @@ import numpy as np
 import scipy as sp
 import scipy.stats as sps
 import time
-
+import sys
 # K = length(topic_prior)
 # D = size(z)
 # N = map number-of-word documents
@@ -70,7 +70,7 @@ def split_training(ndocs, nwords, ntopics, topics, docs, words):
     d2=[z2_map[doc][0] for doc,word in zip(docs, words) if holdout(doc)]
     return ((z1,w1,d1), (z2,w2,d2))
 
-def log_snapshot(tim, num_samples, z,out):
+def log_snapshot(tim, num_samples, z, out):
     out.write("%.3f" % tim)
     out.write(' ')
     out.write(str(num_samples))
@@ -78,41 +78,42 @@ def log_snapshot(tim, num_samples, z,out):
     out.write('['+' '.join([str(n) for n in z]) + ']')
     out.write('\t')
 
-def run_nb(words, docs, topics, outf):
+def run_nb(words, docs, topics, output_dir, num_samples):
 
     num_docs = 1+docs[-1]
     num_words=1+max(words)
     num_topics=1+max(topics)
-    out=open(outf+str(num_topics)+'-'+str(num_docs), 'w')
+    out=open(output_dir+str(num_topics)+'-'+str(num_docs), 'w')
 
-    topic_prior = np.full(num_topics, 1.0, dtype=np.float64)
-    word_prior = np.full(num_words, 1.0, dtype=np.float64)
 
-    ((z1, w1, doc1), (z2,w2,doc2)) = split_training(num_docs, num_words, num_topics, topics, docs, words)
-    D1=len(z1)
+    ((z1p, w1p, doc1p), (z2p,w2p,doc2p)) = split_training(num_docs, num_words, num_topics, topics, docs, words)
+    D1=len(z1p)
     D2=num_docs - D1
-    N1=len(w1)
-    N2=len(w2)
+    assert (D2 == len(z2p))
+    N1=len(w1p)
+    N2=len(w2p)
+
+    topic_prior = np.array([1.0]*num_topics)
+    word_prior = np.array([1.0]*num_words)
+    doc1 = np.array(doc1p, dtype=np.int32)
+    doc2 = np.array(doc2p, dtype=np.int32)
+    w1 = np.array(w1p, dtype=np.int32)
+    w2 = np.array(w2p, dtype=np.int32)
+    z1 = np.array(z1p, dtype=np.int32)
+
     with AugurInfer('config.yml', augur_nb) as infer_obj:
         augur_opt = AugurOpt(cached=False, target='cpu', paramScale=None)
         infer_obj.set_compile_opt(augur_opt)
         infer_obj.set_user_sched(sched1)
         init_time = time.clock()
         c = infer_obj.compile(num_topics, D1, D2, N1, N2,
-                          topic_prior, word_prior,
-                          np.array(doc1, dtype=np.int32), np.array(doc2, dtype=np.int32))
-        c(np.array(z1, dtype=np.int32), np.array(w1, dtype=np.int32), np.array(w2, dtype=np.int32))
-
-        # infer_obj.set_compile_opt(augur_opt)
-        # infer_obj.set_user_sched(sched1)
-        # init_time = time.clock()
-        # c = infer_obj.compile(num_topics, len(topics), len(words), topic_prior, word_prior, np.array(docs))(np.array(words))
+                              topic_prior, word_prior, doc1, doc2)(z1, w1, w2)
 
         compile_time=time.clock()-init_time
         num_samples = 0
         print 'compile-time: ', compile_time
         tim0=time.clock()
-        while num_samples <= 2 or tim < 1:
+        while num_samples <= 2:
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z2'][0]
             tim = time.clock() - tim0
             print 'time at sweep: ', num_samples, tim
@@ -132,22 +133,34 @@ def loadNewsFile(fname) :
 
 def doc_word(docs, words):
     arr = []
-    ci = 0
-    doc = []
-    for (d,w) in zip(docs, words):
-        if d == ci:
-            doc.append(w)
-            ci=d
+    acc = []
+    curr_doc = docs[0]
+    for doc, word in zip(docs, words):
+        if doc is curr_doc:
+            acc += [word]
         else:
-            ci=d
-            ndoc=np.array(doc, dtype=np.int32)
-            arr.append(ndoc)
-            doc=[w]
-    return np.array(arr, dtype=np.int32)
+            curr_doc = doc
+            arr += [np.array(acc, dtype=np.int32)]
+            acc = [word]
+    arr+= [np.array(acc, dtype=np.int32)]
+    return np.array(arr)
+
 
 if __name__ == '__main__':
+    [ns, input_folder, output_dir, num_samples] = sys.argv
+    words_file = input_folder + "words"
+    docs_file = input_folder + "docs"
+    topics_file = input_folder + "topics"
     words=loadNewsFile(words_file)
     docs=loadNewsFile(docs_file)
     topics=loadNewsFile(topics_file)
     print 'loaded news...'
-    run_nb(words, docs, topics, '../../output/NaiveBayesGibbs/augur/')
+    with open(output_dir + '/augur' , 'w') as out:
+        run_nb(words, docs, topics, output_dir, int(num_samples))
+
+# if __name__ == '__main__':
+#     words=loadNewsFile(words_file)
+#     docs=loadNewsFile(docs_file)
+#     topics=loadNewsFile(topics_file)
+#     print 'loaded news...'
+#     run_nb(words, docs, topics, '../../output/NaiveBayesGibbs/augur/')
