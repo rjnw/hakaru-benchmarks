@@ -4,7 +4,7 @@
          hakrit/utils
          racket/cmdline
          racket/runtime-path
-         "utils.rkt"
+         "gmm-utils.rkt"
          "discrete.rkt")
 
 (define testname "GmmGibbs")
@@ -47,9 +47,12 @@
       (for ([i (in-range points)])
         (fprintf out-port "~a " (nat-array-ref state i)))
       (fprintf out-port "~a]\t" (nat-array-ref state (sub1 points))))
-    (define sweeper (curry gibbs-sweep points nat-array-set! update))
 
-    (gibbs-timer sweeper zsc printer #:min-time 0 #:step-time 0.01 #:min-sweeps 1 #:step-sweeps 1)
+
+    (define spr (curry gibbs-sweep points nat-array-set! update))
+
+    (gibbs-timer spr zsc printer #:min-time 12 #:step-time 0.01 #:min-sweeps 0 #:step-sweeps 1)
+
     (fprintf out-port "\n"))
   (call-with-output-file outfile #:exists 'replace
     (λ (out-port)

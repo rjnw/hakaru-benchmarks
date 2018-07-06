@@ -14,7 +14,7 @@
 (define docsfile   (build-path input-dir newsd "docs"))
 (define topicsfile   (build-path input-dir newsd "topics"))
 
-(define holdout-modulo 50)
+(define holdout-modulo 10)
 (define (holdout? i) (zero? (modulo i holdout-modulo)))
 
 (define true-topics (map string->number (file->lines topicsfile)))
@@ -23,6 +23,23 @@
              [i (in-range 0 (length true-topics))]
              #:when (holdout? i))
     tt))
+
+(define (full-accuracy topics)
+  (define-values (correct total)
+    (for/fold ([correct-topics '()]
+               [total-docs '()])
+              ([i (in-range (length true-topics))]
+               [true-topic true-topics]
+               [predict-topic topics]
+               #:when (holdout? (add1 i)))
+      (values (if (equal? true-topic predict-topic)
+                  (cons i correct-topics)
+                  (begin
+                    (printf "not-equal: ~a\n" i)
+                    correct-topics))
+              (cons i total-docs))))
+  (printf "full-accuracy: ~a, ~a\n" (length correct) (length total))
+  (/ (* (length correct) 1.0) (length total)))
 
 (define (accuracy predict-topics)
   (define-values (correct total)
@@ -35,25 +52,25 @@
                   (cons i correct-topics)
                   correct-topics)
               (cons i total-docs))))
-  ;; (printf "acc: ~a/~a\n" (length correct) (length total))
   (/ (* (length correct) 1.0) (length total)))
 
 (define num-topics 20)
 (define num-docs 19997)
 
-(define rkt-test (build-path output-dir testname "rkt" (format "~a-~a" num-topics num-docs)))
+(define rkt-test (build-path output-dir testname "rkt" (format "~a-~a-%~a" num-topics num-docs holdout-modulo)))
 (define hk-test (build-path output-dir testname "hk" (format "~a-~a" num-topics num-docs)))
-(define jags-test (build-path output-dir testname "jags" (format "~a-~a" num-topics num-docs)))
-(define augur-test (build-path output-dir testname "augur" (format "~a-~a" num-topics num-docs)))
+(define jags-test (build-path output-dir testname "jags" (format "~a-~a-adapt0" num-topics num-docs)))
+(define augur-test (build-path output-dir testname "augur" (format "~a-~a-%~a" num-topics num-docs holdout-modulo)))
 
 (define (get-snapshots st)
   (define snapshots (regexp-match* #px"(\\d*\\.?\\d*) (\\d*\\.?\\d*) \\[(.*?)\\]" st #:match-select cdr))
-  (define f (compose inexact->exact string->number))
+  (define f (compose string->number))
   (map (λ (s) (match-define (list tim sweep state) s)
           (list (string->number tim)
                 (f sweep)
                 (map f (regexp-match* #px"\\d+\\.?\\d*" state))))
        snapshots))
+
 
 (define (trial->tsa trial)
   (define sshots (get-snapshots trial))
@@ -64,35 +81,40 @@
     ;; (printf "sweep: ~a, time: ~a, accuracy: ~a\n" sweep tim acc)
     (list tim sweep acc)))
 
+(define (cleanup-jags trial)
+  (define sshots (get-snapshots trial))
+  (for/list ([shot sshots])
+    (match-define (list tim sweep predict) shot)
+    (list tim sweep (full-accuracy (map sub1 predict)))))
+
 (define (str-trials->time-sweep-accuracy trials)
   (map trial->tsa trials))
 
-(begin (define rkt-trials (str-trials->time-sweep-accuracy (file->lines rkt-test)))
-       (define augur-trials (str-trials->time-sweep-accuracy (file->lines augur-test)))
-       ;; (define hs-trials (str-trials->time-sweep-accuracy (file->lines hk-test)))
-       ;; (define jags-trials (cons
-       ;;                      '((22793.95 1 0.776888444222111)
-       ;;                       (23311.4 2 0.806903451725863)
-       ;;                       (23833.82 3 0.8139069534767384)
-       ;;                       (24358.23 4 0.817408704352176)
-       ;;                       (24882.86 5 0.8164082041020511))
-       ;;                      (str-trials->time-sweep-accuracy (file->lines jags-test))))
-       ;; (define jags-trials
-       ;; '(((22793.95 1 0.776888444222111)
-       ;;    (23311.4 2 0.806903451725863)
-       ;;    (23833.82 3 0.8139069534767384)
-       ;;    (24358.23 4 0.817408704352176)
-       ;;    (24882.86 5 0.8164082041020511)))
+(define (fix-timings trials)
+  (define-values (ntrials st ut ns)
+    (for/fold ([ntrials '()]
+               [sweept 0]
+               [updatet 0]
+               [nsweeps 1])
+              ([tsa trials])
+      (match-define (list tim sweep acc) tsa)
+      (if (exact? sweep)
+          (values (cons (list (+ tim updatet) nsweeps acc) ntrials)
+                  0 (+ tim updatet) (add1 nsweeps))
+          (values (cons (list (+ tim updatet sweept) nsweeps acc) ntrials)
+                  (+ tim sweept) updatet (add1 nsweeps)))))
+  (reverse ntrials))
 
-       ;;   (list (for/list ([line (length (file->lines "./NaiveBayesGibbs/jags/manual-20-19997"))])
-       ;;   (define vs (map string->number (string-split line " ")))
-       ;;   (define t (car vs))
-       ;;   (define sweeps (cadr vs))
-       ;;   (define z (map sub1 (cddr vs)))
-       ;;   (list t sweeps (accuracy z))))
-       ;;   )
+(begin (define rkt-trials (map fix-timings (map (λ (trial) (filter (λ (tsa)
+                                                                      (exact? (second tsa)))
+                                                                   trial))
+                                                (str-trials->time-sweep-accuracy (file->lines rkt-test)))))
+       (define augur-trials (map fix-timings (str-trials->time-sweep-accuracy (file->lines augur-test))))
+
+       ;; (define hs-trials (str-trials->time-sweep-accuracy (file->lines hk-test)))
        )
-;; (define hk-trials (str-trial->time-sweep-accuracy (file->lines hk-test)))
+
+(define jags-trials  (map cleanup-jags (file->lines jags-test)))
 
 (define (remove-warmup tsa)
   (for/list ([trial tsa])
@@ -117,7 +139,7 @@
             )
          (plot-file (list
                      (lines rkt-mta #:color (make-object color% 0 73 73)  #:label "hakrit" )
-                     (lines augur-mta #:color (make-object color% 0 73 73)  #:label "augur" )
+                     (lines augur-mta #:color (make-object color% 146 0 0)  #:label "augur")
                      ;; (lines jags-mta #:color (make-object color% 146 0 0)  #:label "jags" )
                      ;; (points jags-mta #:size 6 #:color (make-object color% 146 0 0) #:sym 'diamond)
                      ;; (points rkt-mta #:size 6 #:color (make-object color% 0 73 73) #:sym 'triangle)
@@ -125,9 +147,10 @@
                      )
                     "nb-plot.pdf"
 
-                    ;; #:y-min 0.97
+                    #:y-min 0.9
+                    #:y-max 0.4
                     #:legend-anchor 'bottom-right
-                    #:x-label "sweep"
+                    #:x-label "seconds"
                     #:y-label "accuracy"
                     #:title "NaiveBayesGibbs"))
 

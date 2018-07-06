@@ -18,7 +18,7 @@ import           Utils (SamplerKnobs(..), freshFile,
                         Sampler, oneLine, gmmKnobs,
                         timeJags, gibbsSweep,
                         timeHakaru, paramsFromName)
-import           GmmGibbs.Prog4
+import           GmmGibbs.Prog
 
 default (Int)
 

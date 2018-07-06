@@ -50,9 +50,8 @@ def run_lda(words, docs, num_topics, out, num_samples):
 
         infer_obj.compile(num_topics, len(w_shape), w_shape, topic_prior, word_prior)(w)
         samples = 0
-        tim = 0
-        # while samples < num_samples:
-        while (time.clock() - tim) < 1800:
+        tim = time.clock()
+        while (time.clock() - tim) < 1000:
             print "getting sample: ", samples
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
             print "got a sample in time: ", time.clock() - tim

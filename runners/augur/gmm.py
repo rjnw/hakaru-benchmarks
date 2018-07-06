@@ -37,11 +37,13 @@ def run_gmm(classes, points, t, out):
 
         num_samples = 1
         tim = 0
-        while num_samples <= 100 or tim < 40:
+        while tim < 15:
             tim = time.clock() - init_time
+            for i in range(5):
+                infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
             log_snapshot(tim, num_samples, z)
-            num_samples += 1
+            num_samples += 5
         out.write('\n')
     # error()
 
@@ -53,5 +55,3 @@ if __name__ == '__main__':
             for line in iter(inp.readline, ''):
                 (t, z) = literal_eval(line)
                 run_gmm(int(classes), int(points), t, out)
-    print 'args', sys.argv
-    print classes, points

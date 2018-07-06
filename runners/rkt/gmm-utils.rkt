@@ -27,18 +27,14 @@
 
 ;; update: state -> nat -> nat
 ;; state: array<nat>
-(define ((gibbs-sweep iter-count zs-pos-set! update printer zs) tim sweeps)
-  (define t0 (get-time))
+(define (gibbs-sweep iter-count zs-pos-set! update zs)
   (define (loop i)
     (if (zero? i)
         zs
         (let ([nz (update zs (- i 1))])
-          (when (zero? (modulo i 1000))
-            (printer (elasp-time t0) (- sweeps (exact->inexact (/ i iter-count))) zs)
-            (set! t0 (get-time)))
           (zs-pos-set! zs (- i 1) nz)
           (loop (- i 1)))))
-  (loop iter-count ))
+  (loop iter-count))
 
 (define (gibbs-timer sweeper zs printer
                      #:min-time [min-time 10]
@@ -50,19 +46,18 @@
   (define (gibbs-trial)
     (define (step)
       (define time0 (get-time))
-
       (define (sweeper-step [ss step-sweeps])
         (if (zero? ss)
             (void)
             (begin
-              ((sweeper zs) (elasp-time time0) sweeps)
+              (sweeper zs)
               (sweeper-step (- ss 1)))))
 
       (define (timer-step [tim step-time])
         (define (step-done?) (> (elasp-time time0) step-time))
         (sweeper-step)
         (set! sweeps (+ sweeps step-sweeps))
-        (printer (elasp-time time0) sweeps zs)
+        (printer (elasp-time start-time) sweeps zs)
         (unless (step-done?)
           (timer-step (elasp-time time0))))
       (timer-step))

@@ -11,172 +11,163 @@ import           Control.Monad
 import           System.Environment (getArgs)
 
 prog ::
-  ((MayBoxVec Prob Prob) ->
-   ((MayBoxVec Int Int) ->
-    ((MayBoxVec Double Double) -> (Int -> (Measure Int)))))
+  (Prob ->
+   ((MayBoxVec Prob Prob) ->
+    ((MayBoxVec Int Int) ->
+     ((MayBoxVec Double Double) -> (Int -> (Measure Int))))))
 prog =
-  lam $ \ as42 ->
-  lam $ \ z43 ->
-  lam $ \ t44 ->
-  lam $ \ docUpdate45 ->
-  case_ (size z43 == size t44 &&
-         docUpdate45 < size z43 &&
-         z43 ! docUpdate45 < size as42)
+  lam $ \ s44 ->
+  lam $ \ as45 ->
+  lam $ \ z46 ->
+  lam $ \ t47 ->
+  lam $ \ docUpdate48 ->
+  case_ (size z46 == size t47 &&
+         docUpdate48 < size z46 &&
+         z46 ! docUpdate48 < size as45)
         [branch ptrue
-                ((pose (product (nat_ 0)
-                                (size as42)
-                                (\ _b46 ->
+                ((pose (prob_ 2 ** (nat2real (size t47) * real_ (-1/2)) *
+                        exp (summate (nat_ 0) (size t47) (\ _a49 -> t47 ! _a49 ^ nat_ 2) *
+                             real_ (-1/2)) *
+                        pi ** (nat2real (size t47) * real_ (-1/2)) *
+                        product (nat_ 0)
+                                (size as45)
+                                (\ _b50 ->
                                  product (nat_ 0)
                                          (let_ (bucket (nat_ 0)
-                                                       (size t44)
-                                                       ((r_index (\ () -> size as42)
-                                                                 (\ (_a49,()) -> z43 ! _a49)
-                                                                 (r_add (\ (_a49,(_b50,())) ->
-                                                                         nat_ 1))))) $ \ summary48 ->
-                                          unsafeNat (nat2int (case_ (_b46 == z43 ! docUpdate45)
+                                                       (size t47)
+                                                       ((r_index (\ () -> size as45)
+                                                                 (\ (_a53,()) -> z46 ! _a53)
+                                                                 (r_add (\ (_a53,(_b54,())) ->
+                                                                         nat_ 1))))) $ \ summary52 ->
+                                          unsafeNat (nat2int (case_ (_b50 == z46 ! docUpdate48)
                                                                     [branch ptrue (nat_ 1),
                                                                      branch pfalse (nat_ 0)]) *
                                                      int_ -1 +
-                                                     nat2int (summary48 ! _b46)))
-                                         (\ j47 -> nat2prob j47 + as42 ! _b46)) *
-                        prob_ 2
-                        ** (nat2real (size as42) * real_ (1/2) +
-                            nat2real (size t44) * real_ (-1/2)) *
-                        exp (summate (nat_ 0) (size t44) (\ _a51 -> t44 ! _a51 ^ nat_ 2) *
-                             real_ (-1/2)) *
-                        pi ** (nat2real (size t44) * real_ (-1/2)) *
+                                                     nat2int (summary52 ! _b50)))
+                                         (\ j51 -> nat2prob j51 + as45 ! _b50)) *
                         recip (product (nat_ 0)
                                        (summate (nat_ 0)
-                                                (size t44)
-                                                (\ _a53 ->
-                                                 case_ (_a53 == docUpdate45)
+                                                (size t47)
+                                                (\ _a56 ->
+                                                 case_ (_a56 == docUpdate48)
                                                        [branch ptrue (nat_ 0),
                                                         branch pfalse (nat_ 1)]))
-                                       (\ _b52 ->
-                                        nat2prob _b52 +
-                                        summate (nat_ 0) (size as42) (\ _a54 -> as42 ! _a54))) *
+                                       (\ _b55 ->
+                                        nat2prob _b55 +
+                                        summate (nat_ 0) (size as45) (\ _a57 -> as45 ! _a57))) *
                         recip (nat2prob (summate (nat_ 0)
-                                                 (size t44)
-                                                 (\ _a55 ->
-                                                  case_ (_a55 == docUpdate45)
+                                                 (size t47)
+                                                 (\ _a58 ->
+                                                  case_ (_a58 == docUpdate48)
                                                         [branch ptrue (nat_ 0),
                                                          branch pfalse (nat_ 1)])) +
-                               summate (nat_ 0) (size as42) (\ _a56 -> as42 ! _a56))) $
-                       (categorical (array (size as42) $
-                                           \ zNewb57 ->
-                                           unsafeProb ((fromInt (let_ (bucket (nat_ 0)
-                                                                              (size t44)
-                                                                              ((r_index (\ () ->
-                                                                                         size as42)
-                                                                                        (\ (_a59,()) ->
-                                                                                         z43
-                                                                                         ! _a59)
-                                                                                        (r_add (\ (_a59,(zNewb60,())) ->
-                                                                                                nat_ 1))))) $ \ summary58 ->
-                                                                 nat2int (case_ (zNewb57
-                                                                                 == z43
-                                                                                    ! docUpdate45)
-                                                                                [branch ptrue
-                                                                                        (nat_ 1),
-                                                                                 branch pfalse
-                                                                                        (nat_ 0)]) *
-                                                                 int_ -1 +
-                                                                 nat2int (summary58 ! zNewb57)) +
-                                                        fromProb (as42 ! zNewb57)) *
-                                                       fromProb (exp (summate (nat_ 0)
-                                                                              (size as42)
-                                                                              (\ _a61 ->
-                                                                               (let_ (bucket (nat_ 0)
-                                                                                             (size t44)
-                                                                                             ((r_index (\ () ->
-                                                                                                        size as42)
-                                                                                                       (\ (i63,()) ->
-                                                                                                        z43
-                                                                                                        ! i63)
-                                                                                                       (r_add (\ (i63,(_a64,())) ->
-                                                                                                               t44
-                                                                                                               ! i63))))) $ \ summary62 ->
-                                                                                case_ (_a61
-                                                                                       == zNewb57)
-                                                                                      [branch ptrue
-                                                                                              (t44
-                                                                                               ! docUpdate45),
-                                                                                       branch pfalse
-                                                                                              (real_ 0)] +
-                                                                                case_ (_a61
-                                                                                       == z43
-                                                                                          ! docUpdate45)
-                                                                                      [branch ptrue
-                                                                                              (t44
-                                                                                               ! docUpdate45),
-                                                                                       branch pfalse
-                                                                                              (real_ 0)] *
-                                                                                real_ (-1) +
-                                                                                summary62 ! _a61)
-                                                                               ^ nat_ 2 *
-                                                                               recip (fromInt (int_ 1 +
-                                                                                               (let_ (bucket (nat_ 0)
-                                                                                                             (size t44)
-                                                                                                             ((r_index (\ () ->
-                                                                                                                        size as42)
-                                                                                                                       (\ (i66,()) ->
-                                                                                                                        z43
-                                                                                                                        ! i66)
-                                                                                                                       (r_add (\ (i66,(_a67,())) ->
-                                                                                                                               nat_ 1))))) $ \ summary65 ->
-                                                                                                nat2int (case_ (_a61
-                                                                                                                == zNewb57)
-                                                                                                               [branch ptrue
-                                                                                                                       (nat_ 1),
-                                                                                                                branch pfalse
-                                                                                                                       (nat_ 0)]) +
-                                                                                                nat2int (case_ (_a61
-                                                                                                                == z43
-                                                                                                                   ! docUpdate45)
-                                                                                                               [branch ptrue
-                                                                                                                       (nat_ 1),
-                                                                                                                branch pfalse
-                                                                                                                       (nat_ 0)]) *
-                                                                                                int_ -1 +
-                                                                                                nat2int (summary65
-                                                                                                         ! _a61)) *
-                                                                                               int_ 196))) *
-                                                                      real_ 98)) *
-                                                       fromProb (recip (nat_ 2
-                                                                        `thRootOf` (nat2prob (unsafeNat (product (nat_ 0)
-                                                                                                                 (size as42)
-                                                                                                                 (\ _b68 ->
-                                                                                                                  int_ 2 +
-                                                                                                                  (let_ (bucket (nat_ 0)
-                                                                                                                                (size t44)
-                                                                                                                                ((r_index (\ () ->
-                                                                                                                                           size as42)
-                                                                                                                                          (\ (_a70,()) ->
-                                                                                                                                           z43
-                                                                                                                                           ! _a70)
-                                                                                                                                          (r_add (\ (_a70,(_b71,())) ->
-                                                                                                                                                  nat_ 1))))) $ \ summary69 ->
-                                                                                                                   nat2int (case_ (_b68
-                                                                                                                                   == zNewb57)
-                                                                                                                                  [branch ptrue
-                                                                                                                                          (nat_ 1),
-                                                                                                                                   branch pfalse
-                                                                                                                                          (nat_ 0)]) +
-                                                                                                                   nat2int (case_ (_b68
-                                                                                                                                   == z43
-                                                                                                                                      ! docUpdate45)
-                                                                                                                                  [branch ptrue
-                                                                                                                                          (nat_ 1),
-                                                                                                                                   branch pfalse
-                                                                                                                                          (nat_ 0)]) *
-                                                                                                                   int_ -1 +
-                                                                                                                   nat2int (summary69
-                                                                                                                            ! _b68)) *
-                                                                                                                  int_ 392))))))))))),
+                               summate (nat_ 0) (size as45) (\ _a59 -> as45 ! _a59))) $
+                       (categorical (array (size as45) $
+                                           \ zNewd60 ->
+                                           unsafeProb (fromInt (let_ (bucket (nat_ 0)
+                                                                             (size t47)
+                                                                             ((r_index (\ () ->
+                                                                                        size as45)
+                                                                                       (\ (_a73,()) ->
+                                                                                        z46
+                                                                                        ! _a73)
+                                                                                       (r_add (\ (_a73,(zNewd74,())) ->
+                                                                                               nat_ 1))))) $ \ summary72 ->
+                                                                nat2int (case_ (zNewd60
+                                                                                == z46
+                                                                                   ! docUpdate48)
+                                                                               [branch ptrue
+                                                                                       (nat_ 1),
+                                                                                branch pfalse
+                                                                                       (nat_ 0)]) *
+                                                                int_ -1 +
+                                                                nat2int (summary72 ! zNewd60)) +
+                                                       fromProb (as45 ! zNewd60)) *
+                                           exp (summate (nat_ 0)
+                                                        (size as45)
+                                                        (\ _a61 ->
+                                                         (let_ (bucket (nat_ 0)
+                                                                       (size t47)
+                                                                       ((r_index (\ () -> size as45)
+                                                                                 (\ (i63,()) ->
+                                                                                  z46
+                                                                                  ! i63)
+                                                                                 (r_add (\ (i63,(_a64,())) ->
+                                                                                         t47
+                                                                                         ! i63))))) $ \ summary62 ->
+                                                          case_ (_a61 == zNewd60)
+                                                                [branch ptrue (t47 ! docUpdate48),
+                                                                 branch pfalse (real_ 0)] +
+                                                          case_ (_a61 == z46 ! docUpdate48)
+                                                                [branch ptrue (t47 ! docUpdate48),
+                                                                 branch pfalse (real_ 0)] *
+                                                          real_ (-1) +
+                                                          summary62 ! _a61)
+                                                         ^ nat_ 2 *
+                                                         recip (fromInt (let_ (bucket (nat_ 0)
+                                                                                      (size t47)
+                                                                                      ((r_index (\ () ->
+                                                                                                 size as45)
+                                                                                                (\ (i66,()) ->
+                                                                                                 z46
+                                                                                                 ! i66)
+                                                                                                (r_add (\ (i66,(_a67,())) ->
+                                                                                                        nat_ 1))))) $ \ summary65 ->
+                                                                         nat2int (case_ (_a61
+                                                                                         == zNewd60)
+                                                                                        [branch ptrue
+                                                                                                (nat_ 1),
+                                                                                         branch pfalse
+                                                                                                (nat_ 0)]) +
+                                                                         nat2int (case_ (_a61
+                                                                                         == z46
+                                                                                            ! docUpdate48)
+                                                                                        [branch ptrue
+                                                                                                (nat_ 1),
+                                                                                         branch pfalse
+                                                                                                (nat_ 0)]) *
+                                                                         int_ -1 +
+                                                                         nat2int (summary65
+                                                                                  ! _a61)) *
+                                                                fromProb (s44 ^ nat_ 2) +
+                                                                real_ 1)) *
+                                                fromProb (s44 ^ nat_ 2) *
+                                                real_ (1/2)) *
+                                           recip (nat_ 2
+                                                  `thRootOf` (unsafeProb (product (nat_ 0)
+                                                                                  (size as45)
+                                                                                  (\ _b68 ->
+                                                                                   fromInt (let_ (bucket (nat_ 0)
+                                                                                                         (size t47)
+                                                                                                         ((r_index (\ () ->
+                                                                                                                    size as45)
+                                                                                                                   (\ (_a70,()) ->
+                                                                                                                    z46
+                                                                                                                    ! _a70)
+                                                                                                                   (r_add (\ (_a70,(_b71,())) ->
+                                                                                                                           nat_ 1))))) $ \ summary69 ->
+                                                                                            nat2int (case_ (_b68
+                                                                                                            == zNewd60)
+                                                                                                           [branch ptrue
+                                                                                                                   (nat_ 1),
+                                                                                                            branch pfalse
+                                                                                                                   (nat_ 0)]) +
+                                                                                            nat2int (case_ (_b68
+                                                                                                            == z46
+                                                                                                               ! docUpdate48)
+                                                                                                           [branch ptrue
+                                                                                                                   (nat_ 1),
+                                                                                                            branch pfalse
+                                                                                                                   (nat_ 0)]) *
+                                                                                            int_ -1 +
+                                                                                            nat2int (summary69
+                                                                                                     ! _b68)) *
+                                                                                   fromProb (s44
+                                                                                             ^ nat_ 2) +
+                                                                                   real_ 1)))))))),
          branch pfalse
-                (case_ (not (size z43 == size t44))
+                (case_ (not (size z46 == size t47))
                        [branch ptrue (reject),
                         branch pfalse
-                               (case_ (not (docUpdate45 < size z43))
+                               (case_ (not (docUpdate48 < size z46))
                                       [branch ptrue (reject), branch pfalse (reject)])])]
-

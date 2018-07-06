@@ -38,6 +38,7 @@ vocabSize <- length(unique(words))
 ## write("words", file="")
 ## write(words, file="", append=TRUE)
 
+
 holdoutFilter <- function (x) {if(x%%holdoutModulo==0) return(TRUE) else return(FALSE)}
 topicIndices <- Filter(holdoutFilter, array(0:docsSize))
 ## write("topicindices: ", file="", append=TRUE)
@@ -45,6 +46,7 @@ topicIndices <- Filter(holdoutFilter, array(0:docsSize))
 
 topics[topicIndices] <- NA
 
+write("running nb", file="", append=TRUE)
 time0 <- proc.time()["elapsed"]
 
 model <- jags.model(modelFile, #'NaiveBayesModel.jags',
@@ -58,7 +60,7 @@ model <- jags.model(modelFile, #'NaiveBayesModel.jags',
                                 'w'          = words,
                                 'doc'        = docs),
                     n.chains = 1,
-                    n.adapt = 10,
+                    n.adapt = 0,
                     quiet=TRUE)
 time1 <- proc.time()["elapsed"]
 write(c(time0, time1), file="")

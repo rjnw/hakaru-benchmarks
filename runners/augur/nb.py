@@ -32,8 +32,6 @@ augur_nb_2d_partially_supervised = '''(K : Int, D1 : Int, D2 : Int, topic_hyper 
 
 sched = 'ConjGibbs [theta] (*) ConjGibbs [phi] (*) DiscGibbs [z2]'
 
-def holdout(i):
-    return (i%50 == 0)
 
 def npi32(arr):
     return np.array(arr, dtype=np.int32)
@@ -61,9 +59,8 @@ def doc_word(topics, docs, words):
     assert len(topics) == len(arr)
     return arr
 
-def split_training(ndocs, nwords, ntopics, topics, docs, words):
+def split_training(ndocs, nwords, ntopics, topics, docs, words, holdout):
     dw = doc_word(topics, docs, words)
-
     z1_map = []
     z1_tmap = []
     z1n=0
@@ -84,7 +81,7 @@ def split_training(ndocs, nwords, ntopics, topics, docs, words):
     w2 = np.array([npi32(dw[oz]) for (z2i, oz) in z2_map])
     return (npi32(z1_tmap), D1, D2, w1, w2)
 
-def log_snapshot(tim, num_samples, z, out):
+def log_snapshot(tim, num_samples, z, out, ):
     out.write("%.3f" % tim)
     out.write(' ')
     out.write(str(num_samples))
@@ -92,15 +89,17 @@ def log_snapshot(tim, num_samples, z, out):
     out.write('['+' '.join([str(n) for n in z]) + ']')
     out.write('\t')
 
-def run_nb(words, docs, topics, output_dir, num_samples):
+def run_nb(words, docs, topics, out, total_sweeps, total_time, holdout_modulo):
+    def holdout(i):
+        return (i%holdout_modulo == 0)
 
     num_docs = len(topics)
     num_words=1+max(words)
     num_topics=1+max(topics)
-    out=open(output_dir+str(num_topics)+'-'+str(num_docs), 'w')
+    # out=open(output_dir+str(num_topics)+'-'+str(num_docs)+'-%'+str(holdout_modulo), 'w')
+    ctout = open('compiletime', 'a')
 
-
-    (z1, D1, D2, w1, w2) = split_training(num_docs, num_words, num_topics, topics, docs, words)
+    (z1, D1, D2, w1, w2) = split_training(num_docs, num_words, num_topics, topics, docs, words, holdout)
 
     topic_prior = np.array([1.0]*num_topics)
     word_prior = np.array([1.0]*num_words)
@@ -115,15 +114,21 @@ def run_nb(words, docs, topics, output_dir, num_samples):
         c = infer_obj.compile(num_topics, D1, D2, topic_prior, word_prior, doc1_length, doc2_length)(z1, w1,w2)
 
         compile_time=time.clock()-init_time
-        num_samples = 0
+        sweeps = 1
         print 'compile-time: ', compile_time
+        ctout.write(str(compile_time))
+        ctout.write('\n')
+        ctout.close()
+        return None
+
         tim0=time.clock()
-        while num_samples <= 2:
+        while sweeps <= total_sweeps or (time.clock() -tim0) <= total_time:
+            tim=time.clock()
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z2'][0]
-            tim = time.clock() - tim0
-            print 'time at sweep: ', num_samples, tim
-            log_snapshot(tim, num_samples, z,out)
-            num_samples += 1
+            tim = time.clock() - tim
+            print 'sweeped: ', sweeps, 'in',  tim, 'total', time.clock()-tim0
+            log_snapshot(tim, sweeps, z,out)
+            sweeps += 1
         out.write('\n')
 
 def loadNewsFile(fname) :
@@ -132,7 +137,7 @@ def loadNewsFile(fname) :
     return map(int, raw)
 
 if __name__ == '__main__':
-    [ns, input_folder, output_dir, num_samples] = sys.argv
+    [ns, input_folder, output_dir, num_trials, trial_sweeps, trial_time, holdout_modulo] = sys.argv
     words_file = input_folder + "words"
     docs_file = input_folder + "docs"
     topics_file = input_folder + "topics"
@@ -140,7 +145,13 @@ if __name__ == '__main__':
     docs=loadNewsFile(docs_file)
     topics=loadNewsFile(topics_file)
     print 'loaded news...'
-    with open(output_dir + '/augur' , 'w') as out:
-        run_nb(words, docs, topics, output_dir, int(num_samples))
+    num_docs=len(topics)
+    num_words=1+max(words)
+    num_topics=1+max(topics)
+    out=open(output_dir+str(num_topics)+'-'+str(num_docs)+'-%'+str(holdout_modulo), 'w')
+    for i in range(int(num_trials)):
+        print 'running trial: ', i
+        run_nb(words, docs, topics, out, int(trial_sweeps), int(trial_time), int(holdout_modulo))
 
-# python2 nb.py ../../input/news/ ../../output/NaiveBayesGibbs/augur/ 1
+
+# python2 nb.py ../../input/news/ ../../output/NaiveBayesGibbs/augur/ 1 10

@@ -56,7 +56,7 @@ Executable gmmGibbs
     Main-is:           GmmGibbs/Main.hs
     Default-Language:  Haskell2010
     GHC-Options:       -O2 -Wall -fwarn-tabs
-    other-modules:     Utils GmmGibbs.Prog4
+    other-modules:     Utils GmmGibbs.Prog
     build-depends:     base                 >= 4.7  && < 5.0,
                        mwc-random           >= 0.13 && < 0.14,
                        hakaru               >= 0.6,

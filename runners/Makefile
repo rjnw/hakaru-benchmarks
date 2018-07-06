@@ -25,3 +25,14 @@ GmmGibbs: GmmGibbsTrial GmmGibbsAcc
 
 NaiveBayes:
 	./hkbin/naiveBayesGibbs ../input ../testcode/jagssrc ../output
+
+# NaiveBayesJags:
+# 	R "
+
+lda-rkt:
+	cd ./rkt && racket LdaGibbs.rkt ../../input/kos/ ../../output/LdaGibbs/kos/ $(topics) $(trials)
+	./hkbin/ldaLikelihood ../input/kos/ ../output/LdaGibbs/kos/rkt-$(topics)   ../output/accuracies/LdaGibbs/kos/rkt-$(topics) $(topics)
+
+lda-augur:
+	cd ./augur && python2 ./lda.py ../../input/kos/ ../../output/LdaGibbs/kos/ $(topics) $(trials)
+	./hkbin/ldaLikelihood ../input/kos/ ../output/LdaGibbs/kos/augur-$(topics)   ../output/accuracies/LdaGibbs/kos/augur-$(topics) $(topics)

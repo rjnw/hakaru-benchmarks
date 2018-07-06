@@ -9,24 +9,14 @@
   (map (λ (tr) (map (λ (tsa) (list (first tsa) (third tsa))) tr)) al))
 
 (define (plot-accuracy classes pts)
-  (define (time-as al (i 0.01))
-    (define j (/ 1 i))
-    (define (mean-accuracy al)
-      (if (ormap empty? al)
+  (define (mean-time trials)
+    (define (rec trials)
+      (if (ormap empty? trials)
           '()
-          (cons (let ([c (map car al)])
+          (cons (let ([c (map car trials)])
                   (cons (mean (map first c)) (map (λ (tsa) (cons (third tsa) (second tsa))) c) ))
-                (mean-accuracy (map cdr al)))))
-    ;; (define time-map (make-hash (mean-accuracy al)))
-    (define time-map (make-hash))
-    (map (λ (tr)
-           (for ([sw tr])
-             (match-define (list t s a) sw)
-             (define tn (/ (round (* t j)) j))
-             (hash-set! time-map tn (cons (cons a s) (hash-ref time-map tn '())))))
-         al)
-    time-map
-    (make-hash (mean-accuracy al)))
+                (rec (map cdr trials)))))
+    (make-hash (rec trials)))
 
   (define (parse runner)
     (define accuracy-file (build-path "./accuracies/GmmGibbs/" (format "~a/~a-~a" runner classes pts)))
@@ -54,93 +44,114 @@
       ;; (printf "~a " min-time)
       (map (λ (shot) (list (- (first shot) min-time) (second shot) (third shot))) trial)))
 
-  (define (line-intr runner lcolor lstyle icolor istyle legend pstyle  (i 1) (point-size 6))
-    (define pr (remove-warmup (parse runner)))
-    (define sta (run->sweep-time.accuracy pr))
-    ;; (pretty-display sta)
-    (define smta (sweep-time.accuracy->sweep-mean$time.accuracy sta))
-    ;; (pretty-display smta)
-    (define tsa  (time-as pr))
-    (void)
+  (define (trial-plot runner trials pts lcolor lstyle icolor istyle legend pstyle  (i 1) (point-size 3))
+    ;; (define sta (run->sweep-time.accuracy pr))
+    ;; (define smta (sweep-time.accuracy->sweep-mean$time.accuracy sta))
+    (define tsa-map (mean-time trials))
+    (define sta
+      (sort
+       (for/list ([(k v) tsa-map])
+         (list (mean (map cdr v))
+               k
+               (mean (map car v))))
+       (λ (v1 v2) (< (car v1) (car v2)))))
     (list
+
      (lines-interval
-      (sort (for/list ([(k v) tsa])
+      (sort (for/list ([(k v) tsa-map])
               (list k (+ (mean (map car v))
                          (/ (stddev (map car v))
                             (sqrt (length (map car v)))))))
             (λ (v1 v2) (< (car v1) (car v2))))
-      (sort (for/list ([(k v) tsa])
+      (sort (for/list ([(k v) tsa-map])
               (list k  (- (mean (map car v))
                           (/ (stddev (map car v))
                              (sqrt (length (map car v)))))))
             (λ (v1 v2) (< (car v1) (car v2))))
       #:color icolor #:style istyle
       #:line1-style 'transparent #:line2-style 'transparent
-      #:alpha 0.3)
+      #:alpha 0.2)
 
-     ;; (points
-     ;;  (for/list ([(s ta) smta]
-     ;;             #:when (zero? (modulo s 10)))
-     ;;    ta)
-     ;;  #:size point-size #:color lcolor #:sym pstyle)
-     ;; (points
-     ;;  (apply append
-     ;;         (for/list ([trial pr])
-     ;;           (for/list ([p trial])
-     ;;             (list (car p) (caddr p)))))
-     ;;  #:size 1 #:alpha 0.1 #:line-width 1
-     ;;  #:color color #:label (string-append runner "-dots"))
+     (points
+      (for/list ([v sta]
+                 #:when (if (equal? runner "augur")
+                            (zero? (modulo (sub1 (first v)) 200))
+                            (zero? (modulo (first v) 10))))
+        (cdr v))
+      #:line-width 0.5
+      #:size point-size #:color lcolor #:sym pstyle)
 
      (lines
-      (sort (for/list ([(k v) tsa])
+      (sort (for/list ([(k v) tsa-map])
               (list k (mean (map car v))))
             (λ (v1 v2) (< (car v1) (car v2))))
       #:color lcolor #:style lstyle
-      #:width 1
+      #:width 0.7
       #:label legend)
-     )
-    )
-  ;; (line-intr "jags"
-  ;;            (make-object color% 73 0 146) 'dot-dash
-  ;;            (make-object color% 0 146 146) 'solid
-  ;;            "Old Haskell-backend" 'square)
+     ))
 
+  (define get-trial parse)
+  (define (fix-timings trials)
+    (define-values (ntrials t)
+      (for/fold ([ntrials '()]
+                 [t 0])
+                ([tsa trials])
+        (match-define (list tim sweep acc) tsa)
+        (values (cons (list (+ tim t) sweep acc) ntrials)
+                (+ tim t))))
+    (reverse ntrials))
+  (define hk-trial (remove-warmup (get-trial "hk")))
+  (define augur-trial (remove-warmup (get-trial "augur")))
+  (define jags-trial (remove-warmup (get-trial "jags")))
+  (define rkt-trial (remove-warmup  (get-trial "rkt")))
   (parameterize
       ([plot-font-size 8]
        [plot-legend-box-alpha 1])
     (plot-file
-
      (append
       ;; http://www.somersault1824.com/wp-content/uploads/2015/02/color-blindness-palette.png
       ;; line-color line-style interval-color style legend line-points
-      (line-intr "rkt"
-                 (make-object color% 0 73 73) 'solid
-                 (make-object color% 0 146 146) 'solid
-                 "New LLVM-backend" 'triangle)
 
-      (line-intr "hk"
-                 (make-object color% 73 0 146) 'dot-dash
-                 (make-object color% 0 146 146) 'solid
-                 "Old Haskell-backend" 'square)
-      (line-intr "jags"
-                 (make-object color% 146 0 0) 'short-dash
-                 (make-object color% 146 73 0) 'solid
-                 "JAGS" 'diamond)
-      (line-intr "augur"
-                 (make-object color% 255 109 182) 'solid
-                 (make-object color% 255 182 119) 'solid
-                 "Augur" 'triangle)
+      (trial-plot "rkt"
+                  rkt-trial '()
+                  (make-object color% 0 73 73) 'solid
+                  (make-object color% 0 146 146) 'solid
+                  "LLVM-backend" 'triangle)
+      (trial-plot "hk"
+                  hk-trial '()
+                  (make-object color% 73 0 146) 'dot-dash
+                  (make-object color% 0 146 146) 'solid
+                  "Haskell-backend" 'square)
+      (trial-plot "augur"
+                  (map (curry filter (λ (tsa) (zero? (modulo (sub1 (second tsa)) 20)))) augur-trial)
+                  '()
+                  (make-object color% 146 73 0) 'solid
+                  (make-object color% 0 0 0) 'solid
+                  "Augur" 'bullet)
+      (trial-plot "jags"
+                  jags-trial
+                  '()
+                  (make-object color% 146 0 0) 'short-dash
+                  (make-object color% 146 73 0) 'solid
+                  "JAGS" 'diamond)
       (list (tick-grid)))
-          ;; "augur50-10000.pdf"
      (format "../../ppaml/writing/pipeline/GmmGibbs~a-~a.pdf" classes pts)
+     ;; 50-10000
+     ;; #:y-max 45
+     ;; #:y-min 15
+     ;; #:x-max 30
+     ;; #:width 300
+     ;; #:height 300
 
-     #:y-max 50
-     #:y-min 0
-     #:x-max 90
-     #:width 500
+
+     ;; 25-5000
+     #:y-max 60
+     #:y-min 30
+     #:x-max 10
+     #:width 300
      #:height 300
-     #:y-label "Accuracy in %" #:x-label "Time in seconds" #:legend-anchor 'bottom-right))
-  )
+
+     #:y-label "Accuracy in %" #:x-label "Time in seconds" #:legend-anchor 'bottom-right)))
 
 ;; full optimizations 294.1ms
 ;; no runtimeopts 485.0ms
@@ -148,29 +159,6 @@
 ;; no licm and loop fusion 11000ms
 ;; no loop fusion 400ms
 
-;; (define (plot-opt-bench )
-;;   (parameterize (
-;;                  ;; [plot-y-ticks (ticks-add (plot-y-ticks) '(294 485 400))]
-;;                  )
-;;     (plot
-
-;;      (list
-;;       (tick-grid)
-;;       (discrete-histogram `((a 294)
-;;                             (b 485)
-;;                             (d 11000)
-;;                             (e 400)
-;;                             (c 22000)
-;;                             )
-;;                           #:add-ticks? #t
-;; )
-;;       )
-;;      #:y-min 0.1
-;;      #:y-max 1000
-;;      )
-;;     )
-;;   )
-;; (plot-opt-bench)
 (module+ main
   (define-values (classes points)
     (command-line #:args (classes points)
@@ -181,8 +169,9 @@
   ;; (plot-accuracy 6 10)
   ;; (plot-accuracy 12 1000)
   ;; (plot-accuracy 15 1000)
-  ;; (plot-accuracy 20 1000)
-  ;; (plot-accuracy 25 10000)
-  (plot-accuracy 50 10000)
-  ;; (plot-accuracy 30 1000)
+  ;; (plot-accuracy 50 10000)
+  (plot-accuracy 25 5000)
+
+  ;; (plot-accuracy 80 10000)
+  ;; (plot-accuracy 100 10000)
   )

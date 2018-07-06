@@ -47,8 +47,8 @@
 
   (define distf (discrete-sampler 0 (- num-topics 1)))
   (define z (malloc _uint64 words-size))
-  (for ([i (in-range words-size)])
-    (nat-array-set! z i (distf)))
+  ;; (for ([i (in-range words-size)])
+  ;;   (nat-array-set! z i (distf)))
 
   (printf "input-done\n")
   (define prog (compile-hakaru srcfile full-info))
@@ -65,7 +65,7 @@
       (fprintf out-port "~a]\t" (nat-array-ref z (- words-size 1))))
     (define time0 (get-time))
     (define (loop i)
-      (when (< (elasp-time time0) 1800)
+      (when (< (elasp-time time0) 1000)
         (when (zero? (modulo i 10000))
           (snap (elasp-time time0) i))
         (nat-array-set! z i (update z i))
@@ -77,6 +77,8 @@
   (call-with-output-file outfile #:exists 'replace
     (λ (out-port)
       (for ([i (in-range num-trials)])
+        (for ([i (in-range words-size)])
+          (nat-array-set! z i (distf)))
         (run-single out-port)))))
 
 (module+ main
