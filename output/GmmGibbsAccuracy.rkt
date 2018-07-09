@@ -127,7 +127,7 @@
                   '()
                   (make-object color% 146 73 0) 'solid
                   (make-object color% 0 0 0) 'solid
-                  "Augur" 'bullet)
+                  "AugurV2" 'bullet)
       (trial-plot "jags"
                   jags-trial
                   '()
@@ -137,19 +137,19 @@
       (list (tick-grid)))
      (format "../../ppaml/writing/pipeline/GmmGibbs~a-~a.pdf" classes pts)
      ;; 50-10000
-     ;; #:y-max 45
-     ;; #:y-min 15
-     ;; #:x-max 30
-     ;; #:width 300
-     ;; #:height 300
+     #:y-max 45
+     #:y-min 15
+     #:x-max 30
+     #:width 300
+     #:height 300
 
 
      ;; 25-5000
-     #:y-max 60
-     #:y-min 30
-     #:x-max 10
-     #:width 300
-     #:height 300
+     ;; #:y-max 60
+     ;; #:y-min 30
+     ;; #:x-max 10
+     ;; #:width 300
+     ;; #:height 300
 
      #:y-label "Accuracy in %" #:x-label "Time in seconds" #:legend-anchor 'bottom-right)))
 
@@ -169,8 +169,8 @@
   ;; (plot-accuracy 6 10)
   ;; (plot-accuracy 12 1000)
   ;; (plot-accuracy 15 1000)
-  ;; (plot-accuracy 50 10000)
-  (plot-accuracy 25 5000)
+  (plot-accuracy 50 10000)
+  ;; (plot-accuracy 25 5000)
 
   ;; (plot-accuracy 80 10000)
   ;; (plot-accuracy 100 10000)

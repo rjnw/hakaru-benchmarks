@@ -34,6 +34,10 @@
   (for/list ([(s ta) (in-hash sta)])
     (list (mean (map car ta)) (mean (map second ta)))))
 
+(define (sweep-time.accuracy->mean$sweep.accuracy sta)
+  (for/list ([(s ta)  sta])
+    (list s (mean (map second ta)))))
+
 (define (sweep-time.accuracy->sweep-mean$time.accuracy sta)
   (for/hash ([(s ta)  sta])
     (values s (list (mean (map car ta)) (mean (map second ta))))))

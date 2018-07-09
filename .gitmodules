@@ -10,3 +10,6 @@
 [submodule "other/augurv2"]
 	path = other/augurv2
 	url = https://github.com/danehuang/augurv2.git
+[submodule "other/psi"]
+	path = other/psi
+	url = https://github.com/eth-sri/psi.git

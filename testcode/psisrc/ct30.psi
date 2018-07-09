@@ -4,7 +4,7 @@
 def main(){
     dataControlGroup := readCSV("data/ClinicalTrial/dataControlGroup.csv");
     dataTreatedGroup := readCSV("data/ClinicalTrial/dataTreatedGroup.csv");
-    n := 100;
+    n := 30;
     // n := dataControlGroup.length;
 
     isEffective := flip(1/2);

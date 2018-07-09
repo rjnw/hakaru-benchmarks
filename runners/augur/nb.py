@@ -59,10 +59,18 @@ def doc_word(topics, docs, words):
     assert len(topics) == len(arr)
     return arr
 
-def split_training(ndocs, nwords, ntopics, topics, docs, words, holdout):
+def run_nb(words, docs, topics, out, total_sweeps, total_time, holdout_modulo):
+
+    def holdout(i):
+        return (i%holdout_modulo == 0)
+
+    num_docs = len(topics)
+    num_words=1+max(words)
+    num_topics=1+max(topics)
     dw = doc_word(topics, docs, words)
     z1_map = []
     z1_tmap = []
+    z1_dmap = {}
     z1n=0
     z2_map = []
     z2n=0
@@ -73,33 +81,31 @@ def split_training(ndocs, nwords, ntopics, topics, docs, words, holdout):
         else:
             z1_map += [(z1n, d)]
             z1_tmap += [t]
+            z1_dmap[d] = z1n
             z1n+=1
     D1= len(z1_map)
     D2= len(z2_map)
     assert D1+D2 == len(dw)
     w1 = np.array([npi32(dw[oz]) for (z1i, oz) in z1_map])
     w2 = np.array([npi32(dw[oz]) for (z2i, oz) in z2_map])
-    return (npi32(z1_tmap), D1, D2, w1, w2)
 
-def log_snapshot(tim, num_samples, z, out, ):
-    out.write("%.3f" % tim)
-    out.write(' ')
-    out.write(str(num_samples))
-    out.write(' ')
-    out.write('['+' '.join([str(n) for n in z]) + ']')
-    out.write('\t')
+    (z1, D1, D2, w1, w2) = (npi32(z1_tmap), D1, D2, w1, w2)
 
-def run_nb(words, docs, topics, out, total_sweeps, total_time, holdout_modulo):
-    def holdout(i):
-        return (i%holdout_modulo == 0)
-
-    num_docs = len(topics)
-    num_words=1+max(words)
-    num_topics=1+max(topics)
-    # out=open(output_dir+str(num_topics)+'-'+str(num_docs)+'-%'+str(holdout_modulo), 'w')
-    ctout = open('compiletime', 'a')
-
-    (z1, D1, D2, w1, w2) = split_training(num_docs, num_words, num_topics, topics, docs, words, holdout)
+    def log_snapshot(tim, num_samples, z2):
+        out.write("%.3f" % tim)
+        out.write(' ')
+        out.write(str(num_samples))
+        out.write(' ')
+        # out.write('['+' '.join([str(n) for n in z]) + ']')
+        out.write('[')
+        for i in range(len(topics)):
+            if (i%holdout_modulo == 0):
+                out.write(str(z2[i//holdout_modulo]))
+            else:
+                out.write(str(topics[i]))
+            out.write(' ')
+        out.write(']')
+        out.write('\t')
 
     topic_prior = np.array([1.0]*num_topics)
     word_prior = np.array([1.0]*num_words)
@@ -114,21 +120,18 @@ def run_nb(words, docs, topics, out, total_sweeps, total_time, holdout_modulo):
         c = infer_obj.compile(num_topics, D1, D2, topic_prior, word_prior, doc1_length, doc2_length)(z1, w1,w2)
 
         compile_time=time.clock()-init_time
-        sweeps = 1
+        sweeps = 0
         print 'compile-time: ', compile_time
-        ctout.write(str(compile_time))
-        ctout.write('\n')
-        ctout.close()
-        return None
-
         tim0=time.clock()
         while sweeps <= total_sweeps or (time.clock() -tim0) <= total_time:
             tim=time.clock()
             z = infer_obj.samplen(burnIn=0, numSamples=1)['z2'][0]
             tim = time.clock() - tim
-            print 'sweeped: ', sweeps, 'in',  tim, 'total', time.clock()-tim0
-            log_snapshot(tim, sweeps, z,out)
             sweeps += 1
+            if sweeps%10 == 0:
+                print 'sweeped: ', sweeps, 'in',  tim, 'total', time.clock()-tim0
+                log_snapshot(tim, sweeps, z)
+
         out.write('\n')
 
 def loadNewsFile(fname) :
@@ -148,7 +151,7 @@ if __name__ == '__main__':
     num_docs=len(topics)
     num_words=1+max(words)
     num_topics=1+max(topics)
-    out=open(output_dir+str(num_topics)+'-'+str(num_docs)+'-%'+str(holdout_modulo), 'w')
+    out=open(output_dir+str(num_topics)+'-'+str(num_docs)+'-'+str(holdout_modulo), 'w')
     for i in range(int(num_trials)):
         print 'running trial: ', i
         run_nb(words, docs, topics, out, int(trial_sweeps), int(trial_time), int(holdout_modulo))

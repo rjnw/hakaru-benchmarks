@@ -23,8 +23,20 @@ GmmGibbsTrial: gmm-rkt gmm-hs gmm-aug
 
 GmmGibbs: GmmGibbsTrial GmmGibbsAcc
 
-NaiveBayes:
+nb-rkt:
+	cd ./rkt && racket NaiveBayesGibbsOpt.rkt $(trials) $(sweeps) $(trial-time) $(holdout-modulo)
+nb-rkt-ll:
+	./hkbin/nbLikelihood ../input/news/ ../output/NaiveBayesGibbs/rkt/20-19997-$(holdout-modulo) ../output/accuracies/NaiveBayesGibbs/rkt/20-19997-$(holdout-modulo) 20
+
+nb-hk:
 	./hkbin/naiveBayesGibbs ../input ../testcode/jagssrc ../output
+
+nb-augur:
+	cd ./augur && python2 nb.py ../../input/news/ ../../output/NaiveBayesGibbs/augur/ $(trials) $(sweeps) $(trial-time) $(holdout-modulo)
+nb-augur-ll:
+	./hkbin/nbLikelihood ../input/news/ ../output/NaiveBayesGibbs/augur/20-19997-$(holdout-modulo) ../output/accuracies/NaiveBayesGibbs/augur/20-19997-$(holdout-modulo) 20
+
+
 
 # NaiveBayesJags:
 # 	R "

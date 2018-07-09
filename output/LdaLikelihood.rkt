@@ -7,6 +7,8 @@
          plot)
 (define source-dir "../testcode/hkrkt/")
 
+(define topics 50)
+
 (define (trial->tsa trial)
   (define (get-snapshots st)
     (define snapshots (regexp-match* #px"(\\d*\\.?\\d*) (\\d*\\.?\\d*) \\[(.*?)\\]" st #:match-select cdr))
@@ -37,7 +39,7 @@
       (values (cons (list tim nsweeps acc) ntrials) (add1 nsweeps))))
   (reverse ntrials))
 
-(define topics 50)
+
 (define rkt-orig   (parse (format "kos/~a-~a"  "rkt" topics)))
 (define rkt-trials (map fix-sweeps rkt-orig))
 ;; (error 'stop)
@@ -57,6 +59,11 @@
                   (cons (mean (map first c)) (map (λ (tsa) (cons (third tsa) (second tsa))) c) ))
                 (rec (map cdr trials)))))
     (make-hash (rec trials)))
+
+(define (remove-warmup tsa)
+  (for/list ([trial tsa])
+    (define min-time (first (first trial)))
+    (map (λ (shot) (list (- (first shot) min-time) (second shot) (third shot))) trial)))
 
 (define (trial-plot runner trials lcolor lstyle icolor istyle  pstyle  (i 1) (point-size 6))
   (define tsa-map (mean-time trials))
@@ -82,11 +89,19 @@
     #:color lcolor #:style lstyle
     #:width 0.7
     #:label runner)
-   ;; (points
-   ;;  (for/list ([(s ta) smta]
-   ;;             #:when (zero? (modulo s 10)))
-   ;;    ta)
-   ;;  #:size point-size #:color lcolor #:sym pstyle)
+   (if (equal? runner "AugurV2")
+       (points
+        (for/list ([(k v) tsa-map]
+                   #:when (and (not (zero? (first (map cdr v))))
+                               (zero? (modulo (first (map cdr v)) 10))))
+          (list k (mean (map car v))))
+        #:size point-size #:color lcolor #:sym pstyle)
+       (points
+        (for/list ([(k v) tsa-map]
+                   #:when (and (not (zero? (sub1 (first (map cdr v)))))
+                           (member (first (map cdr v)) '(1 37 73))))
+          (list k (mean (map car v))))
+        #:size point-size #:color lcolor #:sym pstyle))
    ;; (points
    ;;  trial
    ;;  #:size point-size #:alpha 0.1 #:line-width 1
@@ -103,19 +118,19 @@
 
 (plot-file
  (list
-  (trial-plot "Hakaru" rkt-trials
-            (make-object color% 0 73 73) 'solid
-            (make-object color% 0 146 146) 'solid
-   'triangle)
+  (trial-plot "LLVM-backend" (remove-warmup rkt-trials)
+              (make-object color% 0 73 73) 'solid
+              (make-object color% 0 146 146) 'solid
+              'triangle)
 
-  (trial-plot "AugurV2" augur-trials
-            (make-object color% 73 0 146) 'solid
-            (make-object color% 0 146 146) 'solid
-            "AugurV2" 'square)
+  (trial-plot "AugurV2" (remove-warmup augur-trials)
+                  (make-object color% 146 73 0) 'solid
+                  (make-object color% 0 0 0) 'solid
+                  'bullet)
   (tick-grid)
   )
 
- (format "ldalikelihood-~a.pdf" topics)
+ (format "../../ppaml/writing/pipeline/ldalikelihood-~a.pdf" topics)
  #:legend-anchor 'bottom-right
  ;; #:y-min -4700000
  ;; #:y-max -4500000
@@ -124,7 +139,6 @@
  ;; topics 50
  #:y-max -4200000
  #:y-min -4400000
-
  #:x-max 800
 
 

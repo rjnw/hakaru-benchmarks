@@ -34,7 +34,9 @@ def run_gmm(classes, points, t, out):
 
         init_time = time.clock()
         infer_obj.compile(classes, points, (1.0/14)**2, np.array([1.0]*classes))(np.array(t))
-
+        compile_time = time.clock()- init_time
+        init_time = time.clock()
+        infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
         num_samples = 1
         tim = 0
         while tim < 15:

@@ -9,7 +9,7 @@
          racket/date
          disassemble
          "discrete.rkt"
-         "utils.rkt")
+         "gmm-utils.rkt")
 
 (define testname "NaiveBayesGibbs")
 
@@ -33,7 +33,7 @@
   (printf "num-docs: ~a, num-words: ~a, num-topics: ~a\n" num-docs num-words num-topics)
   (printf "words-size: ~a, docs-size: ~a, topics-size: ~a\n" words-size docs-size topics-size)
 
-  (define outfile (build-path output-dir testname "rkt" (format "~a-~a-%~a" num-topics num-docs holdout-modulo)))
+  (define outfile (build-path output-dir testname "rkt" (format "~a-~a-~a" num-topics num-docs holdout-modulo)))
 
   (define full-info
     `(((array-info . ((size . ,num-topics))))
@@ -92,11 +92,10 @@
     (define (printer tim sweeps state)
       (printf "sweeped: ~a in ~a\n" sweeps (~r tim #:precision '(= 3)))
       (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
-      (for ([i (in-range (- num-docs 1))]
-            #:when (holdout? i))
-        (fprintf out-port "~a, " (get-index-nat-array state i)))
+      (for ([i (in-range (- num-docs 1))])
+        (fprintf out-port "~a " (get-index-nat-array state i)))
       (fprintf out-port "~a]\t" (get-index-nat-array state (- num-docs 1))))
-    (define sweeper (curry gibbs-sweep num-docs set-index-nat-array update printer))
+    (define sweeper (curry gibbs-sweep num-docs set-index-nat-array update))
     (gibbs-timer sweeper z printer
                  #:min-sweeps trial-sweeps
                  #:step-sweeps 1
@@ -107,6 +106,9 @@
   (call-with-output-file outfile #:exists 'replace
     (λ (out-port)
       (for ([i (in-range num-trials)])
+        (for ([i (in-range (length rk-topics))]
+              #:when (holdout? i))
+          (nat-array-set! z i (distf)))
         (run out-port)))))
 
 (module+ test
