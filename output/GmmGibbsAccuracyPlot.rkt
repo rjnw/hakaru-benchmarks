@@ -8,7 +8,7 @@
 (define (time-accuracy al)
   (map (λ (tr) (map (λ (tsa) (list (first tsa) (third tsa))) tr)) al))
 
-(define (plot-accuracy classes pts)
+(define (plot-accuracy classes pts output-file)
   (define (mean-time trials)
     (define (rec trials)
       (if (ormap empty? trials)
@@ -111,7 +111,6 @@
      (append
       ;; http://www.somersault1824.com/wp-content/uploads/2015/02/color-blindness-palette.png
       ;; line-color line-style interval-color style legend line-points
-
       (trial-plot "rkt"
                   rkt-trial '()
                   (make-object color% 0 73 73) 'solid
@@ -135,13 +134,21 @@
                   (make-object color% 146 73 0) 'solid
                   "JAGS" 'diamond)
       (list (tick-grid)))
-     (format "../../ppaml/writing/pipeline/GmmGibbs~a-~a.pdf" classes pts)
+     output-file
+     ;; (format "../../ppaml/writing/pipeline/GmmGibbs~a-~a.pdf" classes pts)
+     #:y-max y-min
+     #:y-min y-max
+     #:x-min x-min
+     #:x-max x-max
+     #:width width
+     #:height height
+
      ;; 50-10000
-     #:y-max 45
-     #:y-min 15
-     #:x-max 30
-     #:width 300
-     #:height 300
+     ;; #:y-max 45
+     ;; #:y-min 15
+     ;; #:x-max 30
+     ;; #:width 300
+     ;; #:height 300
 
 
      ;; 25-5000
@@ -158,18 +165,39 @@
 ;; no histogram 22000ms
 ;; no licm and loop fusion 11000ms
 ;; no loop fusion 400ms
+(define y-min (make-parameter 0))
+(define y-max (make-parameter 100))
+(define x-max (make-parameter 1000))
+(define x-min (make-parameter 0))
+(define width (make-parameter 500))
+(define height (make-parameter 500))
 
 (module+ main
-  (define-values (classes points)
-    (command-line #:args (classes points)
-                  (values (string->number classes)
-                          (string->number points)))))
+  (define-values (classes points output-file)
+    (command-line
+     #:program "GmmGibbsAccuracyPlot"
+     #:once-each
+     ["--y-min" yn "Minimum value for y-axis"
+                (y-min (string->number yn))]
+     ["--y-max" yx "Maximum value for y-axis"
+                (y-max (string->number yx))]
+     ["--x-min" xn "Minimum value for x-axis"
+                (x-min (string->number xn))]
+     ["--x-max" xx "Maximum value for x-axis"
+                (x-max (string->number xx))]
+     ["--width" w "Width of the plot"
+                (width (string->number w))]
+     ["--height" h "Height of the plot"
+                 (height (string->number h))]
+     #:args (classes points output-file)
+     (values (string->number classes) (string->number points) output-file)))
+  (pretty-print (list classes points output-file)))
 
 (module+ test
   ;; (plot-accuracy 6 10)
   ;; (plot-accuracy 12 1000)
   ;; (plot-accuracy 15 1000)
-  (plot-accuracy 50 10000)
+  (plot-accuracy 50 10000 "test-50-10000")
   ;; (plot-accuracy 25 5000)
 
   ;; (plot-accuracy 80 10000)
