@@ -32,6 +32,14 @@ clean:
 docker:
 	cd ./docker; sudo docker build -t hakaru-benchmark .
 
+gmm-trial:
+	cd ./runners; make gmm-trial classes=$(classes) points=$(points)
+gmm-acc:
+	cd ./runners; make gmm-acc classes=$(classes) points=$(points)
+gmm-plot:
+	echo "use racket GmmGibbsAccuracy.rkt in output folder for finer control."
+	cd ./output; racket GmmGibbsAccuracy.rkt $(classes) $(points) $(output-file)
+
+gmm: gmm-trial gmm-acc gmm-plot
+
 BenchmarkGmmGibbs:
-	cd ./runners; make GmmGibbs classes=$(classes) points=$(points)
-	cd ./output; racket GmmGibbsAccuracy.rkt $(classes) $(points)

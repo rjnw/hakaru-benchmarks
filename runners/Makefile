@@ -9,19 +9,18 @@ gmm-hs:
 	./hkbin/gmmGibbs ../input/GmmGibbs/$(classes)-$(points) ../testcode/jagssrc ../output/
 gmm-aug:
 	cd ./augur && python2 gmm.py $(classes) $(points)
+gmm-trial: gmm-rkt gmm-hs gmm-aug
 
 gmm-rkt-acc:
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/rkt/$(classes)-$(points)
 gmm-hs-acc:
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/hk/$(classes)-$(points)
+gmm-jags-acc:
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/jags/$(classes)-$(points)
 gmm-aug-acc:
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/augur/$(classes)-$(points)
-
-GmmGibbsAcc: gmm-rkt-acc gmm-hs-acc gmm-aug-acc
-GmmGibbsTrial: gmm-rkt gmm-hs gmm-aug
-
-GmmGibbs: GmmGibbsTrial GmmGibbsAcc
+gmm-acc: gmm-rkt-acc gmm-hs-acc gmm-jags-acc gmm-aug-acc
+gmm: gmm-trial gmm-acc
 
 nb-rkt:
 	cd ./rkt && racket NaiveBayesGibbsOpt.rkt $(trials) $(sweeps) $(trial-time) $(holdout-modulo)
