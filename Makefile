@@ -32,14 +32,24 @@ clean:
 docker:
 	cd ./docker; sudo docker build -t hakaru-benchmark .
 
+gmm-input:
+	cd ./input; make gmm classes=$(classes) points=$(points) trials=$(trials)
+
 gmm-trial:
 	cd ./runners; make gmm-trial classes=$(classes) points=$(points)
 gmm-acc:
 	cd ./runners; make gmm-acc classes=$(classes) points=$(points)
 gmm-plot:
 	echo "use racket GmmGibbsAccuracy.rkt in output folder for finer control."
-	cd ./output; racket GmmGibbsAccuracy.rkt $(classes) $(points) $(output-file)
+	cd ./output; racket GmmGibbsAccuracyPlot.rkt $(classes) $(points) $(output-file)
 
-gmm: gmm-trial gmm-acc gmm-plot
+gmm: gmm-input gmm-trial gmm-acc gmm-plot
 
-BenchmarkGmmGibbs:
+lda-rkt:
+	cd ./runners; make lda-rkt topics=$(topics) trials=$(trials)
+lda-augur:
+	cd ./runners; make lda-augur topics=$(topics) trials=$(trials)
+lda-plot:
+	echo "use racket LdaLIkelihoodPlot.rkt in output folder for finer control."
+	cd ./output; racket LdaLikelihoodPlot.rkt $(topics) $(output-file)
+lda: lda-rkt lda-augur lda-plot

@@ -116,32 +116,80 @@
   )
 
 
-(plot-file
- (list
-  (trial-plot "LLVM-backend" (remove-warmup rkt-trials)
-              (make-object color% 0 73 73) 'solid
-              (make-object color% 0 146 146) 'solid
-              'triangle)
+(define (plot-likelihood topics output-file)
+  (plot-file
+   (list
+    (trial-plot "LLVM-backend" (remove-warmup rkt-trials)
+                (make-object color% 0 73 73) 'solid
+                (make-object color% 0 146 146) 'solid
+                'triangle)
 
-  (trial-plot "AugurV2" (remove-warmup augur-trials)
-                  (make-object color% 146 73 0) 'solid
-                  (make-object color% 0 0 0) 'solid
-                  'bullet)
-  (tick-grid)
-  )
+    (trial-plot "AugurV2" (remove-warmup augur-trials)
+                (make-object color% 146 73 0) 'solid
+                (make-object color% 0 0 0) 'solid
+                'bullet)
+    (tick-grid)
+    )
 
- (format "../../ppaml/writing/pipeline/ldalikelihood-~a.pdf" topics)
- #:legend-anchor 'bottom-right
- ;; #:y-min -4700000
- ;; #:y-max -4500000
- ;; #:x-max 800
+   ;; (format "../../ppaml/writing/pipeline/ldalikelihood-~a.pdf" topics)
+   output-file
+   #:legend-anchor 'bottom-right
+   ;; topics 100
+   ;; #:y-min -4700000
+   ;; #:y-max -4500000
+   ;; #:x-max 800
 
- ;; topics 50
- #:y-max -4200000
- #:y-min -4400000
- #:x-max 800
+   ;; topics 50
+   ;; #:y-max -4200000
+   ;; #:y-min -4400000
+   ;; #:x-max 800
 
+   #:y-max y-min
+   #:y-min y-max
+   #:x-min x-min
+   #:x-max x-max
+   #:width width
+   #:height height
 
- #:y-label "Log likelihood"
- #:x-label "Time in seconds"
- )
+   #:y-label "Log likelihood"
+   #:x-label "Time in seconds"))
+
+(define y-min (make-parameter #f))
+(define y-max (make-parameter #f))
+(define x-max (make-parameter #f))
+(define x-min (make-parameter #f))
+(define width (make-parameter (plot-width)))
+(define height (make-parameter (plot-height)))
+
+(module+ main
+  (define-values (topics output-file)
+    (command-line
+     #:program "LdaLikelihoodPlot"
+     #:once-each
+     ["--y-min" yn "Minimum value for y-axis"
+                (y-min (string->number yn))]
+     ["--y-max" yx "Maximum value for y-axis"
+                (y-max (string->number yx))]
+     ["--x-min" xn "Minimum value for x-axis"
+                (x-min (string->number xn))]
+     ["--x-max" xx "Maximum value for x-axis"
+                (x-max (string->number xx))]
+     ["--width" w "Width of the plot"
+                (width (string->number w))]
+     ["--height" h "Height of the plot"
+                 (height (string->number h))]
+     #:args (topics output-file)
+     (values topics output-file)))
+  (plot-likelihood topics output-file))
+
+(module+ test
+  ;; topics 100
+  (parameterize ([y-min -4700000]
+                 [y-max -4500000]
+                 [x-max 800])
+    (plot-likelihood 100 "../../ppaml/writing/pipeline/ldalikelihood-100.pdf"))
+
+  (parameterize ([y-min -4200000]
+                 [y-max -4400000]
+                 [x-max 800])
+    (plot-likelihood 100 "../../ppaml/writing/pipeline/ldalikelihood-100.pdf")))
