@@ -197,13 +197,17 @@
 
   (parameterize
       (;; [plot-x-transform log-transform]
+       [plot-x-ticks (linear-ticks #:divisors '(5) #:base 10 #:number 2)]
+       [plot-y-ticks (linear-ticks #:divisors '(10) #:base 10 #:number 2)]
+       [plot-y-far-axis? #f]
+       [plot-x-far-axis? #f]
        )
     (plot-file (append
                 (trial-plot "rkt"
                             rkt-trials '()
                             (make-object color% 0 73 73) 'solid
                             (make-object color% 0 146 146) 'solid
-                            "LLVM-backend" 'triangle)
+                            "Hakaru" 'triangle)
                 (trial-plot "augur"
                             augur-trials
                             ;; (map (curry filter (λ (tsa) (zero? (modulo (sub1 (second tsa)) 20)))) augur-trials)
@@ -225,13 +229,15 @@
                 ;; (points rkt-mta #:size 6 #:color (make-object color% 0 73 73) #:sym 'triangle)
                 ;; (lines (first hk-points) #:color 5 #:label "haskell")
 
-                (list (tick-grid))
+
                 )
                "../../ppaml/writing/pipeline/NaiveBayesGibbs-Accuracy.pdf"
 
                #:y-min 45
                #:y-max 85
                #:x-max 400
+               #:height 200
+               #:width 400
                #:legend-anchor 'right
                #:x-label "Time in seconds"
                #:y-label "Accuracy in %")))

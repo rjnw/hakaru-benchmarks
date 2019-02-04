@@ -51,7 +51,10 @@
   ;;   (nat-array-set! z i (distf)))
 
   (printf "input-done\n")
+  (define t0 (get-time))
   (define prog (compile-hakaru srcfile full-info))
+  (printf "compile-time: ~a\n" (elasp-time t0))
+  (error 'stop)
   (define (update z word-update)
     (prog topics-prior words-prior num-docs words docs z word-update))
   (printf "compiled, now running...\n")

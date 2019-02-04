@@ -45,9 +45,8 @@ def run_lda(words, docs, num_topics, out, num_samples):
         infer_obj.set_compile_opt(augur_opt)
         infer_obj.set_user_sched(sched)
 
-        init_time = time.clock()
         w_shape = np.array([x for x in map(len, w)], dtype=np.int32)
-
+        init_time = time.clock()
         infer_obj.compile(num_topics, len(w_shape), w_shape, topic_prior, word_prior)(w)
         samples = 0
         tim = time.clock()

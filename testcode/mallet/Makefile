@@ -12,11 +12,8 @@ mallet-2.0.8/bin/mallet: mallet-2.0.8.tar.gz
 	./mallet-2.0.8/bin/mallet import-dir --input ../../input/20_newsgroups/* --output 20newsgroup.mallet
 
 nb.classifier: 20newsgroup.mallet
-<<<<<<< 35b158f1ec04bc763fd1a6ce48f94513e8e02685
 	./mallet-2.0.8/bin/mallet train-classifier --input 20newsgroup.mallet --cross-validation 10 --report test:accuracy --verbosity 0 --trainer NaiveBayes --output-classifier nb.classifier
-=======
 	./mallet-2.0.8/bin/mallet train-classifier --input 20newsgroup.mallet --training-portion 0.9999 --trainer NaiveBayes --output-classifier nb.classifier --report test:
->>>>>>> reporting mallet
 
 all: nb.classifier
 
