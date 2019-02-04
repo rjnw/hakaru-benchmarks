@@ -14,22 +14,20 @@
   (printf "c, ~a, p: ~a\n" classes points)
   (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
   (define full-info
-    `(()
-      ((array-info . ((size . ,classes))))
-      ((array-info . ((size . ,points))))
-      ((array-info . ((size . ,points)))
-       ;; (attrs . (constant))
-       ;; (value . ,(car input))
-       )
-      ((nat-info . ((value-range . (0 . ,(- points 1))))))))
+    `((as . ((array-info . ((size . ,classes)))))
+      (z . ((array-info . ((size . ,points)))))
+      (t . ((array-info . ((size . ,points)))))
+      ;; ((nat-info . ((value-range . (0 . ,(- points 1))))))
+      ))
 
   (define infile  (build-path input-dir testname (format "~a-~a" classes points)))
   (define outfile (build-path output-dir testname "rkt" (format "~a-~a" classes points)))
 
-  (define prog (compile-hakaru srcfile full-info))
+  (define module-env (compile-file srcfile full-info))
+  (define prog (get-prog module-env))
 
   (define stdev (real->prob '14.0))
-  (define as (real-array (build-list classes (const 0.0))))
+  (define as (make-fixed-hakrit-array (build-list classes (const 0.0)) 'real))
 
   (define (run-single str out-port)
     (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
@@ -37,21 +35,20 @@
     (define distf (discrete-sampler 0 (- classes 1)))
     (define zs (build-list points (λ (a) (distf))))
 
-    (define tsc (real-array (map string->number (regexp-split "," ts-str))))
-    (define zsc (nat-array zs))
+    (define tsc (make-fixed-hakrit-array (map string->number (regexp-split "," ts-str)) 'real))
+    (define zsc (make-fixed-hakrit-array zs 'nat))
     (define (update z doc)
       (prog stdev as z tsc doc))
 
     (define (printer tim sweeps state)
       (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
       (for ([i (in-range points)])
-        (fprintf out-port "~a " (nat-array-ref state i)))
-      (fprintf out-port "~a]\t" (nat-array-ref state (sub1 points))))
+        (fprintf out-port "~a " (fixed-hakrit-array-ref state 'nat i)))
+      (fprintf out-port "~a]\t" (fixed-hakrit-array-ref state 'nat (sub1 points))))
 
 
-    (define spr (curry gibbs-sweep points nat-array-set! update))
-
-    (gibbs-timer spr zsc printer #:min-time 12 #:step-time 0.01 #:min-sweeps 0 #:step-sweeps 1)
+    (define spr (curry gibbs-sweep points (λ (arr i v) (fixed-hakrit-array-set! arr 'nat i v)) update))
+    (gibbs-timer spr zsc printer #:min-time 2 #:step-time 0.01 #:min-sweeps 0 #:step-sweeps 1)
 
     (fprintf out-port "\n"))
   (call-with-output-file outfile #:exists 'replace
