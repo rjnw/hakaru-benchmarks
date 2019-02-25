@@ -2,3 +2,12 @@ compiled/
 *~
 hkbin/
 maple2017/
+output/GmmGibbs/
+output/LdaGibbs/
+output/NaiveBayesGibbs/
+output/ClinicalTrial/
+output/LinearRegression/
+output/accuracies/GmmGibbs/
+output/accuracies/LdaGibbs/
+output/accuracies/NaiveBayesGibbs/
+input/
