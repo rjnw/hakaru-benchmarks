@@ -54,6 +54,7 @@
   (call-with-output-file outfile #:exists 'replace
     (λ (out-port)
       (for ([line (file->lines infile)])
+        (printf "running:\n")
         (run-single line out-port)))))
 
 (module+ main

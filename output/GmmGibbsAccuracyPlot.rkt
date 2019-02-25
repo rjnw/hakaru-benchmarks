@@ -87,7 +87,8 @@
             (λ (v1 v2) (< (car v1) (car v2))))
       #:color lcolor #:style lstyle
       #:width 0.7
-      #:label legend)
+      #:label legend
+      )
      ))
 
   (define get-trial parse)
@@ -100,12 +101,18 @@
         (values (cons (list (+ tim t) sweep acc) ntrials)
                 (+ tim t))))
     (reverse ntrials))
-  (define hk-trial (remove-warmup (get-trial "hk")))
-  (define augur-trial (remove-warmup (get-trial "augur")))
-  (define jags-trial (remove-warmup (get-trial "jags")))
+  ;; (define hk-trial (remove-warmup (get-trial "hk")))
+  ;; (define augur-trial (remove-warmup (get-trial "augur")))
+  ;; (define jags-trial (remove-warmup (get-trial "jags")))
   (define rkt-trial (remove-warmup  (get-trial "rkt")))
   (parameterize
-      ([plot-font-size 8]
+      (
+       ;; [plot-font-size 10]
+       [plot-legend-box-alpha 1]
+       [plot-x-ticks (linear-ticks #:divisors '(5) #:base 10 #:number 5)]
+       [plot-y-ticks (linear-ticks #:divisors '(10) #:base 10 #:number 2)]
+       [plot-y-far-axis? #f]
+       [plot-x-far-axis? #f]
        [plot-legend-box-alpha 1])
     (plot-file
      (append
@@ -115,33 +122,34 @@
                   rkt-trial '()
                   (make-object color% 0 73 73) 'solid
                   (make-object color% 0 146 146) 'solid
-                  "LLVM-backend" 'triangle)
-      (trial-plot "hk"
-                  hk-trial '()
-                  (make-object color% 73 0 146) 'dot-dash
-                  (make-object color% 0 146 146) 'solid
-                  "Haskell-backend" 'square)
-      (trial-plot "augur"
-                  (map (curry filter (λ (tsa) (zero? (modulo (sub1 (second tsa)) 20)))) augur-trial)
-                  '()
-                  (make-object color% 146 73 0) 'solid
-                  (make-object color% 0 0 0) 'solid
-                  "AugurV2" 'bullet)
-      (trial-plot "jags"
-                  jags-trial
-                  '()
-                  (make-object color% 146 0 0) 'short-dash
-                  (make-object color% 146 73 0) 'solid
-                  "JAGS" 'diamond)
-      (list (tick-grid)))
+                  "Hakaru" 'triangle)
+      ;; (trial-plot "hk"
+      ;;             hk-trial '()
+      ;;             (make-object color% 73 0 146) 'dot-dash
+      ;;             (make-object color% 0 146 146) 'solid
+      ;;             "Haskell-backend" 'square)
+      ;; (trial-plot "augur"
+      ;;             (map (curry filter (λ (tsa) (zero? (modulo (sub1 (second tsa)) 20)))) augur-trial)
+      ;;             '()
+      ;;             (make-object color% 146 73 0) 'solid
+      ;;             (make-object color% 0 0 0) 'solid
+      ;;             "AugurV2" 'bullet)
+      ;; (trial-plot "jags"
+      ;;             jags-trial
+      ;;             '()
+      ;;             (make-object color% 146 0 0) 'short-dash
+      ;;             (make-object color% 146 73 0) 'solid
+      ;;             "JAGS" 'diamond)
+      ;; (list (tick-grid))
+      )
      output-file
      ;; (format "../../ppaml/writing/pipeline/GmmGibbs~a-~a.pdf" classes pts)
-     #:y-max y-min
-     #:y-min y-max
-     #:x-min x-min
-     #:x-max x-max
-     #:width width
-     #:height height
+     #:y-max ( y-min)
+     #:y-min ( y-max)
+     #:x-min ( x-min)
+     #:x-max ( x-max)
+     #:width ( width)
+     #:height ( height)
 
      ;; 50-10000
      ;; #:y-max 45
@@ -158,16 +166,17 @@
      ;; #:width 300
      ;; #:height 300
 
-     #:y-label "Accuracy in %" #:x-label "Time in seconds" #:legend-anchor 'bottom-right)))
+     #:y-label "Accuracy in %" #:x-label "Time in seconds"
+     #:legend-anchor 'bottom-right)))
 
 ;; full optimizations 294.1ms
 ;; no runtimeopts 485.0ms
 ;; no histogram 22000ms
 ;; no licm and loop fusion 11000ms
 ;; no loop fusion 400ms
-(define y-min (make-parameter 0))
-(define y-max (make-parameter 100))
-(define x-max (make-parameter 1000))
+(define y-min (make-parameter 30))
+(define y-max (make-parameter 60))
+(define x-max (make-parameter 2))
 (define x-min (make-parameter 0))
 (define width (make-parameter 500))
 (define height (make-parameter 500))
@@ -191,14 +200,16 @@
                  (height (string->number h))]
      #:args (classes points output-file)
      (values (string->number classes) (string->number points) output-file)))
+  (plot-accuracy classes points output-file)
   (pretty-print (list classes points output-file)))
 
 (module+ test
-  ;; (plot-accuracy 6 10)
+  ;; (plot-accuracy 6 10 "test.pdf")
   ;; (plot-accuracy 12 1000)
-  ;; (plot-accuracy 15 1000)
-  (plot-accuracy 50 10000 "test-50-10000")
-  ;; (plot-accuracy 25 5000)
+  ;; (plot-accuracy 15 1000 "gmm-15-1000-new.pdf")
+  ;; (plot-accuracy 50 10000 "test-50-10000")
+  ;; (plot-accuracy 25 1000 "gmm-25-1000-old.pdf")
+  (plot-accuracy 25 5000 "gmm-25-5000-new.pdf")
 
   ;; (plot-accuracy 80 10000)
   ;; (plot-accuracy 100 10000)

@@ -1,0 +1,93 @@
+#lang racket
+
+(require sham
+         hakrit
+         racket/cmdline
+         ffi/unsafe
+         racket/runtime-path
+         math/statistics
+         "../utils.rkt"
+         "../discrete.rkt")
+
+
+(define testname "GmmGibbs")
+(define pair-array-regex "^\\(\\[(.*)\\],\\[(.*)\\]\\)$")
+
+(define (run-test classes points)
+  (printf "c, ~a, p: ~a\n" classes points)
+  (define srcfile (build-path hksrc-dir (string-append testname ".hkr")))
+  (define empty-info '(() () () () () ()))
+  (define full-info
+    `(()
+      ((array-info . ((size . ,classes)
+                      ;; (elem-info . ((prob-info . ((constant . 1.0)))))
+                      ))
+       ;; (attrs . (constant))
+       )
+      ((array-info
+        . ((size . ,points)
+           (elem-info
+            . ((nat-info
+                . ((value-range . (0 . ,(- classes 1))))))))))
+      ((array-info . ((size . ,points)))
+       ;; (attrs . (constant))
+       ;; (value . ,(car input))
+       )
+      ((nat-info . ((value-range . (0 . ,(- points 1))))))))
+
+
+  (define infile  (build-path input-dir testname (format "~a-~a" classes points)))
+  (define outfile (build-path output-dir testname "rkt" (format "~a-~a" classes points)))
+
+
+  (define module-env (compile-file srcfile full-info))
+
+  (define jit-val (curry rkt->jit module-env))
+
+  ;; (jit-dump-module module-env)
+  ;; (optimize-module module-env #:opt-level 3)
+  ;; (initialize-jit! module-env #:opt-level 3)
+
+  (define init-rng  (jit-get-function 'init-rng module-env))
+  (define prog (jit-get-function 'prog module-env))
+  (init-rng)
+
+  (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<~a.~a>" classes 'nat)) module-env ))
+  (define get-index-nat-array (jit-get-function (string->symbol (format "get-index$array<~a.~a>"  classes 'nat)) module-env ))
+  (define stdev (jit-val 'prob 14.0))
+  (define as (list->cblock (build-list classes (const 0.0)) _double))
+
+
+
+  (define (run-bench str)
+    (match-define (list _ ts-str zs-str) (regexp-match pair-array-regex str))
+    (define orig-zs (map  string->number (regexp-split "," zs-str)))
+    (define distf (discrete-sampler 0 (- classes 1)))
+    (define zs (build-list points (λ (a) (distf))))
+
+    ;; (define tsc (jit-val '(array real) (map string->number (regexp-split "," ts-str))))
+    ;; (define zsc (jit-val '(array nat) zs))
+
+    (define tsc (list->cblock (map string->number (regexp-split "," ts-str)) _double))
+    (define zsc (list->cblock zs _uint64))
+
+    (define (sweep)
+      (for ([doc (in-range 1)])
+        (prog stdev as zsc tsc doc)))
+
+    (define (get-run-time)
+      (define d (cdr (for/list ([s (in-range 1000)])
+                   (let ([t (get-time)])
+                     (begin
+                       (sweep)
+                       (* (elasp-time t)
+                          10000))))))
+      (cons (mean d) (/ (stddev d)
+                        (sqrt (length d)))))
+    ;; (printf "average over 10: ~ams\n" (/ (for/sum  ([s (in-range 10)]) (get-run-time)) 10.0))
+    (pretty-display (get-run-time)))
+
+  (run-bench (car (file->lines infile))))
+
+(module+ main ;;args
+  (run-test 50 10000))

@@ -18,19 +18,19 @@
     `((dataX . ((array-info ((size . ,n)))))
       (x6 . ((array-info . ((size . ,n)))))))
 
-  (define module-env (compile-file srcfile))
+  (define module-env (compile-file srcfile lrinfo))
   (define prog (get-prog module-env))
 
   (define pair-array-regex "^\\(\\[(.*)\\],\\[(.*)\\]\\)$")
   (define x-list (map string->number (string-split (file->string xfile))))
   (define f (open-input-file yfile))
-  (define xdata (make-sized-hakrit-array (map exact->inexact x-list) 'real))
+  (define xdata (real-array (map exact->inexact x-list)))
 
   (define (run-single str out-port)
     (match-define (list _ y-str abv-str)  (regexp-match pair-array-regex str))
     (define y-list (map string->number (string-split y-str ",")))
     (match-define (list a b v) (map string->number (string-split abv-str ",")))
-    (define y-array (make-sized-hakrit-array y-list 'real))
+    (define y-array (real-array y-list))
     (define before-ts (get-time))
     (define out-arr (prog xdata y-array))
     (define after-ts (get-time))

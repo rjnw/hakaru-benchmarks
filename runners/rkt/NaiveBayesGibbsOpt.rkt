@@ -36,34 +36,30 @@
   (define outfile (build-path output-dir testname "rkt" (format "~a-~a-~a" num-topics num-docs holdout-modulo)))
 
   (define full-info
-    `(((array-info . ((size . ,num-topics))))
-      ((array-info . ((size . ,num-words))))
-      ((array-info . ((size . ,num-docs)
-                      (elem-info . ((nat-info
-                                     . ((value-range
-                                         . (0 . ,(- num-topics 1))))))))))
-      ((array-info . ((size . ,words-size)
-                      (elem-info . ((nat-info
-                                     . ((value-range
-                                         . (0 . ,(- num-words 1)))))))
-                      (value . ,rk-words))))
-      ((array-info . ((size . ,words-size)
-                      (elem-info . ((nat-info
-                                     . ((value-range
-                                         . (0 . ,(- num-docs 1)))))))
-                      (value . ,rk-docs))))
-      ((nat-info . ((value-range . (0 . ,(- num-docs 1))))))))
+    `((topic_prior . ((array-info . ((size . ,num-topics)))))
+      (word_prior . ((array-info . ((size . ,num-words)))))
+      (z . ((array-info . ((size . ,num-docs)
+                           ;; (elem-info . ((nat-info
+                           ;;            . ((value-range
+                           ;;                . (0 . ,(- num-topics 1)))))))
+                           ))))
+      (w . ((array-info . ((size . ,words-size)
+                           ;; (elem-info . ((nat-info . ((value-range . (0 . ,(- num-words 1)))))))
+                           ;; (value . ,words)
+                           ))))
+      (doc . ((array-info . ((size . ,words-size)
+                             ;; (elem-info . ((nat-info
+                             ;;                . ((value-range
+                             ;;                    . (0 . ,(- num-docs 1)))))))
+                             ;; (value . ,docs)
+                             ))))
+      ;; (docUpdate . ((nat-info . ((value-range . (0 . ,(- num-docs 1)))))))
+      ))
 
 
   (define module-env (compile-file srcfile full-info))
-  (define init-rng (jit-get-function 'init-rng module-env))
-  (init-rng)
+  (define prog (get-prog module-env))
   (printf "compiled prog\n")
-  (define jit-val (curry rkt->jit module-env))
-  (define set-index-nat-array (jit-get-function (string->symbol (format "set-index!$array<~a.~a>" num-topics 'nat)) module-env ))
-  (define get-index-nat-array (jit-get-function (string->symbol (format "get-index$array<~a.~a>" num-topics 'nat)) module-env ))
-
-  (define prog (jit-get-function 'prog module-env))
 
   (define topicPrior (list->cblock (build-list num-topics (const 0.0)) _double))
   (define wordPrior (list->cblock (build-list num-words (const 0.0)) _double))
