@@ -1,0 +1,3 @@
+p(isEffective) = 4199/10007·δ(1)[isEffective]+5808/10007·δ(0)[isEffective]
+p(isEffective) = 345037099/943155256·δ(1)[isEffective]+598118157/943155256·δ(0)[isEffective]
+p(isEffective) = 279642132540675/369701798418241·δ(0)[isEffective]+90059665877566/369701798418241·δ(1)[isEffective]

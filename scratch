@@ -1,0 +1,90 @@
+nb augur
+compile-time:  0.069542 update-time:  0.013645
+compile-time:  0.064754 update-time:  0.013789
+compile-time:  0.066065 update-time:  0.013815
+compile-time:  0.070779 update-time:  0.017583
+compile-time:  0.071278 update-time:  0.01729
+
+
+
+lda augur:
+compile time 13.01708
+compile time 12.846968
+compile time 13.26474
+compile time 12.711792
+compile time 12.949411
+compile time 13.207584
+
+
+lda rkt hk-maple:
+ 2:36.43elapsed
+ 2:03.51elapsed
+ 2:19.69elapsed
+ 2:03.72elapsed
+
+156.43
+123.51
+139.69
+123.72
+
+lda rkt
+compile-time
+2.905635
+2.9085140000000003
+2.9283599999999996
+2.8976779999999995
+2.883759
+
+psi
+../../testcode/psisrc/ct10.psi
+1.61s user 0.02s system 99% cpu 1.632 total
+
+../../testcode/psisrc/ct20.psi
+$bin $i  5.82s user 0.04s system 99% cpu 5.867 total
+
+../../testcode/psisrc/ct30.psi
+$bin $i  15.44s user 0.11s system 99% cpu 15.571 total
+
+../../testcode/psisrc/ct40.psi
+$bin $i  50.39s user 0.30s system 99% cpu 50.741 total
+
+../../testcode/psisrc/ct50.psi
+$bin $i  101.33s user 0.34s system 99% cpu 1:41.79 total
+
+../../testcode/psisrc/ct60.psi
+$bin $i  224.49s user 0.78s system 99% cpu 3:45.58 total
+
+../../testcode/psisrc/ct80.psi
+$bin $i  787.87s user 2.01s system 99% cpu 13:10.96 total
+
+../../testcode/psisrc/ct90.psi
+$bin $i  1434.59s user 3.01s system 99% cpu 23:59.44 total
+
+
+psi lr
+../../testcode/psisrc/lr10.psi
+$bin $i  0.41s user 0.00s system 99% cpu 0.413 total
+
+../../testcode/psisrc/lr20.psi
+$bin $i  0.63s user 0.02s system 99% cpu 0.653 total
+
+../../testcode/psisrc/lr30.psi
+$bin $i  0.91s user 0.01s system 99% cpu 0.923 total
+
+../../testcode/psisrc/lr40.psi
+$bin $i  1.24s user 0.02s system 99% cpu 1.258 total
+
+../../testcode/psisrc/lr50.psi
+$bin $i  1.59s user 0.03s system 99% cpu 1.618 total
+
+../../testcode/psisrc/lr60.psi
+$bin $i  1.87s user 0.02s system 99% cpu 1.891 total
+
+../../testcode/psisrc/lr70.psi
+$bin $i  2.20s user 0.04s system 99% cpu 2.237 total
+
+../../testcode/psisrc/lr80.psi
+$bin $i  2.49s user 0.05s system 99% cpu 2.544 total
+
+../../testcode/psisrc/lr90.psi
+$bin $i  2.87s user 0.03s system 99% cpu 2.905 total
