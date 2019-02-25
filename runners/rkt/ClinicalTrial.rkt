@@ -5,7 +5,7 @@
          disassemble
          racket/cmdline
          racket/runtime-path
-         "utils.rkt")
+         "gmm-utils.rkt")
 
 (define testname "ClinicalTrial")
 
@@ -18,40 +18,8 @@
           (list `(pairinfo . ((ainfo . ((arrayinfo . ((size . ,n)))))
                               (binfo . ((arrayinfo . ((size . ,n))))))))))
 
-  (define module-env (compile-file srcfile ctinfo))
-  ;; (jit-verify-module module-env)
-  ;; (error 'stop)
-  ;; (jit-write-module module-env "ct.ll")
-  (optimize-module module-env #:opt-level 3)
-  (jit-dump-function module-env 'prog)
-  (initialize-jit! module-env #:opt-level 0)
-
-  (define init-rng (jit-get-function 'init-rng module-env))
-
-  (init-rng)
-
-  (define prog (jit-get-function 'prog module-env))
-;  (jit-dump-function module-env 'prog)
-;  (disassemble-ffi-function (jit-get-function-ptr 'prog module-env) #:size 2000)
-
-  (define make-pair-array-bool
-    (jit-get-function (string->symbol (format "make$pair<array<~a.bool>*.array<~a.bool>*>" n n))
-                      module-env))
-  (define make-array-bool
-    (jit-get-function (string->symbol (format "new-sized$array<~a.bool>" n))
-                      module-env))
-  (define set-index-array-bool
-    (jit-get-function (string->symbol (format "set-index!$array<~a.bool>" n))
-                      module-env))
-
-  (define tbool (jit-get-racket-type 'bool module-env))
-
-  (define (make-array lst)
-    (define arr (make-array-bool))
-    (for ([v lst]
-          [i (in-range (length lst))])
-      (set-index-array-bool arr i v))
-    arr)
+  (define module-env (debug-file srcfile))
+  (define prog (get-prog module-env))
 
   (define pair-array-regex "^\\(\\[(.*)\\],\\[(.*)\\]\\)$")
 
@@ -60,6 +28,7 @@
       ["True" 1]
       ["False" 0]))
   (define total-wrong 0)
+  (define total 0)
   (define (run-single str out-port)
     (define m1 (regexp-match "\\(\\[(.*)\\],\\[(.*)\\]\\),(.*)\\)" str))
     (when (< (length m1) 4)
@@ -68,15 +37,16 @@
     (define b (map tobool (regexp-split "," (third m1))))
     (define i (tobool (fourth m1)))
     ;(printf "a: ~a, b: ~a, i: ~a\n" a b i)
-    (define ca (make-array a))
-    (define cb (make-array b))
-    (define p (make-pair-array-bool ca cb))
+    (define ca (sized-nat-array a))
+    (define cb (sized-nat-array b))
+    (define p (cons-array-pair ca cb))
 
     (define before-time (get-time))
     (define outi (prog n p))
     (define after-time (get-time))
     (fprintf out-port "~a ~a [~a]\t\n" (~r (- after-time before-time) #:precision '(= 3)) 1 outi)
     (unless (equal? outi i) (set! total-wrong (+ total-wrong 1)))
+    (set! total (+ total 1))
     outi)
 
   (time (call-with-input-file xfile
@@ -85,7 +55,7 @@
          (λ (out-port)
            (for ([line (in-lines xf-port)])
              (run-single line out-port)))))))
-  (printf "total-wrong: ~a\n" total-wrong))
+  (printf "total-wrong: ~a in total: ~a\n" total-wrong total))
 
 (module+ main
   (run-test (command-line #:args (n) (string->number n))))
