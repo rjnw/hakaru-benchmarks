@@ -102,8 +102,8 @@
                 (+ tim t))))
     (reverse ntrials))
   ;; (define hk-trial (remove-warmup (get-trial "hk")))
-  ;; (define augur-trial (remove-warmup (get-trial "augur")))
-  ;; (define jags-trial (remove-warmup (get-trial "jags")))
+  (define augur-trial (remove-warmup (get-trial "augur")))
+  (define jags-trial (remove-warmup (get-trial "jags")))
   (define rkt-trial (remove-warmup  (get-trial "rkt")))
   (parameterize
       (
@@ -128,18 +128,18 @@
       ;;             (make-object color% 73 0 146) 'dot-dash
       ;;             (make-object color% 0 146 146) 'solid
       ;;             "Haskell-backend" 'square)
-      ;; (trial-plot "augur"
-      ;;             (map (curry filter (λ (tsa) (zero? (modulo (sub1 (second tsa)) 20)))) augur-trial)
-      ;;             '()
-      ;;             (make-object color% 146 73 0) 'solid
-      ;;             (make-object color% 0 0 0) 'solid
-      ;;             "AugurV2" 'bullet)
-      ;; (trial-plot "jags"
-      ;;             jags-trial
-      ;;             '()
-      ;;             (make-object color% 146 0 0) 'short-dash
-      ;;             (make-object color% 146 73 0) 'solid
-      ;;             "JAGS" 'diamond)
+      (trial-plot "augur"
+                  (map (curry filter (λ (tsa) (zero? (modulo (sub1 (second tsa)) 20)))) augur-trial)
+                  '()
+                  (make-object color% 146 73 0) 'solid
+                  (make-object color% 0 0 0) 'solid
+                  "AugurV2" 'bullet)
+      (trial-plot "jags"
+                  jags-trial
+                  '()
+                  (make-object color% 146 0 0) 'short-dash
+                  (make-object color% 146 73 0) 'solid
+                  "JAGS" 'diamond)
       ;; (list (tick-grid))
       )
      output-file
@@ -202,6 +202,8 @@
      (values (string->number classes) (string->number points) output-file)))
   (plot-accuracy classes points output-file)
   (pretty-print (list classes points output-file)))
+
+;; racket GmmGibbsAccuracyPlot.rkt --x-max 10 --y-min 30 --y-max 60 --height 200 --width 400 25 5000 "./plot.pdf"
 
 (module+ test
   ;; (plot-accuracy 6 10 "test.pdf")
