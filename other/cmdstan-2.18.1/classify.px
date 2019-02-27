@@ -50,9 +50,9 @@ while (defined(my $obs = <>)) {
     $csv->column_names(@header);
 
     # Compute (expected) accuracy for each sample
-    my $t = 0;
+    my @accuracy = (1/$K);
     while (my $sample = $csv->getline_hr($stan)) {
-        last if ++$t > $#time;
+        last if @accuracy >= @time;
         my @mu    = @{$sample}{@header_mu   };
         my @theta = @{$sample}{@header_theta};
         my @log_theta = map log, @theta;
@@ -76,8 +76,25 @@ while (defined(my $obs = <>)) {
         for (my $truth = 0; $truth < $K; ++$truth) {
             $accuracy -= $matrix[$truth][$assignment[$truth]];
         }
-        $accuracy /= scalar(@obs);
-        print $time[$t]-$time[0], " $t [$accuracy]\t";
+        push @accuracy, $accuracy / scalar(@obs);
+    }
+
+    # Interpolate linearly between samples (dividing 10 seconds into 1024 ticks)
+    my $time0 = $time[0];
+    for (my $tick = 0; $tick <= 1024; ++$tick) {
+        my $t = $tick * 10 / 1024;
+        my $time = $time0 + $t;
+        # Invariant: $time[0] <= $time
+        while (@time >= 2 && $time[1] <= $time) {
+            shift @time;
+            shift @accuracy;
+        }
+        last unless @time >= 2;
+        # Invariant: $time[0] <= $time < $time[1]
+        my $accuracy = ($accuracy[0] * ($time[1] - $time   ) +
+                        $accuracy[1] * ($time    - $time[0]))
+                     /                 ($time[1] - $time[0]);
+        print "$t $tick [$accuracy]\t";
     }
     print "\n";
 }
