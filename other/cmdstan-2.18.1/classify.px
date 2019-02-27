@@ -1,0 +1,83 @@
+#!/usr/bin/perl -w
+# Benchmark STAN on GMM
+# ./classify.px ../../input/GmmGibbs/50-10000
+
+use strict;
+use File::Basename qw(basename);
+use File::Temp ();
+use Text::CSV;
+use List::Util qw(max sum);
+use Algorithm::Munkres qw(assign);
+
+# Iterate over trials, each specified as an input line
+while (defined(my $obs = <>)) {
+
+    # Parse input file name for K = number of classes
+    my ($K) = (basename($ARGV) =~ /^(\d+)/) or die;
+    my @header_theta = map "theta.$_", 1..$K; # we'll start our indexing at 0
+    my @header_mu    = map "mu.$_"   , 1..$K; # we'll start our indexing at 0
+
+    # Parse synthetic data
+    my @obs = $obs =~ /^\(\[([^\[\]]*)\],\[([^\[\]]*)\]\)$/ or die;
+    my @truth = $obs[1] =~ /[^,]+/g or die;
+    $obs = $obs[0];
+    @obs = $obs =~ /[^,]+/g or die;
+    scalar(@truth) == scalar(@obs) or die;
+    die if grep { $_ < 0 || $_ > $K-1 || $_ != int } @truth;
+
+    # Run STAN on synthetic data and collect iteration timings (for 10 seconds)
+    # through modified stan/src/stan/services/util/generate_transitions.hpp
+    my $data = File::Temp->new(SUFFIX => '.data.R');
+    print $data "s <- 14\n",
+                "K <- $K\n",
+                "N <- ", scalar(@obs), "\n",
+                "t <- c($obs)\n";
+    $data->flush();
+    my $stan = File::Temp->new(SUFFIX => '.csv');
+    open my $log, "-|", "./gmm", qw(sample save_warmup=1 data), "file=$data",
+                                 qw(output refresh=1), "file=$stan" or die;
+    my @time;
+    while (defined(my $iteration = <$log>)) {
+        push @time, $1 if $iteration =~ /^(\d+\.\d+) Iteration:/;
+    }
+
+    # Open CSV file containing samples from STAN
+    my $csv = Text::CSV->new({binary => 1});
+    my $line;
+    do { $line = <$stan> } while $line =~ /^#/;
+    $csv->parse($line) or die;
+    my @header = $csv->fields();
+    $csv->column_names(@header);
+
+    # Compute (expected) accuracy for each sample
+    my $t = 0;
+    while (my $sample = $csv->getline_hr($stan)) {
+        last if ++$t > $#time;
+        my @mu    = @{$sample}{@header_mu   };
+        my @theta = @{$sample}{@header_theta};
+        my @log_theta = map log, @theta;
+        my @matrix = map [(0) x $K], 1..$K; # assignment problem
+        for (my $i = 0; $i < @obs; ++$i) {
+            my $obs = $obs[$i];
+            my @p = map { $log_theta[$_] - ($obs - $mu[$_]) ** 2 / 2 } 0..$K-1;
+            my $p = max @p;
+            # my @predict = grep { $p[$_] == $p } 0..$K-1;
+            # @predict == 1 ? $predict[0] : @predict == 0 ? rand $K : $predict[rand @predict];
+            @p = map { exp($_ - $p) } @p;
+            $p = sum @p;
+            my $row = $matrix[$truth[$i]];
+            for (my $predict = 0; $predict < $K; ++$predict) {
+                $row->[$predict] -= $p[$predict]/$p;
+            }
+        }
+        my @assignment;
+        assign(\@matrix, \@assignment);
+        my $accuracy = 0;
+        for (my $truth = 0; $truth < $K; ++$truth) {
+            $accuracy -= $matrix[$truth][$assignment[$truth]];
+        }
+        $accuracy /= scalar(@obs);
+        print $time[$t]-$time[0], " $t [$accuracy]\t";
+    }
+    print "\n";
+}
