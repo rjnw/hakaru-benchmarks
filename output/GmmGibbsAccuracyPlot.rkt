@@ -48,11 +48,11 @@
     (define sta^ (run->sweep-time.accuracy trials))
     (define smta (sweep-time.accuracy->sweep-mean$time.accuracy sta^))
     (define tsa-map (mean-time trials))
-    (pretty-print tsa-map)
-    (pretty-print sta^)
-    (pretty-print (map cdr
-                       (sort (hash->list smta)
-                             (λ (v1 v2) (< (car v1) (car v2))))))
+    ;; (pretty-print tsa-map)
+    ;; (pretty-print sta^)
+    ;; (pretty-print (map cdr
+    ;;                    (sort (hash->list smta)
+    ;;                          (λ (v1 v2) (< (car v1) (car v2))))))
     (define sta
       (sort
        (for/list ([(k v) tsa-map])
@@ -79,22 +79,24 @@
 
      (points
       (for/list ([v sta]
-                 #:when (if (equal? runner "augur")
+                 #:when (if  (equal? runner "augur")
                             (zero? (modulo (sub1 (first v)) 200))
-                            (zero? (modulo (first v) 10))))
+                            (if (equal? runner "stan")
+                                 #f
+                                (zero? (modulo (first v) 10)))))
         (cdr v))
       #:line-width 0.5
       #:size point-size #:color lcolor #:sym pstyle)
 
      (lines
-      (sort
-       (map cdr
-            (sort (hash->list smta)
-                  (λ (v1 v2) (< (car v1) (car v2)))))
-       (λ (v1 v2) (< (car v1) (car v2))))
-      ;; (sort (for/list ([(k v) tsa-map])
-      ;;         (list k (mean (map car v))))
-      ;;       (λ (v1 v2) (< (car v1) (car v2))))
+      ;; (sort
+      ;;  (map cdr
+      ;;       (sort (hash->list smta)
+      ;;             (λ (v1 v2) (< (car v1) (car v2)))))
+      ;;  (λ (v1 v2) (< (car v1) (car v2))))
+      (sort (for/list ([(k v) tsa-map])
+              (list k (mean (map car v))))
+            (λ (v1 v2) (< (car v1) (car v2))))
       #:color lcolor #:style lstyle
       #:width 0.7
       #:label legend
@@ -114,7 +116,6 @@
   ;; (define hk-trial (remove-warmup (get-trial "hk")))
   (define augur-trial (remove-warmup (get-trial "augur")))
   (define stan-trial (remove-warmup (get-trial "stan")))
-  (pretty-print stan-trial)
   (define jags-trial (remove-warmup (get-trial "jags")))
   (define rkt-trial (remove-warmup  (get-trial "rkt")))
   (parameterize
@@ -157,7 +158,7 @@
                   stan-trial
                   '()
                   (make-object color% 0 109 219) 'long-dash
-                  (make-object color% 146 73 0) 'solid
+                  (make-object color% 0 109 219) 'solid
                   "stan" 'diamond)
       ;; (list (tick-grid))
       )
@@ -195,7 +196,7 @@
 ;; no loop fusion 400ms
 (define y-min (make-parameter 30))
 (define y-max (make-parameter 60))
-(define x-max (make-parameter 2))
+(define x-max (make-parameter 10))
 (define x-min (make-parameter 0))
 (define width (make-parameter 500))
 (define height (make-parameter 500))
@@ -228,9 +229,9 @@
   ;; (plot-accuracy 6 10 "test.pdf")
   ;; (plot-accuracy 12 1000)
   ;; (plot-accuracy 15 1000 "gmm-15-1000-new.pdf")
-  (plot-accuracy 50 10000 "gmm-50-10000.pdf")
+  ;; (plot-accuracy 50 10000 "gmm-50-10000.pdf")
   ;; (plot-accuracy 25 1000 "gmm-25-1000-old.pdf")
-  ;; (plot-accuracy 25 5000 "gmm-25-5000-new.pdf")
+  (plot-accuracy 25 5000 "gmm-25-5000-new.pdf")
 
   ;; (plot-accuracy 80 10000)
   ;; (plot-accuracy 100 10000)
