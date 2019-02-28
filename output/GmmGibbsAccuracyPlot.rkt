@@ -196,7 +196,7 @@
 ;; no loop fusion 400ms
 (define y-min (make-parameter 30))
 (define y-max (make-parameter 60))
-(define x-max (make-parameter 10))
+(define x-max (make-parameter 20))
 (define x-min (make-parameter 0))
 (define width (make-parameter 500))
 (define height (make-parameter 500))
