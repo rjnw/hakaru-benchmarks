@@ -11,3 +11,4 @@ output/accuracies/GmmGibbs/
 output/accuracies/LdaGibbs/
 output/accuracies/NaiveBayesGibbs/
 input/
+other/cmdstan-2.18.1/
