@@ -1,0 +1,57 @@
+So here's how to measure STAN's per-data startup time:
+
+1. Apply this patch temporarily
+2. rm -f gmm.hpp gmm; make gmm
+3. Run classify.px as before
+4. Hit Ctrl-C after a dozen trials
+5. Undo step 1 and redo step 2
+
+[ccshan 2019-02-27]
+
+diff --git a/other/cmdstan-2.18.1/stan/src/stan/services/util/generate_transitions.hpp b/other/cmdstan-2.18.1/stan/src/stan/services/util/generate_transitions.hpp
+index 2dc96a8..1077826 100644
+--- a/other/cmdstan-2.18.1/stan/src/stan/services/util/generate_transitions.hpp
++++ b/other/cmdstan-2.18.1/stan/src/stan/services/util/generate_transitions.hpp
+@@ -48,7 +48,6 @@ namespace stan {
+                                 Model& model, RNG& base_rng,
+                                 callbacks::interrupt& callback,
+                                 callbacks::logger& logger) {
+-        time_t tv_sec0 = 0;
+         for (int m = 0; m < num_iterations; ++m) {
+           callback();
+ 
+@@ -60,11 +59,8 @@ namespace stan {
+               = std::ceil(std::log10(static_cast<double>(finish)));
+             std::stringstream message;
+             struct timespec ts;
+-            time_t sec = 0;
+             if (0 == clock_gettime(CLOCK_REALTIME, &ts)) {
+-              if (m == 0) tv_sec0 = ts.tv_sec;
+-              sec = ts.tv_sec - tv_sec0;
+-              message << sec << '.';
++              message << ts.tv_sec << '.';
+               const char prev = message.fill('0');
+               message << std::setfill('0') << std::setw(9) << ts.tv_nsec << ' ';
+               message.fill(prev);
+@@ -78,8 +74,7 @@ namespace stan {
+             message << (warmup ? " (Warmup)" : " (Sampling)");
+ 
+             logger.info(message);
+-            if (sec > 10)
+-              throw std::runtime_error("Timeout after 10 seconds");
++	    throw std::runtime_error("Done measuring startup time");
+           }
+ 
+           init_s = sampler.transition(init_s, logger);
+diff --git a/other/cmdstan-2.18.1/classify.px b/other/cmdstan-2.18.1/classify.px
+index f281d60..e3c24d4 100755
+--- a/other/cmdstan-2.18.1/classify.px
++++ b/other/cmdstan-2.18.1/classify.px
+@@ -38,6 +38,7 @@ while (defined(my $obs = <>)) {
+                                  qw(output refresh=1), "file=$stan" or die;
+     my @time;
+     while (defined(my $iteration = <$log>)) {
++        print $iteration if $iteration =~ /^\d+\.\d+ /;
+         push @time, $1 if $iteration =~ /^(\d+\.\d+) Iteration:/;
+     }
+ 
