@@ -41,6 +41,7 @@ gmm-acc:
 	cd ./runners; make gmm-acc classes=$(classes) points=$(points)
 gmm-plot:
 	echo "use racket GmmGibbsAccuracy.rkt in output folder for finer control."
+	echo "racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 20 --y-max 45 --height 300 --width 700 50 10000 \"gmm-50-10000.pdf\""
 	cd ./output; racket GmmGibbsAccuracyPlot.rkt $(classes) $(points) $(output-file)
 
 gmm: gmm-input gmm-trial gmm-acc gmm-plot
