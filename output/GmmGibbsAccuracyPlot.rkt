@@ -121,6 +121,7 @@
   (parameterize
       (
        ;; [plot-font-size 10]
+       [plot-font-face "Linux Libertine O"]
        [plot-legend-box-alpha 1]
        [plot-x-ticks (linear-ticks #:divisors '(5) #:base 10 #:number 5)]
        [plot-y-ticks (linear-ticks #:divisors '(10) #:base 10 #:number 2)]
@@ -159,7 +160,7 @@
                   '()
                   (make-object color% 0 109 219) 'long-dash
                   (make-object color% 0 109 219) 'solid
-                  "stan" 'diamond)
+                  "STAN" 'diamond)
       ;; (list (tick-grid))
       )
      output-file
