@@ -43,6 +43,26 @@ index 2dc96a8..1077826 100644
            }
  
            init_s = sampler.transition(init_s, logger);
+diff -u a/other/cmdstan-2.18.1/src/cmdstan/command.hpp b/other/cmdstan-2.18.1/src/cmdstan/command.hpp
+--- a/other/cmdstan-2.18.1/src/cmdstan/command.hpp
++++ b/other/cmdstan-2.18.1/src/cmdstan/command.hpp
+@@ -98,6 +98,16 @@
+     parser.print(info);
+     info();
+ 
++    {
++      struct timespec ts;
++      if (0 == clock_gettime(CLOCK_REALTIME, &ts)) {
++        std::stringstream message;
++        message << ts.tv_sec << '.'
++                << std::setfill('0') << std::setw(9) << ts.tv_nsec
++	        << " Startup";
++	logger.info(message);
++      }
++    }
+ 
+     stan::callbacks::writer init_writer;
+     stan::callbacks::interrupt interrupt;
 diff --git a/other/cmdstan-2.18.1/classify.px b/other/cmdstan-2.18.1/classify.px
 index f281d60..e3c24d4 100755
 --- a/other/cmdstan-2.18.1/classify.px
