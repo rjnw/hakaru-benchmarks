@@ -11,7 +11,7 @@ import           Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime, addUTCTi
 import           Control.DeepSeq
 
 import ClinicalTrial.Prog
-import Utils    
+import Utils
 
 main :: IO ()
 main = do
@@ -27,6 +27,7 @@ main = do
          Just ni <- unMeasure (prog n (UV.fromList v1, UV.fromList v2)) g
          timeaftersample <- getCurrentTime
          let t = diffTime timeaftersample timeafterread
+         putStrLn $ "time: " ++ show t
          return (t + t_sofar, if ni==i then numright+1 else numright)
   let lns = lines dat
       numlines = length lns
