@@ -39,7 +39,7 @@ def run_gmm(classes, points, t, out):
         infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]
         num_samples = 1
         tim = 0
-        while tim < 15:
+        while tim < 24:
             tim = time.clock() - init_time
             for i in range(5):
                 infer_obj.samplen(burnIn=0, numSamples=1)['z'][0]

@@ -48,7 +48,7 @@
 
 
     (define spr (curry gibbs-sweep points (λ (arr i v) (fixed-hakrit-array-set! arr 'nat i v)) update))
-    (gibbs-timer spr zsc printer #:min-time 10 #:step-time 0.01 #:min-sweeps 0 #:step-sweeps 1)
+    (gibbs-timer spr zsc printer #:min-time 24 #:step-time 0.01 #:min-sweeps 0 #:step-sweeps 1)
 
     (fprintf out-port "\n"))
   (call-with-output-file outfile #:exists 'replace
