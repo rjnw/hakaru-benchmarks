@@ -55,3 +55,7 @@ lda-plot:
 	echo "use racket LdaLIkelihoodPlot.rkt in output folder for finer control."
 	cd ./output; racket LdaLikelihoodPlot.rkt $(topics) $(output-file)
 lda: lda-rkt lda-augur lda-plot
+
+sham-plot:
+	cd ./runners/rkt; racket GmmGibbsSham.rkt 25 5000; GmmGibbsOptSham.rkt 25 5000
+	cd ./output; racket GmmGibbsTimePlot.rkt
