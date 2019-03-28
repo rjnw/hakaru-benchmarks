@@ -72,6 +72,28 @@ Executable gmmGibbs
                        split                >= 0.2.3.2,
                        directory            >= 1.3.0.0
 
+Executable gmmGibbsSham
+    Hs-Source-Dirs:    .
+    Main-is:           GmmGibbsSham/Main.hs
+    Default-Language:  Haskell2010
+    GHC-Options:       -O2 -Wall -fwarn-tabs
+    other-modules:     Utils GmmGibbs.Prog
+    build-depends:     base                 >= 4.7  && < 5.0,
+                       mwc-random           >= 0.13 && < 0.14,
+                       hakaru               >= 0.6,
+                       logfloat             >= 0.13 && < 0.14,
+                       text                 >= 0.11 && < 1.3,
+                       pretty               >= 1.1  && < 1.2,
+                       filepath             >= 1.3,
+                       vector               >= 0.10,
+                       bytestring           >= 0.10,
+                       process              >= 1.1  && < 2.0,
+                       temporary            >= 1.2.1.1,
+                       time                 >= 1.6.0.1,
+                       split                >= 0.2.3.2,
+                       directory            >= 1.3.0.0
+
+
 Executable gmmAccuracy
     Hs-Source-Dirs:    .
     Main-is:           GmmGibbs/Accuracy.hs

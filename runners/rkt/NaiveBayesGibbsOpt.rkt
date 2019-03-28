@@ -74,7 +74,7 @@
     (if (holdout? docUpdate)
         (begin
           (prog topicPrior wordPrior z words docs docUpdate))
-        (get-index-nat-array z docUpdate)))
+        (fixed-hakrit-array-ref z 'nat docUpdate)))
 
   (define distf (discrete-sampler 0 (- num-topics 1)))
   (define zs (for/list ([orig-value rk-topics]
@@ -89,9 +89,9 @@
       (printf "sweeped: ~a in ~a\n" sweeps (~r tim #:precision '(= 3)))
       (fprintf out-port "~a ~a [" (~r tim #:precision '(= 3)) sweeps)
       (for ([i (in-range (- num-docs 1))])
-        (fprintf out-port "~a " (get-index-nat-array state i)))
-      (fprintf out-port "~a]\t" (get-index-nat-array state (- num-docs 1))))
-    (define sweeper (curry gibbs-sweep num-docs set-index-nat-array update))
+        (fprintf out-port "~a " (fixed-hakrit-array-ref state 'nat i)))
+      (fprintf out-port "~a]\t" (fixed-hakrit-array-ref state 'nat (- num-docs 1))))
+    (define sweeper (curry gibbs-sweep num-docs (λ (arr i v) (fixed-hakrit-array-set! arr 'nat i v)) update))
     (gibbs-timer sweeper z printer
                  #:min-sweeps trial-sweeps
                  #:step-sweeps 1
