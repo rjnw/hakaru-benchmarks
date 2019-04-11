@@ -36,7 +36,7 @@ nb-augur-ll:
 	./hkbin/nbLikelihood ../input/news/ ../output/NaiveBayesGibbs/augur/20-19997-$(holdout-modulo) ../output/accuracies/NaiveBayesGibbs/augur/20-19997-$(holdout-modulo) 20
 
 lda-rkt:
-	cd ./rkt && racket LdaGibbs.rkt ../../input/kos/ ../../output/LdaGibbs/kos/ $(topics) $(trials)
+	cd ./rkt && racket LdaGibbsOpt.rkt ../../input/kos/ ../../output/LdaGibbs/kos/ $(topics) $(trials)
 	./hkbin/ldaLikelihood ../input/kos/ ../output/LdaGibbs/kos/rkt-$(topics)   ../output/accuracies/LdaGibbs/kos/rkt-$(topics) $(topics)
 
 lda-augur:
