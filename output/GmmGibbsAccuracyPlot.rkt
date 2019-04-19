@@ -224,7 +224,8 @@
   (plot-accuracy classes points output-file)
   (pretty-print (list classes points output-file)))
 
-;; racket GmmGibbsAccuracyPlot.rkt --x-max 10 --y-min 30 --y-max 60 --height 200 --width 400 25 5000 "./plot.pdf"
+;; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 35 --y-max 60 --height 300 --width 400 25 5000 "gmm-25-5000.pdf"
+;; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 20 --y-max 45 --height 300 --width 700 50 10000 "gmm-50-10000.pdf"
 
 (module+ test
   ;; (plot-accuracy 6 10 "test.pdf")
