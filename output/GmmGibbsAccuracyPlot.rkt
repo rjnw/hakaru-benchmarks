@@ -132,35 +132,35 @@
      (append
       ;; http://www.somersault1824.com/wp-content/uploads/2015/02/color-blindness-palette.png
       ;; line-color line-style interval-color style legend line-points
-      (trial-plot "hk"
-                  hk-trial '()
-                  (make-object color% 73 0 146) 'dot-dash
-                  (make-object color% 0 146 146) 'solid
-                  "Haskell-backend" 'square)
+      ;; (trial-plot "hk"
+      ;;             hk-trial '()
+      ;;             (make-object color% 73 0 146) 'dot-dash
+      ;;             (make-object color% 0 146 146) 'solid
+      ;;             "Haskell-backend" 'square)
 
       (trial-plot "rkt"
                   rkt-trial '()
                   (make-object color% 0 73 73) 'solid
                   (make-object color% 0 146 146) 'solid
                   "Hakaru" 'triangle)
-      ;; (trial-plot "augur"
-      ;;             (map (curry filter (λ (tsa) (zero? (modulo (sub1 (second tsa)) 20)))) augur-trial)
-      ;;             '()
-      ;;             (make-object color% 146 73 0) 'solid
-      ;;             (make-object color% 0 0 0) 'solid
-      ;;             "AugurV2" 'bullet)
-      ;; (trial-plot "jags"
-      ;;             jags-trial
-      ;;             '()
-      ;;             (make-object color% 146 0 0) 'short-dash
-      ;;             (make-object color% 146 73 0) 'solid
-      ;;             "JAGS" 'diamond)
-      ;; (trial-plot "stan"
-      ;;             stan-trial
-      ;;             '()
-      ;;             (make-object color% 0 109 219) 'long-dash
-      ;;             (make-object color% 0 109 219) 'solid
-      ;;             "STAN" 'diamond)
+      (trial-plot "augur"
+                  (map (curry filter (λ (tsa) (zero? (modulo (sub1 (second tsa)) 20)))) augur-trial)
+                  '()
+                  (make-object color% 146 73 0) 'solid
+                  (make-object color% 0 0 0) 'solid
+                  "AugurV2" 'bullet)
+      (trial-plot "jags"
+                  jags-trial
+                  '()
+                  (make-object color% 146 0 0) 'short-dash
+                  (make-object color% 146 73 0) 'solid
+                  "JAGS" 'diamond)
+      (trial-plot "stan"
+                  stan-trial
+                  '()
+                  (make-object color% 0 109 219) 'long-dash
+                  (make-object color% 0 109 219) 'solid
+                  "STAN" 'diamond)
       ;; (list (tick-grid))
       )
      output-file

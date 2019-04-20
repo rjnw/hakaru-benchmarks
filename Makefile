@@ -15,6 +15,7 @@ generate-testcode:
 	cd ./testcode/hssrc ; make
 
 build-rkt:
+	cd ./rcf; raco pkg install --skip-installed --deps search-auto
 	cd ./sham ; raco pkg install --skip-installed --deps search-auto
 	cd ./hakrit ; raco pkg install --skip-installed --deps search-auto
 
@@ -32,9 +33,9 @@ clean:
 docker:
 	cd ./docker; sudo docker build -t hakaru-benchmark .
 
+# GMMGibbs
 gmm-input:
 	cd ./input; make gmm classes=$(classes) points=$(points) trials=$(trials)
-
 gmm-trial:
 	cd ./runners; make gmm-trial classes=$(classes) points=$(points)
 gmm-acc:
@@ -44,9 +45,20 @@ gmm-plot:
 	echo "racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 24 --y-max 44 --height 300 --width 400 50 10000 gmm-50-10000.pdf"
 	echo "racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 35 --y-max 60 --height 300 --width 400 25 5000 gmm-25-5000.pdf"
 	cd ./output; racket GmmGibbsAccuracyPlot.rkt $(classes) $(points) $(output-file)
-
 gmm: gmm-input gmm-trial gmm-acc gmm-plot
+gmm-25:
+	make gmm-trial classes=25 points=5000
+	make gmm-acc classes=25 points=5000
+	cd ./output; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 35 --y-max 60 --height 300 --width 400 25 5000 gmm-25-5000.pdf
+	xdg-open ./output/gmm-25-5000.pdf
 
+gmm-50:
+	make gmm-trial classes=50 points=10000
+	make gmm-acc classes=50 points=10000
+	cd ./output; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 24 --y-max 44 --height 300 --width 400 50 10000 gmm-50-10000.pdf
+	xdg-open ./output/gmm-50-10000.pdf
+
+# lda
 lda-rkt:
 	cd ./runners; make lda-rkt topics=$(topics) trials=$(trials)
 lda-augur:

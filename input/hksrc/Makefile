@@ -13,4 +13,4 @@ all: $(generators)
 	cd ../../hakaru; stack exec -- ghc -O2 ../input/hksrc/$< -o ../input/bin/$(notdir $@);
 
 clean:
-	rm *.hs *.hi *.o ../bin/*
+	rm *.hi *.o ../bin/*

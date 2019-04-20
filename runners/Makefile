@@ -9,7 +9,12 @@ gmm-hs:
 	./hkbin/gmmGibbs ../input/GmmGibbs/$(classes)-$(points) ../testcode/jagssrc ../output/
 gmm-aug:
 	cd ./augur && python2 gmm.py $(classes) $(points)
-gmm-trial: gmm-rkt gmm-hs gmm-aug
+gmm-stan:
+	cd ../other; make stan
+	cd ../other/cmdstan-2.18.1; make gmm
+	cd ../other/cmdstan-2.18.1; ./classify.px ../../input/GmmGibbs/$(classes)-$(points) > ../../output/accuracies/GmmGibbs/stan/$(classes)-$(points)
+
+gmm-trial: gmm-rkt gmm-hs gmm-aug gmm-stan
 
 gmm-rkt-acc:
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/rkt/$(classes)-$(points)
@@ -19,7 +24,7 @@ gmm-jags-acc:
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/jags/$(classes)-$(points)
 gmm-aug-acc:
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/augur/$(classes)-$(points)
-gmm-acc: gmm-rkt-acc gmm-hs-acc gmm-jags-acc gmm-aug-acc
+gmm-acc: gmm-rkt-acc gmm-hs gmm-jags-acc gmm-aug-acc
 gmm: gmm-trial gmm-acc
 
 nb-rkt:
