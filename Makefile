@@ -46,28 +46,46 @@ gmm-plot:
 	echo "racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 35 --y-max 60 --height 300 --width 400 25 5000 gmm-25-5000.pdf"
 	cd ./output; racket GmmGibbsAccuracyPlot.rkt $(classes) $(points) $(output-file)
 gmm: gmm-input gmm-trial gmm-acc gmm-plot
+
 gmm-25:
 	make gmm-trial classes=25 points=5000
 	make gmm-acc classes=25 points=5000
 	cd ./output; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 35 --y-max 60 --height 300 --width 400 25 5000 gmm-25-5000.pdf
-	xdg-open ./output/gmm-25-5000.pdf
+# xdg-open ./output/gmm-25-5000.pdf
 
 gmm-50:
 	make gmm-trial classes=50 points=10000
 	make gmm-acc classes=50 points=10000
 	cd ./output; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 24 --y-max 44 --height 300 --width 400 50 10000 gmm-50-10000.pdf
-	xdg-open ./output/gmm-50-10000.pdf
+# xdg-open ./output/gmm-50-10000.pdf
+
+# naive bayes
+nb:
+	cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
+	cd ./runners; make nb-augur trials=12 sweeps=50 trial-time=500 holdout-modulo=10
+	cd ./runners; make nb-rkt-ll holdout-modulo=10
+	cd ./runners; make nb-augur-ll holdout-modulo=10
+	cd ./output; racket NaiveBayesAccuracy.rkt
+	cd ./output; racket NaiveBayesLiklihood.rkt
 
 # lda
-lda-rkt:
-	cd ./runners; make lda-rkt topics=$(topics) trials=$(trials)
-lda-augur:
-	cd ./runners; make lda-augur topics=$(topics) trials=$(trials)
-lda-plot:
-	echo "use racket LdaLIkelihoodPlot.rkt in output folder for finer control."
-	cd ./output; racket LdaLikelihoodPlot.rkt $(topics) $(output-file)
-lda: lda-rkt lda-augur lda-plot
+lda-50:
+	cd ./runners; make lda-rkt topics=50 trials=5
+	cd ./runners; make lda-augur topics=50 trials=5
+	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4200000 --y-max -4400000 50 ldalikelihood-50.pdf
+lda-100:
+	cd ./runners; make lda-rkt topics=100 trials=5
+	cd ./runners; make lda-augur topics=100 trials=5
+	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4500000 --y-max -4700000 100 ldalikelihood-100.pdf
 
+allbench:
+	make gmm-25
+	make gmm-50
+	make nb
+	make lda-50
+	make lda-100
+
+# sham plots
 sham-plot:
 	cd ./runners/rkt; racket GmmGibbsSham.rkt 25 5000; GmmGibbsOptSham.rkt 25 5000
 	cd ./output; racket GmmGibbsTimePlot.rkt

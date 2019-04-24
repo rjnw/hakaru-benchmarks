@@ -127,9 +127,7 @@
     (trial-plot "AugurV2" (remove-warmup augur-trials)
                 (make-object color% 146 73 0) 'solid
                 (make-object color% 0 0 0) 'solid
-                'bullet)
-    (tick-grid)
-    )
+                'bullet))
 
    ;; (format "../../ppaml/writing/pipeline/ldalikelihood-~a.pdf" topics)
    output-file
@@ -144,12 +142,12 @@
    ;; #:y-min -4400000
    ;; #:x-max 800
 
-   #:y-max y-min
-   #:y-min y-max
-   #:x-min x-min
-   #:x-max x-max
-   #:width width
-   #:height height
+   #:y-max (y-min)
+   #:y-min (y-max)
+   #:x-min (x-min)
+   #:x-max (x-max)
+   #:width (width)
+   #:height (height)
 
    #:y-label "Log likelihood"
    #:x-label "Time in seconds"))
@@ -192,4 +190,4 @@
   (parameterize ([y-min -4200000]
                  [y-max -4400000]
                  [x-max 800])
-    (plot-likelihood 100 "../../ppaml/writing/pipeline/ldalikelihood-100.pdf")))
+    (plot-likelihood 50 "../../ppaml/writing/pipeline/ldalikelihood-50.pdf")))

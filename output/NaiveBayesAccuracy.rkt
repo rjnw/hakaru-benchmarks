@@ -231,7 +231,7 @@
 
 
                 )
-               "../../ppaml/writing/pipeline/NaiveBayesGibbs-Accuracy.pdf"
+               "naivebayesgibbs-accuracy.pdf"
 
                #:y-min 45
                #:y-max 85
