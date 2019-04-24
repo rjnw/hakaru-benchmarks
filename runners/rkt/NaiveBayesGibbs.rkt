@@ -86,7 +86,8 @@
                      (fprintf out-port "~a, " (sized-nat-array-ref state i)))
                    (fprintf out-port "~a]\t" (sized-nat-array-ref state (- num-topics 1))))
                  #:min-sweeps 1
-                 #:step-sweeps 1))
+                 #:step-sweeps 1
+                 #:min-time 0))
   (printf "locked and loaded!\nrunning-test:\n")
   (call-with-output-file outfile #:exists 'replace
     (λ (out-port)
