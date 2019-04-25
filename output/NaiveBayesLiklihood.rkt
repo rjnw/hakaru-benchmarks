@@ -160,7 +160,7 @@
    ;;       (lines augur-mean-xy #:color (make-object color% 146 0 0) #:label "AugurV2")
    ;;       (lines jags-mean-xy #:color (make-object color% 146 0 0) #:label "JAGS")
    ;;       (tick-grid))
-   "../../ppaml/writing/pipeline/NaiveBayesGibbs-Likelihood.pdf"
+   "NaiveBayesGibbs-Likelihood.pdf"
    #:y-min -21800000
    #:y-max -21500000
    #:x-max 400

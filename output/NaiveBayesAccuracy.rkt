@@ -231,7 +231,7 @@
 
 
                 )
-               "naivebayesgibbs-accuracy.pdf"
+               "NaiveBayesGibbs-Accuracy.pdf"
 
                #:y-min 45
                #:y-max 85
