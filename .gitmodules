@@ -9,7 +9,10 @@
 	url = https://github.com/hakaru-dev/hakaru-rktjit.git
 [submodule "other/augurv2"]
 	path = other/augurv2
-	url = https://github.com/danehuang/augurv2.git
+	url = https://github.com/rjnw/augurv2.git
 [submodule "other/psi"]
 	path = other/psi
 	url = https://github.com/eth-sri/psi.git
+[submodule "rcf"]
+	path = rcf
+	url = https://github.com/rjnw/rcf.git
