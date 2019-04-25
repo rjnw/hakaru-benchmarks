@@ -15,9 +15,14 @@ generate-testcode:
 	cd ./testcode/hssrc ; make
 
 build-rkt:
+	raco pkg install disassemble
 	cd ./rcf; raco pkg install --skip-installed --deps search-auto
 	cd ./sham ; raco pkg install --skip-installed --deps search-auto
 	cd ./hakrit ; raco pkg install --skip-installed --deps search-auto
+
+build-augur:
+	cd other/augurv2/compiler/augur; stack build
+	cd cbits; make libcpu
 
 build-input:
 	cd ./input ; make all
@@ -61,6 +66,8 @@ gmm-50:
 
 # naive bayes
 nb:
+	mkdir -p output/NaiveBayesGibbs/rkt
+	mkdir -p output/NaiveBayesGibbs/
 	cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
 	cd ./runners; make nb-augur trials=12 sweeps=50 trial-time=500 holdout-modulo=10
 	cd ./runners; make nb-rkt-ll holdout-modulo=10
