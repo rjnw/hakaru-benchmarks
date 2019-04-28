@@ -15,14 +15,17 @@ generate-testcode:
 	cd ./testcode/hssrc ; make
 
 build-rkt:
-	raco pkg install disassemble
+	raco pkg install --skip-installed disassemble
 	cd ./rcf; raco pkg install --skip-installed --deps search-auto
 	cd ./sham ; raco pkg install --skip-installed --deps search-auto
 	cd ./hakrit ; raco pkg install --skip-installed --deps search-auto
 
 build-augur:
 	cd other/augurv2/compiler/augur; stack build
-	cd cbits; make libcpu
+	$(eval LIBFILE=$(shell cd other/augurv2/compiler/augur; ls `stack path --dist-dir`/build/*so))
+	cp  other/augurv2/compiler/augur/$(LIBFILE) other/augurv2/lib/libHSaugur-0.1.0.0.so
+	cd other/augurv2/cbits; make libcpu
+	cd other/augurv2/pyaugur; sudo python2 setup.py install
 
 build-input:
 	cd ./input ; make all
@@ -66,9 +69,9 @@ gmm-50:
 
 # naive bayes
 nb:
-	mkdir -p output/NaiveBayesGibbs/rkt
-	mkdir -p output/NaiveBayesGibbs/
-	cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
+	# mkdir -p output/NaiveBayesGibbs/rkt
+	# cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
+	mkdir -p output/NaiveBayesGibbs/augur
 	cd ./runners; make nb-augur trials=12 sweeps=50 trial-time=500 holdout-modulo=10
 	cd ./runners; make nb-rkt-ll holdout-modulo=10
 	cd ./runners; make nb-augur-ll holdout-modulo=10
