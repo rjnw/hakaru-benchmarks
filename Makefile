@@ -69,9 +69,9 @@ gmm-50:
 
 # naive bayes
 nb:
-	# mkdir -p output/NaiveBayesGibbs/rkt
-	# cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
-	mkdir -p output/NaiveBayesGibbs/augur
+	mkdir -p output/NaiveBayesGibbs/rkt
+	mkdir -p output/NaiveBayesGibbs/
+	cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
 	cd ./runners; make nb-augur trials=12 sweeps=50 trial-time=500 holdout-modulo=10
 	cd ./runners; make nb-rkt-ll holdout-modulo=10
 	cd ./runners; make nb-augur-ll holdout-modulo=10
