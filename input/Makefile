@@ -18,9 +18,9 @@ lrinp-dataX=$(foreach n,$(numbers),./$(lr)/dataX/$n)
 gn=$(foreach n, $(i), ./$(gg)/$n)
 gminp=$(foreach k, $(numbers), $(foreach g,$(gn),$(g)-$k))
 
-tests := 2
+tests := 20
 
-all: buildgen $(ctinp) $(lrinp-y) $(lrinp-datax) $(gminp)
+all: buildgen $(ctinp) $(lrinp-y) $(lrinp-datax)
 
 buildgen:
 	cd ./hksrc && make all

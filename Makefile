@@ -6,6 +6,8 @@ submodule-init:
 	git submodule init
 	git submodule update
 
+build: build-hakaru build-rkt build-augur build-psi build-haskell build-stan
+
 build-hakaru:
 	cd ./hakaru ; stack build && stack install --local-bin-path ../hkbin
 
@@ -31,8 +33,17 @@ build-augur:
 build-haskell:
 	cd ./runners; make hkbin
 
-build-input:
+build-psi:
+	cd ./other/psi; ./dependencies.sh
+	cd ./other/psi; ./build-release.sh
+
+build-stan:
+	cd ./other; make stan
+
+build-input: get20newsgroup
 	cd ./input; make all
+	cd ./input; make gmm classes=25 points=5000 trials=50
+	cd ./input; make gmm classes=50 points=10000 trials=50
 
 get20newsgroup:
 	cd ./input; ./download-data.sh

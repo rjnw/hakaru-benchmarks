@@ -15,7 +15,7 @@
   (define outfile (build-path output-dir testname "rkt" (number->string n)))
 
   (define lrinfo
-    `((dataX . ((array-info ((size . ,n)))))
+    `((dataX . ((array-info . ((size . ,n)))))
       (x6 . ((array-info . ((size . ,n)))))))
 
   (define module-env (compile-file srcfile lrinfo))
@@ -58,7 +58,7 @@
 
 (module+ test
   ;; (run-test 10)
-  ;; (run-test 100)
+  (run-test 100)
   ;; (run-test 1000)
-  (run-test 10000)
+  ;; (run-test 10000)
   )
