@@ -34,8 +34,7 @@ build-haskell:
 	cd ./runners; make hkbin
 
 build-psi:
-	cd ./other/psi; ./dependencies.sh
-	cd ./other/psi; ./build-release.sh
+	cd ./other; make psi
 
 build-stan:
 	cd ./other; make stan
@@ -87,10 +86,10 @@ gmm-50:
 
 # naive bayes
 nb:
-	# mkdir -p output/NaiveBayesGibbs/rkt
-	# cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
-	# mkdir -p output/NaiveBayesGibbs/augur
-	# cd ./runners; make nb-augur trials=12 sweeps=50 trial-time=500 holdout-modulo=10
+	mkdir -p output/NaiveBayesGibbs/rkt
+	cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
+	mkdir -p output/NaiveBayesGibbs/augur
+	cd ./runners; make nb-augur trials=12 sweeps=50 trial-time=500 holdout-modulo=10
 	cd ./runners; make nb-hk
 	cd ./runners; make nb-rkt-ll holdout-modulo=10
 	cd ./runners; make nb-augur-ll holdout-modulo=10

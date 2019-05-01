@@ -18,7 +18,7 @@
           (list `(pairinfo . ((ainfo . ((arrayinfo . ((size . ,n)))))
                               (binfo . ((arrayinfo . ((size . ,n))))))))))
 
-  (define module-env (debug-file srcfile))
+  (define module-env (compile-file srcfile))
   (define prog (get-prog module-env))
 
   (define pair-array-regex "^\\(\\[(.*)\\],\\[(.*)\\]\\)$")
@@ -45,6 +45,7 @@
     (define outi (prog n p))
     (define after-time (get-time))
     (fprintf out-port "~a ~a [~a]\t\n" (~r (- after-time before-time) #:precision '(= 3)) 1 outi)
+    (printf "time: ~a\n" (- after-time before-time))
     (unless (equal? outi i) (set! total-wrong (+ total-wrong 1)))
     (set! total (+ total 1))
     outi)

@@ -30,19 +30,19 @@ main = do
       numTrials = 1
       fname = show numTopics ++ "-" ++ show numDocs
       benchmark_dir = outputs_dir </> "NaiveBayesGibbs"
-      -- jagsmodel = jagscodedir </> "NaiveBayesModel.jags"
-      -- jagsrunner = jagscodedir </> "NaiveBayesModel.R"
+      jagsmodel = jagscodedir </> "NaiveBayesModel.jags"
+      jagsrunner = jagscodedir </> "NaiveBayesModel.R"
   hkfile   <- freshFile (benchmark_dir </> "hk") fname
-  -- jagsfile <- freshFile (benchmark_dir </> "jags") fname
+  jagsfile <- freshFile (benchmark_dir </> "jags") fname
 
   replicateM_ numTrials $ do
     putStrLn "starting a new trial"
     hktrial   <- oneLine <$> hakaru g holdouts numTopics numDocs w doc zs nbKnobs
     putStrLn "writing haskell..."
     appendFile hkfile   hktrial
-    -- jagstrial <- oneLine <$> jags jagsmodel jagsrunner inputs_path nbKnobs
-    -- putStrLn "writing jags..."
-    -- appendFile jagsfile jagstrial
+    jagstrial <- oneLine <$> jags jagsmodel jagsrunner inputs_path nbKnobs
+    putStrLn "writing jags..."
+    appendFile jagsfile jagstrial
 
 nbKnobs = Knobs { minSeconds = 1
                 , stepSeconds = 0.5
