@@ -1,0 +1,27 @@
+../../testcode/psisrc/ct10.psi
+p(isEffective) = 4199/10007·δ(1)[isEffective]+5808/10007·δ(0)[isEffective]
+$bin --nocheck $i  0.77s user 0.02s system 99% cpu 0.800 total
+../../testcode/psisrc/ct20.psi
+p(isEffective) = 345037099/943155256·δ(1)[isEffective]+598118157/943155256·δ(0)[isEffective]
+$bin --nocheck $i  2.68s user 0.04s system 99% cpu 2.724 total
+../../testcode/psisrc/ct30.psi
+p(isEffective) = 279642132540675/369701798418241·δ(0)[isEffective]+90059665877566/369701798418241·δ(1)[isEffective]
+$bin --nocheck $i  7.23s user 0.12s system 99% cpu 7.372 total
+../../testcode/psisrc/ct40.psi
+p(isEffective) = 15494559229766673/71105690955327773·δ(1)[isEffective]+55611131725561100/71105690955327773·δ(0)[isEffective]
+$bin --nocheck $i  22.02s user 0.17s system 99% cpu 22.217 total
+../../testcode/psisrc/ct50.psi
+p(isEffective) = 1493387262054957481531/7140066446291773937506·δ(1)[isEffective]+5646679184236816455975/7140066446291773937506·δ(0)[isEffective]
+$bin --nocheck $i  46.29s user 0.29s system 99% cpu 46.737 total
+../../testcode/psisrc/ct60.psi
+p(isEffective) = 234031448785590873050673312/302216751808226862419976073·δ(0)[isEffective]+68185303022635989369302761/302216751808226862419976073·δ(1)[isEffective]
+$bin --nocheck $i  98.35s user 0.56s system 99% cpu 1:39.04 total
+../../testcode/psisrc/ct70.psi
+p(isEffective) = 18441060370328267343158178525/89094948271856410848074755933·δ(1)[isEffective]+70653887901528143504916577408/89094948271856410848074755933·δ(0)[isEffective]
+$bin --nocheck $i  199.52s user 0.87s system 99% cpu 3:20.62 total
+../../testcode/psisrc/ct80.psi
+p(isEffective) = 2024374806101184224011064808902399/11298679013130902705266452584729669·δ(1)[isEffective]+9274304207029718481255387775827270/11298679013130902705266452584729669·δ(0)[isEffective]
+$bin --nocheck $i  372.05s user 1.64s system 99% cpu 6:14.27 total
+../../testcode/psisrc/ct90.psi
+p(isEffective) = 390859311038505501408733680378406134034455/485777702606365231169748291920189299596317·δ(0)[isEffective]+94918391567859729761014611541783165561862/485777702606365231169748291920189299596317·δ(1)[isEffective]
+$bin --nocheck $i  681.83s user 2.22s system 99% cpu 11:25.39 total

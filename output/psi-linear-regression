@@ -1,0 +1,54 @@
+../../testcode/psisrc/lr100.psi
+p(a,b,invNoise) = 6.2284941228376797e+36·[-invNoise≤0]·e^((-1.2469605058021056e+05)·a·invNoise+(-1.7843554024352469e+03)·b·invNoise+(-2.3192793885774166e+04)·invNoise+-1003/20·b²·invNoise+-338351/2·a²·invNoise+-5050·a·b·invNoise)·invNoise⁵¹·⅟π·√̅8̅4̅3̅4̅1̅0̅5̅3̅/̅4̅0
+$bin --nocheck $i  1.19s user 0.04s system 99% cpu 1.227 total
+../../testcode/psisrc/lr10.psi
+p(a,b,invNoise) = 1.4879898537191569e+02·[-invNoise≤0]·e^((-2.2771346124178698e+01)·invNoise+-103/20·b²·invNoise+-193·a²·invNoise+-55·a·b·invNoise+3.1680035093822103e+00·a·invNoise+9.7750851341549539e+00·b·invNoise)·invNoise⁶·⅟π·√̅2̅3̅7̅7̅/̅1̅0
+$bin --nocheck $i  0.14s user 0.00s system 99% cpu 0.149 total
+../../testcode/psisrc/lr200.psi
+p(a,b,invNoise) = 1.0266646938584450e+71·[-invNoise≤0]·e^((-1.0426808577293958e+06)·a·invNoise+(-2.0271994009767486e+05)·invNoise+(-7.6564429413098602e+03)·b·invNoise+-2003/20·b²·invNoise+-20100·a·b·invNoise+-2686701/2·a²·invNoise)·invNoise¹⁰¹·⅟π·√̅1̅3̅4̅1̅3̅6̅2̅1̅0̅3̅/̅4̅0
+$bin --nocheck $i  3.73s user 0.08s system 99% cpu 3.814 total
+../../testcode/psisrc/lr20.psi
+p(a,b,invNoise) = 1.2496174653776237e+03·[-invNoise≤0]·e^((-2.4760559466341366e+01)·b·invNoise+(-5.6193800238779312e+02)·a·invNoise+(-8.9577373456021957e+01)·invNoise+-203/20·b²·invNoise+-210·a·b·invNoise+-2871/2·a²·invNoise)·invNoise¹¹·⅟π·√̅1̅4̅1̅8̅1̅3̅/̅4̅0
+$bin --nocheck $i  0.23s user 0.01s system 98% cpu 0.236 total
+../../testcode/psisrc/lr300.psi
+p(a,b,invNoise) = 3.3041491863141137e+101·[-invNoise≤0]·e^((-1.7648279926756765e+04)·b·invNoise+(-3.5796019536562416e+06)·a·invNoise+(-7.0889960241650895e+05)·invNoise+-3003/20·b²·invNoise+-45150·a·b·invNoise+-9045051/2·a²·invNoise)·invNoise¹⁵¹·⅟π·√̅6̅7̅7̅7̅0̅6̅3̅1̅5̅3̅/̅4̅0
+$bin --nocheck $i  9.30s user 0.12s system 99% cpu 9.437 total
+../../testcode/psisrc/lr30.psi
+p(a,b,invNoise) = 1.3168397161590028e+09·[-invNoise≤0]·e^((-2.3524349364482028e+03)·a·invNoise+(-3.4541668736307696e+02)·invNoise+(-9.4021441950492806e+01)·b·invNoise+-303/20·b²·invNoise+-465·a·b·invNoise+-4728·a²·invNoise)·invNoise¹⁶·⅟π·√̅3̅5̅1̅4̅5̅9̅/̅2̅0
+$bin --nocheck $i  0.32s user 0.00s system 99% cpu 0.325 total
+../../testcode/psisrc/lr400.psi
+p(a,b,invNoise) = 7.0708401506695199e+134·[-invNoise≤0]·e^((-1.7117707754071469e+06)·invNoise+(-3.1760063169742357e+04)·b·invNoise+(-8.5601184163611838e+06)·a·invNoise+-21413401/2·a²·invNoise+-4003/20·b²·invNoise+-80200·a·b·invNoise)·invNoise²⁰¹·⅟π·√̅2̅1̅3̅9̅7̅4̅4̅4̅2̅0̅3̅/̅4̅0
+$bin --nocheck $i  18.60s user 0.31s system 99% cpu 18.939 total
+../../testcode/psisrc/lr40.psi
+p(a,b,invNoise) = 3.3689790705752983e+12·[-invNoise≤0]·e^((-1.1029498019508637e+03)·invNoise+(-2.1614618138459869e+02)·b·invNoise+(-6.7189782209236912e+03)·a·invNoise+-22141/2·a²·invNoise+-403/20·b²·invNoise+-820·a·b·invNoise)·invNoise²¹·⅟π·√̅2̅1̅9̅8̅8̅2̅3̅/̅4̅0
+$bin --nocheck $i  0.42s user 0.01s system 99% cpu 0.432 total
+../../testcode/psisrc/lr500.psi
+p(a,b,invNoise) = 3.8867587700094864e+166·[-invNoise≤0]·e^((-1.6807856963250277e+07)·a·invNoise+(-3.3809049852126952e+06)·invNoise+(-4.9992423220042989e+04)·b·invNoise+-125250·a·b·invNoise+-41791751/2·a²·invNoise+-5003/20·b²·invNoise)·invNoise²⁵¹·⅟π·√̅5̅2̅2̅0̅8̅5̅0̅5̅2̅5̅3̅/̅4̅0
+$bin --nocheck $i  36.43s user 0.57s system 99% cpu 37.049 total
+../../testcode/psisrc/lr50.psi
+p(a,b,invNoise) = 2.7228147365903951e+15·[-invNoise≤0]·e^((-1.3823361949553033e+04)·a·invNoise+(-2.3241504108563555e+03)·invNoise+(-3.7136498654593869e+02)·b·invNoise+-1275·a·b·invNoise+-21463·a²·invNoise+-503/20·b²·invNoise)·invNoise²⁶·⅟π·√̅6̅6̅6̅9̅4̅1̅/̅5
+$bin --nocheck $i  0.52s user 0.02s system 99% cpu 0.543 total
+../../testcode/psisrc/lr600.psi
+p(a,b,invNoise) = 1.6604454467140988e+195·[-invNoise≤0]·e^((-2.9139159360232521e+07)·a·invNoise+(-5.8829368869977695e+06)·invNoise+(-7.2330042415929580e+04)·b·invNoise+-180300·a·b·invNoise+-6003/20·b²·invNoise+-72180101/2·a²·invNoise)·invNoise³⁰¹·⅟π·√̅1̅0̅8̅2̅1̅6̅2̅4̅6̅3̅0̅3̅/̅4̅0
+$bin --nocheck $i  61.94s user 0.72s system 99% cpu 1:02.82 total
+../../testcode/psisrc/lr60.psi
+p(a,b,invNoise) = 5.8415803205544105e+20·[-invNoise≤0]·e^((-2.5085609346529481e+04)·a·invNoise+(-4.3924146057749413e+03)·invNoise+(-5.7381260018814369e+02)·b·invNoise+-1830·a·b·invNoise+-603/20·b²·invNoise+-73811/2·a²·invNoise)·invNoise³¹·⅟π·√̅1̅1̅0̅1̅9̅0̅3̅3̅/̅4̅0
+$bin --nocheck $i  0.67s user 0.02s system 99% cpu 0.693 total
+../../testcode/psisrc/lr700.psi
+p(a,b,invNoise) = 4.4108465075806124e+226·[-invNoise≤0]·e^((-4.6379795888763773e+07)·a·invNoise+(-9.3883338968666408e+06)·invNoise+(-9.8781574001862950e+04)·b·invNoise+-114578451/2·a²·invNoise+-245350·a·b·invNoise+-7003/20·b²·invNoise)·invNoise³⁵¹·⅟π·√̅2̅0̅0̅4̅2̅6̅6̅6̅7̅3̅5̅3̅/̅4̅0
+$bin --nocheck $i  104.63s user 1.22s system 99% cpu 1:46.04 total
+../../testcode/psisrc/lr70.psi
+p(a,b,invNoise) = 1.1368547914625332e+25·[-invNoise≤0]·e^((-4.0779540090150861e+04)·a·invNoise+(-7.2686314432680090e+03)·invNoise+(-8.1311150958072119e+02)·b·invNoise+-2485·a·b·invNoise+-58398·a²·invNoise+-703/20·b²·invNoise)·invNoise³⁶·⅟π·√̅1̅0̅1̅7̅7̅6̅6̅9̅/̅2̅0
+$bin --nocheck $i  0.82s user 0.01s system 99% cpu 0.830 total
+../../testcode/psisrc/lr800.psi
+p(a,b,invNoise) = 4.1862880023783176e+258·[-invNoise≤0]·e^((-1.2937465792193163e+05)·b·invNoise+(-1.4075295554874914e+07)·invNoise+(-6.9374546668235298e+07)·a·invNoise+-170986801/2·a²·invNoise+-320400·a·b·invNoise+-8003/20·b²·invNoise)·invNoise⁴⁰¹·⅟π·√̅3̅4̅1̅8̅4̅5̅7̅6̅8̅4̅0̅3̅/̅4̅0
+$bin --nocheck $i  161.72s user 1.78s system 99% cpu 2:43.89 total
+../../testcode/psisrc/lr80.psi
+p(a,b,invNoise) = 2.1576653739386071e+29·[-invNoise≤0]·e^((-1.0955936876371652e+03)·b·invNoise+(-1.1264810179859960e+04)·invNoise+(-6.2109621311813666e+04)·a·invNoise+-173881/2·a²·invNoise+-3240·a·b·invNoise+-803/20·b²·invNoise)·invNoise⁴¹·⅟π·√̅3̅4̅6̅5̅0̅4̅4̅3̅/̅4̅0
+$bin --nocheck $i  1.00s user 0.02s system 99% cpu 1.018 total
+../../testcode/psisrc/lr900.psi
+p(a,b,invNoise) = 1.0107414549166868e+293·[-invNoise≤0]·e^((-1.6404074096231751e+05)·b·invNoise+(-2.0091303831953417e+07)·invNoise+(-9.8892775782311192e+07)·a·invNoise+-243405151/2·a²·invNoise+-405450·a·b·invNoise+-9003/20·b²·invNoise)·invNoise⁴⁵¹·⅟π·√̅5̅4̅7̅4̅7̅9̅5̅4̅9̅4̅5̅3̅/̅4̅0
+$bin --nocheck $i  232.07s user 2.59s system 99% cpu 3:55.41 total
+../../testcode/psisrc/lr90.psi
+p(a,b,invNoise) = 1.5143008781623894e+32·[-invNoise≤0]·e^((-1.4190187947079605e+03)·b·invNoise+(-1.6501691598751520e+04)·invNoise+(-8.9780395880396894e+04)·a·invNoise+-123533·a²·invNoise+-4095·a·b·invNoise+-903/20·b²·invNoise)·invNoise⁴⁶·⅟π·√̅1̅3̅8̅5̅2̅5̅8̅7̅/̅1̅0
+$bin --nocheck $i  1.12s user 0.03s system 99% cpu 1.150 total
