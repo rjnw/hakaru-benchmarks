@@ -1,6 +1,6 @@
 .PHONY: setup submodule-init build-hakaru build-rkt build-input clean docker BenchmarkGmmGibbs
 
-setup: submodule-init build-hakaru build-rkt build-augur build-input
+setup: submodule-init build-hakaru build-rkt build-augur copy-augur-lib build-input
 
 submodule-init:
 	git submodule init
@@ -24,11 +24,14 @@ build-rkt:
 
 build-augur:
 	cd other/augurv2/compiler/augur; stack build
+	cd other/augurv2/cbits; make libcpu
+	cd other/augurv2/pyaugur; sudo python2 setup.py install
+
+copy-augur-lib:
 	$(eval LIBFILE=$(shell cd other/augurv2/compiler/augur; ls `stack path --dist-dir`/build/*so))
 	mkdir -p other/augurv2/lib
 	cp other/augurv2/compiler/augur/$(LIBFILE) other/augurv2/lib/libHSaugur-0.1.0.0.so
-	cd other/augurv2/cbits; make libcpu
-	cd other/augurv2/pyaugur; sudo python2 setup.py install
+
 
 build-haskell:
 	cd ./runners; make hkbin
@@ -84,6 +87,26 @@ gmm-50:
 	cd ./output; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 24 --y-max 44 --height 300 --width 400 50 10000 gmm-50-10000.pdf
 # xdg-open ./output/gmm-50-10000.pdf
 
+clean-gmm-25:
+	rm -f ./output/GmmGibbs/rkt/25-5000
+	rm -f ./output/GmmGibbs/augur/25-5000
+	rm -f ./output/GmmGibbs/jags/25-5000
+	rm -f ./output/GmmGibbs/stan/25-5000
+	rm -f ./output/GmmGibbs/accuracies/rkt/25-5000
+	rm -f ./output/GmmGibbs/accuracies/augur/25-5000
+	rm -f ./output/GmmGibbs/accuracies/jags/25-5000
+	rm -f ./output/GmmGibbs/accuracies/stan/25-5000
+
+clean-gmm-50:
+	rm -f ./output/GmmGibbs/rkt/50-10000
+	rm -f ./output/GmmGibbs/augur/50-10000
+	rm -f ./output/GmmGibbs/jags/50-10000
+	rm -f ./output/GmmGibbs/stan/50-10000
+	rm -f ./output/GmmGibbs/accuracies/rkt/50-10000
+	rm -f ./output/GmmGibbs/accuracies/augur/50-10000
+	rm -f ./output/GmmGibbs/accuracies/jags/50-10000
+	rm -f ./output/GmmGibbs/accuracies/stan/50-10000
+
 # naive bayes
 nb:
 	mkdir -p output/NaiveBayesGibbs/rkt
@@ -97,11 +120,13 @@ nb:
 	cd ./output; racket NaiveBayesLiklihood.rkt
 
 # lda
-lda-50:
+lda-setup:
+	mkdir -p output/LdaGibbs/kos
+lda-50: lda-setup
 	cd ./runners; make lda-rkt topics=50 trials=5
 	cd ./runners; make lda-augur topics=50 trials=5
 	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4200000 --y-max -4400000 50 ldalikelihood-50.pdf
-lda-100:
+lda-100: lda-setup
 	cd ./runners; make lda-rkt topics=100 trials=5
 	cd ./runners; make lda-augur topics=100 trials=5
 	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4500000 --y-max -4700000 100 ldalikelihood-100.pdf
