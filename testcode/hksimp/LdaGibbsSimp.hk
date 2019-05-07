@@ -16,7 +16,7 @@ if wordUpdate < size(w) &&
                             rindex
                               (: size(topic_prior), iB: z[iB],
                                rsplit
-                                 (iB, zNewh: w[wordUpdate] == w[iB], radd(iB, zNewh: 1), rnop)))
+                                 (iB, zNewh: doc[wordUpdate] == doc[iB], radd(iB, zNewh: 1), rnop)))
                nat2int
                  (if nat2int(z[wordUpdate]) <= nat2int(size(topic_prior)) + (-1) &&
                      zNewh == z[wordUpdate]:
@@ -24,15 +24,14 @@ if wordUpdate < size(w) &&
                   else: 0)
                * (-1)
                + nat2int(match summary[zNewh]: (y, z): y))
-            + prob2real(word_prior[w[wordUpdate]]))
+            + prob2real(topic_prior[zNewh]))
            * (int2real
                 (summary = rbucket
                              (0, size(w),
                               rindex
                                 (: size(topic_prior), iB: z[iB],
                                  rsplit
-                                   (iB, zNewh: doc[wordUpdate] == doc[iB], radd(iB, zNewh: 1),
-                                    rnop)))
+                                   (iB, zNewh: w[wordUpdate] == w[iB], radd(iB, zNewh: 1), rnop)))
                  nat2int
                    (if nat2int(z[wordUpdate]) <= nat2int(size(topic_prior)) + (-1) &&
                        zNewh == z[wordUpdate]:
@@ -40,7 +39,7 @@ if wordUpdate < size(w) &&
                     else: 0)
                  * (-1)
                  + nat2int(match summary[zNewh]: (y, z): y))
-              + prob2real(topic_prior[zNewh]))
+              + prob2real(word_prior[w[wordUpdate]]))
            / (int2real
                 (summary = rbucket
                              (0, size(w),

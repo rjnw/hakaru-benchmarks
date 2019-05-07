@@ -23,7 +23,8 @@ prog =
   lam $ \ w63 ->
   lam $ \ doc64 ->
   lam $ \ docUpdate65 ->
-  case_ (docUpdate65 < size z62)
+  case_ (docUpdate65 < size z62 &&
+         z62 ! docUpdate65 < size topic_prior60)
         [branch ptrue
                 ((pose (product (nat_ 0)
                                 (size topic_prior60)
@@ -35,15 +36,11 @@ prog =
                                                                  (\ (iF69,()) -> z62 ! iF69)
                                                                  (r_add (\ (iF69,(i70,())) ->
                                                                          nat_ 1))))) $ \ summary68 ->
-                                          unsafeNat (nat2int (case_ (not (nat2int (size topic_prior60) +
-                                                                          int_ -1
-                                                                          < nat2int (z62
-                                                                                     ! docUpdate65)) &&
-                                                                     i66 == z62 ! docUpdate65)
+                                          unsafeNat (nat2int (case_ (i66 == z62 ! docUpdate65)
                                                                     [branch ptrue (nat_ 1),
                                                                      branch pfalse (nat_ 0)]) *
-                                                     int_ -1) +
-                                          summary68 ! i66)
+                                                     int_ -1 +
+                                                     nat2int (summary68 ! i66)))
                                          (\ j67 -> nat2prob j67 + topic_prior60 ! i66)) *
                         product (nat_ 0)
                                 (size topic_prior60)
@@ -134,11 +131,7 @@ prog =
                                                                                         ! iF95)
                                                                                        (r_add (\ (iF95,(zNewf96,())) ->
                                                                                                nat_ 1))))) $ \ summary94 ->
-                                                                nat2int (case_ (not (nat2int (size topic_prior60) +
-                                                                                     int_ -1
-                                                                                     < nat2int (z62
-                                                                                                ! docUpdate65)) &&
-                                                                                zNewf93
+                                                                nat2int (case_ (zNewf93
                                                                                 == z62
                                                                                    ! docUpdate65)
                                                                                [branch ptrue
@@ -187,34 +180,34 @@ prog =
                                                                              branch pfalse
                                                                                     (nat_ 0)])
                                                                      (\ j99 ->
-                                                                      nat2prob (let_ (bucket (nat_ 0)
-                                                                                             (size w63)
-                                                                                             ((r_split (\ (iF108,()) ->
-                                                                                                        doc64
-                                                                                                        ! iF108
-                                                                                                        == docUpdate65)
-                                                                                                       r_nop
-                                                                                                       (r_index (\ () ->
-                                                                                                                 size word_prior61)
-                                                                                                                (\ (iF108,()) ->
-                                                                                                                 w63
-                                                                                                                 ! iF108)
-                                                                                                                (r_index (\ (iB109,()) ->
-                                                                                                                          size topic_prior60)
-                                                                                                                         (\ (iF108,(iB109,())) ->
-                                                                                                                          z62
-                                                                                                                          ! (doc64
-                                                                                                                             ! iF108))
-                                                                                                                         (r_add (\ (iF108,(i110,(iB109,()))) ->
-                                                                                                                                 nat_ 1))))))) $ \ summary107 ->
-                                                                                case_ summary107
-                                                                                      [branch (ppair PVar
-                                                                                                     PVar)
-                                                                                              (\ y111
-                                                                                                 z112 ->
-                                                                                               z112)]
-                                                                                ! iB98
-                                                                                ! i97) +
+                                                                      (let_ (bucket (nat_ 0)
+                                                                                    (size w63)
+                                                                                    ((r_split (\ (iF108,()) ->
+                                                                                               doc64
+                                                                                               ! iF108
+                                                                                               == docUpdate65)
+                                                                                              r_nop
+                                                                                              (r_index (\ () ->
+                                                                                                        size word_prior61)
+                                                                                                       (\ (iF108,()) ->
+                                                                                                        w63
+                                                                                                        ! iF108)
+                                                                                                       (r_index (\ (iB109,()) ->
+                                                                                                                 size topic_prior60)
+                                                                                                                (\ (iF108,(iB109,())) ->
+                                                                                                                 z62
+                                                                                                                 ! (doc64
+                                                                                                                    ! iF108))
+                                                                                                                (r_add (\ (iF108,(i110,(iB109,()))) ->
+                                                                                                                        nat_ 1))))))) $ \ summary107 ->
+                                                                       nat2prob (case_ summary107
+                                                                                       [branch (ppair PVar
+                                                                                                      PVar)
+                                                                                               (\ y111
+                                                                                                  z112 ->
+                                                                                                z112)]
+                                                                                 ! iB98
+                                                                                 ! i97)) +
                                                                       nat2prob j99 +
                                                                       word_prior61 ! iB98))) *
                                            recip (product (nat_ 0)
@@ -274,5 +267,7 @@ prog =
                                                                             (\ iF126 ->
                                                                              word_prior61
                                                                              ! iF126)))))))),
-         branch pfalse (reject)]
+         branch pfalse
+                (case_ (not (docUpdate65 < size z62))
+                       [branch ptrue (reject), branch pfalse (reject)])]
 

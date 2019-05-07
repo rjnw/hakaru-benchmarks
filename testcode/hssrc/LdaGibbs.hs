@@ -61,8 +61,8 @@ prog =
                                                                              [branch ptrue (nat_ 1),
                                                                               branch pfalse
                                                                                      (nat_ 0)]) *
-                                                              int_ -1) +
-                                                   summary69 ! d66 ! iH67)
+                                                              int_ -1 +
+                                                              nat2int (summary69 ! d66 ! iH67)))
                                                   (\ j68 -> nat2prob j68 + topic_prior59 ! iH67))) *
                         recip (product (nat_ 0)
                                        numDocs61
@@ -81,8 +81,8 @@ prog =
                                                                            [branch ptrue (nat_ 1),
                                                                             branch pfalse
                                                                                    (nat_ 0)]) *
-                                                            int_ -1) +
-                                                 summary75 ! d73)
+                                                            int_ -1 +
+                                                            nat2int (summary75 ! d73)))
                                                 (\ iH74 ->
                                                  nat2prob iH74 +
                                                  summate (nat_ 0)
@@ -121,8 +121,8 @@ prog =
                                                                              [branch ptrue (nat_ 1),
                                                                               branch pfalse
                                                                                      (nat_ 0)]) *
-                                                              int_ -1) +
-                                                   summary82 ! ir80 ! d79)
+                                                              int_ -1 +
+                                                              nat2int (summary82 ! ir80 ! d79)))
                                                   (\ j81 -> nat2prob j81 + word_prior60 ! ir80))) *
                         recip (product (nat_ 0)
                                        (size topic_prior59)
@@ -143,8 +143,8 @@ prog =
                                                                            [branch ptrue (nat_ 1),
                                                                             branch pfalse
                                                                                    (nat_ 0)]) *
-                                                            int_ -1) +
-                                                 summary88 ! d86)
+                                                            int_ -1 +
+                                                            nat2int (summary88 ! d86)))
                                                 (\ ir87 ->
                                                  nat2prob ir87 +
                                                  summate (nat_ 0)
