@@ -120,7 +120,7 @@
   (define rkt-trial (remove-warmup  (get-trial "rkt")))
   (parameterize
       (
-       ;; [plot-font-size 10]
+       [plot-font-size 6]
        [plot-font-face "Linux Libertine O"]
        [plot-legend-box-alpha 1]
        [plot-x-ticks (linear-ticks #:divisors '(5) #:base 10 #:number 5)]
@@ -223,9 +223,6 @@
      (values (string->number classes) (string->number points) output-file)))
   (plot-accuracy classes points output-file)
   (pretty-print (list classes points output-file)))
-
-;; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 35 --y-max 60 --height 300 --width 400 25 5000 "gmm-25-5000.pdf"
-;; racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 20 --y-max 45 --height 300 --width 700 50 10000 "gmm-50-10000.pdf"
 
 (module+ test
   ;; (plot-accuracy 6 10 "test.pdf")
