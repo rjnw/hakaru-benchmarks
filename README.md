@@ -18,10 +18,8 @@ raco pkg install disassemble
 ```
 
 ### Setup
-```sh
-cd hakaru-benchmarks
-make setup
-```
+To build all the packages involved `make setup` at the root directory
+
 Individual setup commands
 * `make submodule-init` intializing and updating submodules
 * `build-hakaru`
@@ -36,11 +34,18 @@ Individual setup commands
 #### GmmGibbs
 * with 25 classes and 5000 points `make gmm-25`
 * with 50 classes and 10000 points `make gmm-50`
+
 output pdfs `hakaru-benchmarks/output/gmm-25-5000.pdf` and `hakaru-benchmarks/output/gmm-50-10000.pdf`
+
+
 #### Naive Bayes Gibbs
 * to run benchmark `make nb`
+
 two output pdfs `hakaru-benchmarks/output/NaiveBayesGibbs-Accuracy.pdf` and `hakaru-benchmarks/output/NaiveBayesGibbs-Likelihood.pdf`
+
+
 #### LDA
 * LDA 50 topics `make lda-50`
 * LDA 100 topics `make lda-100`
+
 output pdfs `hakaru-benchmarks/output/ldalikelihood-50.pdf` and `hakaru-benchmarks/output/ldalikelihood-100.pdf`
