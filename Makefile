@@ -1,6 +1,6 @@
 .PHONY: setup submodule-init build-hakaru build-rkt build-input clean docker BenchmarkGmmGibbs
 
-setup: submodule-init build-hakaru build-rkt build-augur copy-augur-lib build-input
+setup: submodule-init build-hakaru build-rkt build-augur copy-augur-lib build-input build-haskell build-psi build-stan
 
 submodule-init:
 	git submodule init

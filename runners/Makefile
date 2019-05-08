@@ -4,7 +4,7 @@ hkbin:
 	cd ./hk && make all
 
 gmm-rkt:
-	mkdir ../output/GmmGibbs/rkt
+	mkdir -p ../output/GmmGibbs/rkt
 	cd ./rkt && racket GmmGibbsOpt.rkt $(classes) $(points)
 gmm-hs:
 	./hkbin/gmmGibbs ../input/GmmGibbs/$(classes)-$(points) ../testcode/jagssrc ../output/
