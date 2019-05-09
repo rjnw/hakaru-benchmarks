@@ -14,7 +14,6 @@ gmm-aug:
 	mkdir -p ../output/GmmGibbs/augur
 	cd ./augur && python2 gmm.py $(classes) $(points)
 gmm-stan:
-	cd ../other; make stan
 	cd ../other/cmdstan-2.18.1; make gmm
 	mkdir -p ../output/accuracies/GmmGibbs/stan
 	cd ../other/cmdstan-2.18.1; ./classify.px ../../input/GmmGibbs/$(classes)-$(points) > ../../output/accuracies/GmmGibbs/stan/$(classes)-$(points)
