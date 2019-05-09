@@ -7,23 +7,31 @@ gmm-rkt:
 	mkdir -p ../output/GmmGibbs/rkt
 	cd ./rkt && racket GmmGibbsOpt.rkt $(classes) $(points)
 gmm-hs:
+	mkdir -p ../output/GmmGibbs/jags
+	mkdir -p ../output/GmmGibbs/hs
 	./hkbin/gmmGibbs ../input/GmmGibbs/$(classes)-$(points) ../testcode/jagssrc ../output/
 gmm-aug:
+	mkdir -p ../output/GmmGibbs/augur
 	cd ./augur && python2 gmm.py $(classes) $(points)
 gmm-stan:
 	cd ../other; make stan
 	cd ../other/cmdstan-2.18.1; make gmm
+	mkdir -p ../output/accuracies/GmmGibbs/stan
 	cd ../other/cmdstan-2.18.1; ./classify.px ../../input/GmmGibbs/$(classes)-$(points) > ../../output/accuracies/GmmGibbs/stan/$(classes)-$(points)
 
 gmm-trial: gmm-rkt gmm-hs gmm-aug gmm-stan
 
 gmm-rkt-acc:
+	mkdir -p ../output/accuracies/GmmGibbs/rkt/
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/rkt/$(classes)-$(points)
 gmm-hs-acc:
+	mkdir -p ../output/accuracies/GmmGibbs/hs/
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/hk/$(classes)-$(points)
 gmm-jags-acc:
+	mkdir -p ../output/accuracies/GmmGibbs/jags/
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/jags/$(classes)-$(points)
 gmm-aug-acc:
+	mkdir -p ../output/accuracies/GmmGibbs/augur/
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/augur/$(classes)-$(points)
 gmm-acc: gmm-rkt-acc gmm-hs gmm-jags-acc gmm-aug-acc
 gmm: gmm-trial gmm-acc

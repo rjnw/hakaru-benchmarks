@@ -44,6 +44,7 @@ build-stan:
 
 build-input: get20newsgroup
 	cd ./input; make all
+	mkdir -p ./input/data/GmmGibbs
 	cd ./input; make gmm classes=25 points=5000 trials=50
 	cd ./input; make gmm classes=50 points=10000 trials=50
 
