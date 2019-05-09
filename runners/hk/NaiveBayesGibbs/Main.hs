@@ -37,9 +37,9 @@ main = do
 
   replicateM_ numTrials $ do
     putStrLn "starting a new trial"
-    hktrial   <- oneLine <$> hakaru g holdouts numTopics numDocs w doc zs nbKnobs
-    putStrLn "writing haskell..."
-    appendFile hkfile   hktrial
+    -- hktrial   <- oneLine <$> hakaru g holdouts numTopics numDocs w doc zs nbKnobs
+    -- putStrLn "writing haskell..."
+    -- appendFile hkfile   hktrial
     jagstrial <- oneLine <$> jags jagsmodel jagsrunner inputs_path nbKnobs
     putStrLn "writing jags..."
     appendFile jagsfile jagstrial

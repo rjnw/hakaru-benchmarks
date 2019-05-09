@@ -35,6 +35,9 @@ nb-rkt-ll:
 
 nb-hk:
 	./hkbin/naiveBayesGibbs ../input ../testcode/jagssrc ../output
+nb-jags-ll:
+	./hkbin/nbLikelihood ../input/news/ ../output/NaiveBayesGibbs/jags/20-19997-$(holdout-modulo) ../output/accuracies/NaiveBayesGibbs/jags/20-19997-$(holdout-modulo) 20
+
 
 nb-augur:
 	cd ./augur && python2 nb.py ../../input/news/ ../../output/NaiveBayesGibbs/augur/ $(trials) $(sweeps) $(trial-time) $(holdout-modulo)

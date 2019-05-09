@@ -32,16 +32,16 @@ main = do
       jagsrunner = jagscodedir </> "GmmModel.R"
   dat <- readFile inputs_path
   g <- MWC.createSystemRandom
-  hkfile   <- freshFile (benchmark_dir </> "hk")   output_fname
+  -- hkfile   <- freshFile (benchmark_dir </> "hk")   output_fname
   jagsfile <- freshFile (benchmark_dir </> "jags") output_fname
   forM_ (lines dat) $ \line -> do
     let ts :: [Double]
         zs :: [Int]
         (ts,zs) = read line
         tsvec = U.fromList ts
-    hktrial   <- oneLine <$> hakaru g classes tsvec gmmKnobs
+    -- hktrial   <- oneLine <$> hakaru g classes tsvec gmmKnobs
     jagstrial <- oneLine <$> jags jagsmodel jagsrunner classes tsvec gmmKnobs
-    appendFile hkfile   hktrial
+    -- appendFile hkfile   hktrial
     appendFile jagsfile jagstrial
 
 

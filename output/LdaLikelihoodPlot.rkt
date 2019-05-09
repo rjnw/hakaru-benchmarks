@@ -40,11 +40,6 @@
   (reverse ntrials))
 
 
-(define rkt-orig   (parse (format "kos/~a-~a"  "rkt" topics)))
-(define rkt-trials (map fix-sweeps rkt-orig))
-;; (error 'stop)
-(define augur-orig (parse (format "kos/~a-~a" "augur" topics)))
-(define augur-trials (filter (compose not empty?) augur-orig))
 (define (get-xy tsa)
   (for/list ([t tsa])
     (list (first t) (third t))))
@@ -99,7 +94,7 @@
        (points
         (for/list ([(k v) tsa-map]
                    #:when (and (not (zero? (sub1 (first (map cdr v)))))
-                           (member (first (map cdr v)) '(1 37 73))))
+                               (member (first (map cdr v)) '(1 37 73))))
           (list k (mean (map car v))))
         #:size point-size #:color lcolor #:sym pstyle))
    ;; (points
@@ -117,40 +112,55 @@
 
 
 (define (plot-likelihood topics output-file)
-  (plot-file
-   (list
-    (trial-plot "LLVM-backend" (remove-warmup rkt-trials)
-                (make-object color% 0 73 73) 'solid
-                (make-object color% 0 146 146) 'solid
-                'triangle)
+  (define rkt-orig   (parse (format "kos/~a-~a"  "rkt" topics)))
+  (define rkt-trials (map fix-sweeps rkt-orig))
+  (define augur-orig (parse (format "kos/~a-~a" "augur" topics)))
+  (define augur-trials (filter (compose not empty?) augur-orig))
 
-    (trial-plot "AugurV2" (remove-warmup augur-trials)
-                (make-object color% 146 73 0) 'solid
-                (make-object color% 0 0 0) 'solid
-                'bullet))
+  (parameterize
+      (
+       [plot-font-size 6]
+       [plot-font-face "Linux Libertine O"]
+       [plot-legend-box-alpha 1]
+       ;; [plot-x-ticks (linear-ticks #:divisors '(5) #:base 10 #:number 5)]
+       ;; [plot-y-ticks (linear-ticks #:divisors '(10) #:base 10 #:number 2)]
+       [plot-y-far-axis? #f]
+       [plot-x-far-axis? #f]
+       [plot-legend-box-alpha 1])
+      (plot-file
+       (list
+        (trial-plot "Hakaru" (remove-warmup rkt-trials)
+                    (make-object color% 0 73 73) 'solid
+                    (make-object color% 0 146 146) 'solid
+                    'triangle)
 
-   ;; (format "../../ppaml/writing/pipeline/ldalikelihood-~a.pdf" topics)
-   output-file
-   #:legend-anchor 'bottom-right
-   ;; topics 100
-   ;; #:y-min -4700000
-   ;; #:y-max -4500000
-   ;; #:x-max 800
+        (trial-plot "AugurV2" (remove-warmup augur-trials)
+                    (make-object color% 146 73 0) 'solid
+                    (make-object color% 0 0 0) 'solid
+                    'bullet))
 
-   ;; topics 50
-   ;; #:y-max -4200000
-   ;; #:y-min -4400000
-   ;; #:x-max 800
+       ;; (format "../../ppaml/writing/pipeline/ldalikelihood-~a.pdf" topics)
+       output-file
+       #:legend-anchor 'bottom-right
+       ;; topics 100
+       ;; #:y-min -4700000
+       ;; #:y-max -4500000
+       ;; #:x-max 800
 
-   #:y-max (y-min)
-   #:y-min (y-max)
-   #:x-min (x-min)
-   #:x-max (x-max)
-   #:width (width)
-   #:height (height)
+       ;; topics 50
+       ;; #:y-max -4200000
+       ;; #:y-min -4400000
+       ;; #:x-max 800
 
-   #:y-label "Log likelihood"
-   #:x-label "Time in seconds"))
+       #:y-max (y-min)
+       #:y-min (y-max)
+       #:x-min (x-min)
+       #:x-max (x-max)
+       #:width (width)
+       #:height (height)
+
+       #:y-label "Log likelihood"
+       #:x-label "Time in seconds")))
 
 (define y-min (make-parameter #f))
 (define y-max (make-parameter #f))

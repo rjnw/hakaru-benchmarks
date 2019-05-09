@@ -45,8 +45,8 @@
 (define num-docs 19997)
 
 (define rkt-test (build-path output-dir testname "rkt" (format "~a-~a-~a" num-topics num-docs holdout-modulo)))
-(define hk-test (build-path output-dir testname "hk" (format "~a-~a" num-topics num-docs)))
-(define jags-test (build-path output-dir testname "jags" (format "~a-~a-adapt0" num-topics num-docs)))
+;; (define hk-test (build-path output-dir testname "hk" (format "~a-~a" num-topics num-docs)))
+(define jags-test (build-path output-dir testname "jags" (format "~a-~a-~a" num-topics num-docs holdout-modulo)))
 (define augur-test (build-path output-dir testname "augur" (format "~a-~a-~a" num-topics num-docs holdout-modulo)))
 
 (define (get-snapshots st)

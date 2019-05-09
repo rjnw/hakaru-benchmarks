@@ -40,7 +40,8 @@ itergoal = as.numeric(args[5])
 iterstep = as.numeric(args[6])
 iter <- 0
 while (time2 < time2goal || iter < itergoal) {
-    update(model, iterstep-1)
+    ## update(model, iterstep-1)
+    update(model, 1)
     samples <- jags.samples(model, variable.names=c("z"), n.iter=1)
     time2 <- proc.time()["elapsed"]
     iter <- model$iter()

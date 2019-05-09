@@ -88,6 +88,7 @@ gmm-50:
 # xdg-open ./output/gmm-50-10000.pdf
 
 clean-gmm-25:
+	rm -f ./output/gmm-25-5000.pdf
 	rm -f ./output/GmmGibbs/rkt/25-5000
 	rm -f ./output/GmmGibbs/augur/25-5000
 	rm -f ./output/GmmGibbs/jags/25-5000
@@ -98,6 +99,7 @@ clean-gmm-25:
 	rm -f ./output/GmmGibbs/accuracies/stan/25-5000
 
 clean-gmm-50:
+	rm -f ./output/gmm-50-10000.pdf
 	rm -f ./output/GmmGibbs/rkt/50-10000
 	rm -f ./output/GmmGibbs/augur/50-10000
 	rm -f ./output/GmmGibbs/jags/50-10000
