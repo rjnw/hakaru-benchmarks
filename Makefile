@@ -1,6 +1,6 @@
 .PHONY: setup submodule-init build-hakaru build-rkt build-input clean docker BenchmarkGmmGibbs
 
-setup: submodule-init build-hakaru build-rkt build-augur copy-augur-lib build-input build-haskell build-psi build-stan
+setup: submodule-init build-hakaru build-rkt build-augur copy-augur-lib build-haskell build-psi build-stan
 
 submodule-init:
 	git submodule init
@@ -102,22 +102,35 @@ clean-gmm-50:
 	rm -f ./output/GmmGibbs/augur/50-10000
 	rm -f ./output/GmmGibbs/jags/50-10000
 	rm -f ./output/GmmGibbs/stan/50-10000
-	rm -f ./output/GmmGibbs/accuracies/rkt/50-10000
-	rm -f ./output/GmmGibbs/accuracies/augur/50-10000
-	rm -f ./output/GmmGibbs/accuracies/jags/50-10000
-	rm -f ./output/GmmGibbs/accuracies/stan/50-10000
+	rm -f ./output/accuracies/GmmGibbs/rkt/50-10000
+	rm -f ./output/accuracies/GmmGibbs/augur/50-10000
+	rm -f ./output/accuracies/GmmGibbs/jags/50-10000
+	rm -f ./output/accuracies/GmmGibbs/stan/50-10000
 
 # naive bayes
 nb:
 	mkdir -p output/NaiveBayesGibbs/rkt
 	cd ./runners; make nb-rkt trials=2 sweeps=10 trial-time=500 holdout-modulo=10
-	mkdir -p output/NaiveBayesGibbs/augur
+	mkdir -p ./output/NaiveBayesGibbs/augur
 	cd ./runners; make nb-augur trials=12 sweeps=50 trial-time=500 holdout-modulo=10
+	mkdir -p ./output/NaiveBayesGibbs/jags
 	cd ./runners; make nb-hk
+	mkdir -p ./output/accuracies/NaiveBayesGibbs/rkt
 	cd ./runners; make nb-rkt-ll holdout-modulo=10
+	mkdir -p ./output/accuracies/NaiveBayesGibbs/augur
 	cd ./runners; make nb-augur-ll holdout-modulo=10
+	mkdir -p ./output/accuracies/NaiveBayesGibbs/jags
+	cd ./runners; make nb-jags-ll holdout-modulo=10
 	cd ./output; racket NaiveBayesAccuracy.rkt
 	cd ./output; racket NaiveBayesLiklihood.rkt
+
+clean-nb:
+	rm -f ./output/NaiveBayesGibbs/rkt/20-19997-10
+	rm -f ./output/accuracies/NaiveBayesGibbs/rkt/20-19997-10
+	rm -f ./output/NaiveBayesGibbs/augur/20-19997-10
+	rm -f ./output/accuracies/NaiveBayesGibbs/augur/20-19997-10
+	rm -f ./output/NaiveBayesGibbs/jags/20-19997-10
+	rm -f ./output/accuracies/NaiveBayesGibbs/jags/20-19997-10
 
 # lda
 lda-setup:
@@ -137,6 +150,10 @@ allbench:
 	make nb
 	make lda-50
 	make lda-100
+
+go:
+	make setup
+	make allbench
 
 # sham plots
 sham-plot:
