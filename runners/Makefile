@@ -32,7 +32,7 @@ gmm-jags-acc:
 gmm-aug-acc:
 	mkdir -p ../output/accuracies/GmmGibbs/augur/
 	./hkbin/gmmAccuracy ../input/GmmGibbs/$(classes)-$(points) ../output/GmmGibbs/augur/$(classes)-$(points)
-gmm-acc: gmm-rkt-acc gmm-hs gmm-jags-acc gmm-aug-acc
+gmm-acc: gmm-rkt-acc gmm-jags-acc gmm-aug-acc
 gmm: gmm-trial gmm-acc
 
 nb-rkt:
