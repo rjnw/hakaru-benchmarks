@@ -108,6 +108,14 @@ clean-gmm-50:
 	rm -f ./output/accuracies/GmmGibbs/jags/50-10000
 	rm -f ./output/accuracies/GmmGibbs/stan/50-10000
 
+run-gmm-25:
+	make gmm-25
+	make clean-gmm-25
+
+run-gmm-50:
+	make gmm-50
+	make clean-gmm-50
+
 # naive bayes
 nb:
 	mkdir -p output/NaiveBayesGibbs/rkt
@@ -132,7 +140,9 @@ clean-nb:
 	rm -f ./output/accuracies/NaiveBayesGibbs/augur/20-19997-10
 	rm -f ./output/NaiveBayesGibbs/jags/20-19997-10
 	rm -f ./output/accuracies/NaiveBayesGibbs/jags/20-19997-10
-
+run-nb:
+	make nb
+	make clean-nb
 # lda
 lda-setup:
 	mkdir -p output/LdaGibbs/kos
@@ -145,6 +155,9 @@ lda-50: lda-setup
 clean-lda-50:
 	rm -f ./output/LdaGibbs/kos/rkt-50
 	rm -f ./output/LdaGibbs/kos/augur-50
+run-lda-50:
+	make lda-50
+	make clean-lda-50
 
 lda-100: lda-setup
 	cd ./runners; make lda-rkt topics=100 trials=5
@@ -153,13 +166,16 @@ lda-100: lda-setup
 clean-lda-100:
 	rm -f ./output/LdaGibbs/kos/rkt-100
 	rm -f ./output/LdaGibbs/kos/augur-100
+run-lda-100:
+	make lda-100
+	make clean-lda-100
 
 allbench:
-	make gmm-25
-	make gmm-50
-	make nb
-	make lda-50
-	make lda-100
+	make run-gmm-25
+	make run-gmm-50
+	make run-nb
+	make run-lda-50
+	make run-lda-100
 
 go:
 	make setup
