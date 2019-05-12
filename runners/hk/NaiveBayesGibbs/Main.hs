@@ -28,7 +28,7 @@ main = do
       numDocs = U.length zs
       holdouts = filter (\ v -> mod v 100 == 0) $ [0..numDocs - 1]
       numTrials = 1
-      fname = show numTopics ++ "-" ++ show numDocs
+      fname = show numTopics ++ "-" ++ show numDocs ++ "-10"
       benchmark_dir = outputs_dir </> "NaiveBayesGibbs"
       jagsmodel = jagscodedir </> "NaiveBayesModel.jags"
       jagsrunner = jagscodedir </> "NaiveBayesModel.R"

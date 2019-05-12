@@ -176,7 +176,12 @@ allbench:
 	make run-nb
 	make run-lda-50
 	make run-lda-100
-
+clean:
+	make clean-gmm-25
+	make clean-gmm-50
+	make clean-lda-50
+	make clean-lda-100
+	make clean-nb
 go:
 	make setup
 	make allbench

@@ -41,6 +41,7 @@ nb-rkt-ll:
 	./hkbin/nbLikelihood ../input/news/ ../output/NaiveBayesGibbs/rkt/20-19997-$(holdout-modulo) ../output/accuracies/NaiveBayesGibbs/rkt/20-19997-$(holdout-modulo) 20
 
 nb-hk:
+	rm -f ../output/NaiveBayesGibbs/jags/20-19997-10
 	./hkbin/naiveBayesGibbs ../input ../testcode/jagssrc ../output
 nb-jags-ll:
 	./hkbin/nbLikelihood ../input/news/ ../output/NaiveBayesGibbs/jags/20-19997-$(holdout-modulo) ../output/accuracies/NaiveBayesGibbs/jags/20-19997-$(holdout-modulo) 20

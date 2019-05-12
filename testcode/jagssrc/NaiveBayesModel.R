@@ -46,7 +46,6 @@ topicIndices <- Filter(holdoutFilter, array(0:docsSize))
 
 topics[topicIndices] <- NA
 
-write("running nb", file="", append=TRUE)
 time0 <- proc.time()["elapsed"]
 
 model <- jags.model(modelFile, #'NaiveBayesModel.jags',
