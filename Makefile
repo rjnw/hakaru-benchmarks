@@ -89,7 +89,6 @@ gmm-50:
 # xdg-open ./output/gmm-50-10000.pdf
 
 clean-gmm-25:
-	rm -f ./output/gmm-25-5000.pdf
 	rm -f ./output/GmmGibbs/rkt/25-5000
 	rm -f ./output/GmmGibbs/augur/25-5000
 	rm -f ./output/GmmGibbs/jags/25-5000
@@ -100,7 +99,6 @@ clean-gmm-25:
 	rm -f ./output/GmmGibbs/accuracies/stan/25-5000
 
 clean-gmm-50:
-	rm -f ./output/gmm-50-10000.pdf
 	rm -f ./output/GmmGibbs/rkt/50-10000
 	rm -f ./output/GmmGibbs/augur/50-10000
 	rm -f ./output/GmmGibbs/jags/50-10000
@@ -138,14 +136,23 @@ clean-nb:
 # lda
 lda-setup:
 	mkdir -p output/LdaGibbs/kos
+	mkdir -p output/accuracies/LdaGibbs/kos
+
 lda-50: lda-setup
 	cd ./runners; make lda-rkt topics=50 trials=5
 	cd ./runners; make lda-augur topics=50 trials=5
 	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4200000 --y-max -4400000 50 ldalikelihood-50.pdf
+clean-lda-50:
+	rm -f ./output/LdaGibbs/kos/rkt-50
+	rm -f ./output/LdaGibbs/kos/augur-50
+
 lda-100: lda-setup
 	cd ./runners; make lda-rkt topics=100 trials=5
-	cd ./runners; make lda-augur topics=100 trials=5
+	cd ./runners; make lda-augur topics=100 trials=2
 	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4500000 --y-max -4700000 100 ldalikelihood-100.pdf
+clean-lda-100:
+	rm -f ./output/LdaGibbs/kos/rkt-100
+	rm -f ./output/LdaGibbs/kos/augur-100
 
 allbench:
 	make gmm-25
