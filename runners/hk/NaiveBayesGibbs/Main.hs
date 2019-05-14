@@ -46,7 +46,7 @@ main = do
 
 nbKnobs = Knobs { minSeconds = 1
                 , stepSeconds = 0.5
-                , minSweeps = 1
+                , minSweeps = 10
                 , stepSweeps = 1 }
 
 type NBSampler = [Int] ->        -- indices of hold-out docs
