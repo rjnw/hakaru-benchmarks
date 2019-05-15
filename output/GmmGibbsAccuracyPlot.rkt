@@ -1,5 +1,6 @@
 #lang racket
 (require plot
+         plot/private/common/types
          racket/draw
          "plot-tsa.rkt"
          math/statistics)
@@ -7,6 +8,35 @@
 
 (define (time-accuracy al)
   (map (λ (tr) (map (λ (tsa) (list (first tsa) (third tsa))) tr)) al))
+
+(define (merge-legends l1 l2)
+  (define h (make-hash))
+  (define (process l)
+    (cond [(list? l) (for-each process l)]
+          [(legend-entry? l)
+           (match-define (legend-entry label draw-proc) l)
+           (hash-update! h label
+             (lambda (draw-procs) (cons draw-proc draw-procs))
+             (lambda () empty))]))
+  (process l1)
+  (process l2)
+  (define (finalize entry)
+    (define label (car entry))
+    (define draw-procs (reverse (cdr entry)))
+    (legend-entry label
+      (lambda (plot-device x-size y-size)
+        (for ([draw-proc draw-procs])
+          (draw-proc plot-device x-size y-size)))))
+  (map finalize (hash->list h)))
+
+(define (merge-renderer2d-legends rend1 rend2)
+  (match-define (renderer2d _  _  _  proc1) rend1)
+  (match-define (renderer2d br bf tf proc2) rend2)
+  (cond
+   [(not proc1) rend2]
+   [(not proc2) rend1]
+   [else (renderer2d br bf tf
+           (lambda (area) (merge-legends (proc1 area) (proc2 area))))]))
 
 (define (plot-accuracy classes pts output-file)
   (define (mean-time trials)
@@ -77,29 +107,31 @@
       #:line1-style 'transparent #:line2-style 'transparent
       #:alpha 0.2)
 
-     (points
-      (for/list ([v sta]
-                 #:when (if  (equal? runner "augur")
-                            (zero? (modulo (sub1 (first v)) 200))
-                            (if (equal? runner "stan")
-                                 #f
-                                (zero? (modulo (first v) 10)))))
-        (cdr v))
-      #:line-width 0.5
-      #:size point-size #:color lcolor #:sym pstyle)
+     (merge-renderer2d-legends
+      (points
+       (for/list ([v sta]
+                  #:when (if  (equal? runner "augur")
+                             (zero? (modulo (sub1 (first v)) 200))
+                             (if (equal? runner "stan")
+                                  #f
+                                 (zero? (modulo (first v) 10)))))
+         (cdr v))
+       #:line-width 0.5
+       #:size point-size #:color lcolor #:sym pstyle #:label legend)
 
-     (lines
-      ;; (sort
-      ;;  (map cdr
-      ;;       (sort (hash->list smta)
-      ;;             (λ (v1 v2) (< (car v1) (car v2)))))
-      ;;  (λ (v1 v2) (< (car v1) (car v2))))
-      (sort (for/list ([(k v) tsa-map])
-              (list k (mean (map car v))))
-            (λ (v1 v2) (< (car v1) (car v2))))
-      #:color lcolor #:style lstyle
-      #:width 0.7
-      #:label legend
+      (lines
+       ;; (sort
+       ;;  (map cdr
+       ;;       (sort (hash->list smta)
+       ;;             (λ (v1 v2) (< (car v1) (car v2)))))
+       ;;  (λ (v1 v2) (< (car v1) (car v2))))
+       (sort (for/list ([(k v) tsa-map])
+               (list k (mean (map car v))))
+             (λ (v1 v2) (< (car v1) (car v2))))
+       #:color lcolor #:style lstyle
+       #:width 0.7
+       #:label legend
+       )
       )
      ))
 
