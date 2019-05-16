@@ -45,7 +45,7 @@
       ;; (printf "~a " min-time)
       (map (λ (shot) (list (- (first shot) min-time) (second shot) (third shot))) trial)))
 
-  (define (trial-plot runner trials pts lcolor lstyle icolor istyle legend pstyle  (i 1) (point-size 3))
+  (define (trial-plot runner trials pts lcolor lstyle icolor istyle legend pstyle)
     (define sta^ (run->sweep-time.accuracy trials))
     (define smta (sweep-time.accuracy->sweep-mean$time.accuracy sta^))
     (define tsa-map (mean-time trials))
@@ -88,7 +88,7 @@
                                  (zero? (modulo (first v) 10)))))
          (cdr v))
        #:line-width 0.5
-       #:size point-size #:color lcolor #:sym pstyle #:label legend)
+       #:color lcolor #:sym pstyle #:label legend)
 
       (lines
        ;; (sort

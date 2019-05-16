@@ -72,7 +72,7 @@
 ;; (define jags-mean-xy (mean-time (get-xy jags-trials)))
 ;; (define augur-mean-xy (mean-time (get-xy augur-trials)))
 
-(define (trial-plot runner trials pts lcolor lstyle icolor istyle legend pstyle  (i 1) (point-size 3))
+(define (trial-plot runner trials pts lcolor lstyle icolor istyle legend pstyle)
   (define (mean-time trials)
     (define (rec trials)
       (if (ormap empty? trials)
@@ -115,7 +115,7 @@
                           #t))
       (list k (mean (map car v))))
     #:line-width 0.5
-    #:size point-size #:color lcolor #:sym pstyle)
+    #:color lcolor #:sym pstyle)
 
    (lines
     (sort (for/list ([(k v) tsa-map])

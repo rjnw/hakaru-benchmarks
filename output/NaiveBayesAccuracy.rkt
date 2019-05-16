@@ -134,7 +134,7 @@
               (rec (map cdr trials)))))
   (make-hash (rec trials)))
 
-(define (trial-plot runner trials pts lcolor lstyle icolor istyle legend pstyle  (i 1) (point-size 3))
+(define (trial-plot runner trials pts lcolor lstyle icolor istyle legend pstyle)
   ;; (define sta (run->sweep-time.accuracy pr))
   ;; (define smta (sweep-time.accuracy->sweep-mean$time.accuracy sta))
   (define tsa-map (mean-time trials))
@@ -170,7 +170,7 @@
                            #t))
        (list k (mean (map car v))))
      #:line-width 0.5
-     #:size point-size #:color lcolor #:sym pstyle #:label legend)
+     #:color lcolor #:sym pstyle #:label legend)
 
     (lines
      (sort (for/list ([(k v) tsa-map])
@@ -178,7 +178,7 @@
            (λ (v1 v2) (< (car v1) (car v2))))
      #:color lcolor #:style lstyle
      #:width 0.7
-     #:size point-size #:label legend)
+     #:label legend)
     )
    ))
 

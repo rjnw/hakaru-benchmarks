@@ -61,7 +61,7 @@
     (define min-time (first (first trial)))
     (map (λ (shot) (list (- (first shot) min-time) (second shot) (third shot))) trial)))
 
-(define (trial-plot runner trials lcolor lstyle icolor istyle  pstyle  (i 1) (point-size 6))
+(define (trial-plot runner trials lcolor lstyle icolor istyle  pstyle)
   (define tsa-map (mean-time trials))
   (list
    (lines-interval
@@ -85,13 +85,13 @@
                     #:when (and (not (zero? (first (map cdr v))))
                                 (zero? (modulo (first (map cdr v)) 10))))
            (list k (mean (map car v))))
-         #:size point-size #:color lcolor #:sym pstyle #:label runner)
+         #:color lcolor #:sym pstyle #:label runner)
         (points
          (for/list ([(k v) tsa-map]
                     #:when (and (not (zero? (sub1 (first (map cdr v)))))
                                 (member (first (map cdr v)) '(1 37 73))))
            (list k (mean (map car v))))
-         #:size point-size #:color lcolor #:sym pstyle #:label runner))
+         #:color lcolor #:sym pstyle #:label runner))
     (lines
      (sort (for/list ([(k v) tsa-map])
              (list k (mean (map car v))))
@@ -101,7 +101,7 @@
      #:label runner))
    ;; (points
    ;;  trial
-   ;;  #:size point-size #:alpha 0.1 #:line-width 1
+   ;;  #:alpha 0.1 #:line-width 1
    ;;  #:color lcolor #:sym pstyle)
 
    ;; (lines
