@@ -164,7 +164,7 @@
    #:y-min -21800000
    #:y-max -21500000
    #:x-max 400
-   #:height 200
+   #:height 300
    #:width 400
    #:y-label "Log likelihood"
    #:x-label "Time in seconds"

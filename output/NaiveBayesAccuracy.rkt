@@ -239,7 +239,7 @@
                #:y-min 45
                #:y-max 85
                #:x-max 400
-               #:height 200
+               #:height 300
                #:width 400
                #:legend-anchor 'right
                #:x-label "Time in seconds"

@@ -71,8 +71,8 @@ gmm-acc:
 	cd ./runners; make gmm-acc classes=$(classes) points=$(points)
 gmm-plot:
 	echo "use racket GmmGibbsAccuracy.rkt in output folder for finer control."
-	echo "racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 24 --y-max 44 --height 225 --width 400 50 10000 gmm-50-10000.pdf"
-	echo "racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 35 --y-max 60 --height 225 --width 400 25 5000 gmm-25-5000.pdf"
+	echo "racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 24 --y-max 44 --height 300 --width 400 50 10000 gmm-50-10000.pdf"
+	echo "racket GmmGibbsAccuracyPlot.rkt --x-max 20 --y-min 35 --y-max 60 --height 300 --width 400 25 5000 gmm-25-5000.pdf"
 	cd ./output; racket GmmGibbsAccuracyPlot.rkt $(classes) $(points) $(output-file)
 gmm: gmm-input gmm-trial gmm-acc gmm-plot
 
@@ -151,7 +151,7 @@ lda-setup:
 lda-50: lda-setup
 	cd ./runners; make lda-rkt topics=50 trials=5
 	cd ./runners; make lda-augur topics=50 trials=5
-	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4200000 --y-max -4400000 50 ldalikelihood-50.pdf
+	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4200000 --y-max -4400000 --height 300 --width 400 50 ldalikelihood-50.pdf
 clean-lda-50:
 	rm -f ./output/LdaGibbs/kos/rkt-50
 	rm -f ./output/LdaGibbs/kos/augur-50
@@ -162,7 +162,7 @@ run-lda-50:
 lda-100: lda-setup
 	cd ./runners; make lda-rkt topics=100 trials=5
 	cd ./runners; make lda-augur topics=100 trials=2
-	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4500000 --y-max -4700000 100 ldalikelihood-100.pdf
+	cd ./output; racket LdaLikelihoodPlot.rkt --y-min -4500000 --y-max -4700000 --height 300 --width 400 100 ldalikelihood-100.pdf
 clean-lda-100:
 	rm -f ./output/LdaGibbs/kos/rkt-100
 	rm -f ./output/LdaGibbs/kos/augur-100
