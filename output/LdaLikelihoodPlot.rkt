@@ -4,7 +4,8 @@
          racket/runtime-path)
 (require racket/draw
          math/statistics
-         plot)
+         plot
+         "merge-legends.rkt")
 (define source-dir "../testcode/hkrkt/")
 
 (define topics 50)
@@ -77,26 +78,27 @@
     #:color icolor #:style istyle
     #:line1-style 'transparent #:line2-style 'transparent
     #:alpha 0.3)
-   (lines
-    (sort (for/list ([(k v) tsa-map])
-            (list k (mean (map car v))))
-          (λ (v1 v2) (< (car v1) (car v2))))
-    #:color lcolor #:style lstyle
-    #:width 0.7
-    #:label runner)
-   (if (equal? runner "AugurV2")
-       (points
-        (for/list ([(k v) tsa-map]
-                   #:when (and (not (zero? (first (map cdr v))))
-                               (zero? (modulo (first (map cdr v)) 10))))
-          (list k (mean (map car v))))
-        #:size point-size #:color lcolor #:sym pstyle)
-       (points
-        (for/list ([(k v) tsa-map]
-                   #:when (and (not (zero? (sub1 (first (map cdr v)))))
-                               (member (first (map cdr v)) '(1 37 73))))
-          (list k (mean (map car v))))
-        #:size point-size #:color lcolor #:sym pstyle))
+   (merge-renderer2d-legends
+    (if (equal? runner "AugurV2")
+        (points
+         (for/list ([(k v) tsa-map]
+                    #:when (and (not (zero? (first (map cdr v))))
+                                (zero? (modulo (first (map cdr v)) 10))))
+           (list k (mean (map car v))))
+         #:size point-size #:color lcolor #:sym pstyle #:label runner)
+        (points
+         (for/list ([(k v) tsa-map]
+                    #:when (and (not (zero? (sub1 (first (map cdr v)))))
+                                (member (first (map cdr v)) '(1 37 73))))
+           (list k (mean (map car v))))
+         #:size point-size #:color lcolor #:sym pstyle #:label runner))
+    (lines
+     (sort (for/list ([(k v) tsa-map])
+             (list k (mean (map car v))))
+           (λ (v1 v2) (< (car v1) (car v2))))
+     #:color lcolor #:style lstyle
+     #:width 0.7
+     #:label runner))
    ;; (points
    ;;  trial
    ;;  #:size point-size #:alpha 0.1 #:line-width 1

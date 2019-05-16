@@ -1,6 +1,7 @@
 #lang racket
 (require racket/runtime-path
          "plot-tsa.rkt"
+         "merge-legends.rkt"
          math/statistics
          racket/draw
          plot)
@@ -161,22 +162,24 @@
     #:line1-style 'transparent #:line2-style 'transparent
     #:alpha 0.2)
 
-   (points
-    (for/list ([(k v) tsa-map]
-               #:when (if (equal? runner "augur")
-                          (zero? (modulo (first (map cdr v)) 10))
-                          #t))
-      (list k (mean (map car v))))
-    #:line-width 0.5
-    #:size point-size #:color lcolor #:sym pstyle)
+   (merge-renderer2d-legends
+    (points
+     (for/list ([(k v) tsa-map]
+                #:when (if (equal? runner "augur")
+                           (zero? (modulo (first (map cdr v)) 10))
+                           #t))
+       (list k (mean (map car v))))
+     #:line-width 0.5
+     #:size point-size #:color lcolor #:sym pstyle #:label legend)
 
-   (lines
-    (sort (for/list ([(k v) tsa-map])
-            (list k (mean (map car v))))
-          (λ (v1 v2) (< (car v1) (car v2))))
-    #:color lcolor #:style lstyle
-    #:width 0.7
-    #:label legend)
+    (lines
+     (sort (for/list ([(k v) tsa-map])
+             (list k (mean (map car v))))
+           (λ (v1 v2) (< (car v1) (car v2))))
+     #:color lcolor #:style lstyle
+     #:width 0.7
+     #:size point-size #:label legend)
+    )
    ))
 
 (printf "plotting data\n")
