@@ -129,7 +129,8 @@
 
 
 (parameterize
-    ([plot-x-ticks (linear-ticks #:divisors '(5) #:base 10 #:number 2)]
+    ([plot-font-face "Linux Libertine O"]
+     [plot-x-ticks (linear-ticks #:divisors '(5) #:base 10 #:number 2)]
      [plot-y-ticks (linear-ticks #:divisors '(10) #:base 10 #:number 2)]
      [plot-y-far-axis? #f]
      [plot-x-far-axis? #f]

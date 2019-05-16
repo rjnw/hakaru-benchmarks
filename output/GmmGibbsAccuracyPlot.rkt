@@ -123,9 +123,7 @@
   (define rkt-trial (remove-warmup  (get-trial "rkt")))
   (parameterize
       (
-       [plot-font-size 6]
        [plot-font-face "Linux Libertine O"]
-       [plot-legend-box-alpha 1]
        [plot-x-ticks (linear-ticks #:divisors '(5) #:base 10 #:number 5)]
        [plot-y-ticks (linear-ticks #:divisors '(10) #:base 10 #:number 2)]
        [plot-y-far-axis? #f]
