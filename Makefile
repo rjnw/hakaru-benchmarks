@@ -51,7 +51,7 @@ build-input: get20newsgroup
 get20newsgroup:
 	cd ./input; ./download-data.sh
 
-clean:
+clean-setup:
 	cd ./hakaru; stack clean
 	cd ./input; make clean
 	rm ./hkbin/*

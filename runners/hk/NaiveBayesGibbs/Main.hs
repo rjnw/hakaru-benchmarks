@@ -44,7 +44,7 @@ main = do
     putStrLn "writing jags..."
     appendFile jagsfile jagstrial
 
-nbKnobs = Knobs { minSeconds = 1
+nbKnobs = Knobs { minSeconds = 400
                 , stepSeconds = 0.5
                 , minSweeps = 10
                 , stepSweeps = 1 }
