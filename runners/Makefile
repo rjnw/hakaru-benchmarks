@@ -59,3 +59,9 @@ lda-rkt:
 lda-augur:
 	cd ./augur && python2 ./lda.py ../../input/kos/ ../../output/LdaGibbs/kos/ $(topics) $(trials)
 	./hkbin/ldaLikelihood ../input/kos/ ../output/LdaGibbs/kos/augur-$(topics)   ../output/accuracies/LdaGibbs/kos/augur-$(topics) $(topics)
+
+lr:
+	cd rkt; racket LinearRegressionOpt.rkt 1000
+
+ct:
+	cd rkt; racket ClinicalTrial.rkt 1000

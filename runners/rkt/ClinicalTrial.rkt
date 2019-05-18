@@ -55,8 +55,7 @@
        (call-with-output-file outfile #:exists 'replace
          (λ (out-port)
            (for ([line (in-lines xf-port)])
-             (run-single line out-port)))))))
-  (printf "total-wrong: ~a in total: ~a\n" total-wrong total))
+             (run-single line out-port))))))))
 
 (module+ main
   (run-test (command-line #:args (n) (string->number n))))
