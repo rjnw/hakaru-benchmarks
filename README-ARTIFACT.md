@@ -1,5 +1,8 @@
 # hakaru-benchmarks artifact
 
+Our artifact runs and analyzes the benchmarks described in Section 6 of our paper, 
+and produces new PDF versions of the data plotted there.
+
 We have successfully tested our virtual machine image using VirtualBox versions
 5.2.30 and 6.0, but version 5.2.18 could not boot.  The username is "hakaru"
 and the password is "ton618".
@@ -8,14 +11,36 @@ The quantitative evaluation in our paper is produced by a pipeline in which
 a Hakaru program is
 
 1. transformed into a Hakaru IR program by a Haskell program that invokes Maple
-   to do symbolic math (the simplification and histogram transformations), then
+   to do symbolic math (the simplification (Section 3) and histogram (Section 4)
+   transformations), then
 
 2. compiled and run by a Racket program that uses the Sham library to invoke
-   LLVM to generate machine code.
+   LLVM to generate machine code (Section 5).
+
+## Step 0: Repeating our experiments automatically
+
+To repeat the experiments from the paper directly, start a terminal, cd to 
+`/home/hakaru/hakaru-benchmarks/`, then run `make allbench`. This command takes
+a day to finish and will produce 6 PDF files of the benchmark plots shown in the
+paper.  These output plots are in `/home/hakaru/hakaru-benchmarks/output/` and are:
+
+* gmm-25-5000.pdf
+* gmm-50-10000.pdf
+* NaiveBayesGibbs-Accuracy.pdf
+* NaiveBayesGibbs-Likelihood.pdf
+* ldalikelihood-50.pdf
+* ldalikelihood-100.pdf
+
+Because these runs produce large log files, the `allbench` target removes the
+log files after producing the plots.  To keep the log files, use another target
+easily found in `/home/hakaru/hakaru-benchmarks/Makefile`.  For example, to run
+the Naive Bayes topic model and keep the log files, execute `make nb` rather
+than `make run-nb`.
 
 ## Step 1: the simplification and histogram transformations
 
-Step 1 requires Maple, so we enclose its output and it can be skipped.  Inside
+Step 1 requires Maple, but we are not able to provide a license for Maple along with the artifact,
+so we enclose its output and running it can be skipped.  Inside
 the directory `/home/hakaru/hakaru-benchmarks/testcode/`, step 1 turns the
 Hakaru source programs in the subdirectory `hksrc` into the outputs in the
 subdirectories `hksimp`, `hkrkt`, `hssrc`.  The 3 output subdirectories are
@@ -23,7 +48,7 @@ equivalent but in different syntaxes:
 
 * `hksimp/*.hk` is in the same readable Hakaru syntax as the input.
 * `hkrkt/*.hkr` is in an S-expression syntax accepted by step 2.
-* `hssrc/*.hs` is in Haskell, whose compilation using GHC forms our old backend.
+* `hssrc/*.hs` is in Haskell, whose compilation using GHC forms a prior backend for Hakaru.
 
 Repeating step 1 requires the Haskell program: to build it, start a terminal,
 cd to `/home/hakaru/hakaru-benchmarks/`, then run `make build-hakaru`.  It also
@@ -64,22 +89,11 @@ weight
    return (y5, z3))
 ```
 
-## Step 2: code generation and comparison against other systems
+## Step 2: code generation
 
-To repeat Step 2, start a terminal, cd to `/home/hakaru/hakaru-benchmarks/`,
-then run `make allbench`. This command takes a day to finish and will produce 6
-PDF files of the benchmark plots shown in the paper.  These output plots are in
-`/home/hakaru/hakaru-benchmarks/output/` and are:
-
-* gmm-25-5000.pdf
-* gmm-50-10000.pdf
-* NaiveBayesGibbs-Accuracy.pdf
-* NaiveBayesGibbs-Likelihood.pdf
-* ldalikelihood-50.pdf
-* ldalikelihood-100.pdf
-
-Because these runs produce large log files, the `allbench` target removes the
-log files after producing the plots.  To keep the log files, use another target
-easily found in `/home/hakaru/hakaru-benchmarks/Makefile`.  For example, to run
-the Naive Bayes topic model and keep the log files, execute `make nb` rather
-than `make run-nb`.
+The benchmark code is compiled with Sham and run using a harness written in
+Racket. This code is found in `/home/hakaru/hakaru-benchmarks/runners/rkt`.
+A representative example of this code is in the `GmmGibbsOpt.rkt` file in
+that directory. This file can be modified to run the experiment with different
+data. For example, line 29 sets the standard deviation used in the experiment to
+14.
