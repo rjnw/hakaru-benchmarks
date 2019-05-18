@@ -37,6 +37,9 @@ easily found in `/home/hakaru/hakaru-benchmarks/Makefile`.  For example, to run
 the Naive Bayes topic model and keep the log files, execute `make nb` rather
 than `make run-nb`.
 
+### Experiments for exact inference
+To perform the exact inference benchmarks and look at the timing results cd to `/home/hakaru/hakaru-benchmarks/`, then run `make lr` for linear regression and `make ct` for clinical trial. Both of them will print the timings on stdout which is time in seconds for each run.
+
 ## Step 1: the simplification and histogram transformations
 
 Step 1 requires Maple, but we are not able to provide a license for Maple along with the artifact,

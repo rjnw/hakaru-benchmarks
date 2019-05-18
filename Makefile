@@ -186,6 +186,11 @@ go:
 	make setup
 	make allbench
 
+lr:
+	cd runners; make lr
+ct:
+	cd runners; make ct
+
 # sham plots
 sham-plot:
 	cd ./runners/rkt; racket GmmGibbsSham.rkt 25 5000; GmmGibbsOptSham.rkt 25 5000
