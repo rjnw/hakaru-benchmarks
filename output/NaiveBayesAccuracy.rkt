@@ -109,7 +109,7 @@
                       [predict-topic topics]
                       #:when (holdout? (add1 i))
                       )
-             (values (if (equal? true-topic predict-topic)
+             (values (if (= true-topic predict-topic)
                          (cons i correct-topics)
                          (begin
                            correct-topics))
@@ -120,7 +120,7 @@
          (define sshots (get-snapshots trial))
          (for/list ([shot sshots])
            (match-define (list tim sweep predict) shot)
-           (list tim sweep (jags-accuracy (map sub1 predict)))))
+           (list tim sweep (jags-accuracy predict))))
        (define jags-trials  (remove-warmup (map cleanup-jags (file->lines jags-test)))))
 
 
