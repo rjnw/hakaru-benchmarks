@@ -81,7 +81,7 @@ while (defined(my $obs = <>)) {
 
     # Interpolate linearly between samples (dividing 10 seconds into 1024 ticks)
     my $time0 = $time[0];
-    for (my $tick = 0; $tick <= 1024; ++$tick) {
+    for (my $tick = 0; $tick <= 2048; ++$tick) {
         my $t = $tick * 10 / 1024;
         my $time = $time0 + $t;
         # Invariant: $time[0] <= $time
